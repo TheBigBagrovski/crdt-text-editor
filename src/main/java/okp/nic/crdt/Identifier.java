@@ -1,4 +1,4 @@
-package okp.nic;
+package okp.nic.crdt;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
