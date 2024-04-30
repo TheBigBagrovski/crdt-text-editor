@@ -1,5 +1,7 @@
 package okp.nic;
 
+import okp.nic.network.Controller;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;

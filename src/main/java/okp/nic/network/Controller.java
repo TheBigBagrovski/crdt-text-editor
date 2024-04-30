@@ -35,6 +35,20 @@ public class Controller implements TextEditorListener, MessengerListener {
         messenger = new Messenger(host, port, this, peers);
     }
 
+    public void start() {
+        textEditor.show();
+//        for (int i = 1; i <= 5; i++) {
+//            try {
+//                TimeUnit.SECONDS.sleep(1);
+//                insertToTextEditor(Integer.toString(i), i);
+//
+//            } catch (InterruptedException ex) {
+//
+//            }
+//        }
+
+    }
+
     @Override
     public void onInsert(char value, int index) {
         Char c = crdt.localInsert(value, index);
@@ -127,17 +141,5 @@ public class Controller implements TextEditorListener, MessengerListener {
 
 
 /*
-    public void start() {
-        textEditor.show();
-//        for (int i = 1; i <= 5; i++) {
-//            try {
-//                TimeUnit.SECONDS.sleep(1);
-//                insertToTextEditor(Integer.toString(i), i);
-//
-//            } catch (InterruptedException ex) {
-//
-//            }
-//        }
 
-    }
  */
