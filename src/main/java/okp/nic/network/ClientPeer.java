@@ -58,6 +58,7 @@ public class ClientPeer extends WebSocketClient {
     private void handleSignalServerMessage(String message) {
         // Обработка сообщения от сигнального сервера о подключении или отключении пира
         // Здесь реализуется логика для извлечения информации из сообщения и вызов соответствующего метода в Messenger
+        System.out.println("На клиент " + messenger.getHost() + ":" + messenger.getPort() + " пришло сообщение: " + message);
         if (message.startsWith("SIGNAL:CONNECTED:")) {
             String peerAddress = message.substring("SIGNAL:CONNECTED:".length());
             ExecutorService es = Executors.newSingleThreadExecutor();

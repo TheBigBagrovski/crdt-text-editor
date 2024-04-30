@@ -1,6 +1,7 @@
 package okp.nic.network;
 
 import com.google.gson.Gson;
+import lombok.Getter;
 import okp.nic.crdt.Char;
 
 import java.net.InetSocketAddress;
@@ -8,6 +9,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class Messenger {
     private final MessengerListener controller;
 
@@ -75,14 +77,17 @@ public class Messenger {
 
     public void connectToPeer(String peerAddress) {
         System.out.println("MESSENGER - startClientPeers");
-        while (!connectedPeerList.contains(ssUrl)) {
+        String myFullAddress = "ws://" + host + ":" + port; // Construct address string
+        while (!connectedPeerList.contains(peerAddress)) {
             try {
-                ClientPeer peerNode = new ClientPeer(new URI(ssUrl), this);
+//                ClientPeer peerNode = new ClientPeer(new URI(peerAddress), this);
+                ClientPeer peerNode = new ClientPeer(new URI(peerAddress + "?address=" + myFullAddress), this); // Include address in URL
+
                 boolean isSucceeded = peerNode.connectBlocking();
                 if (isSucceeded) {
-                    connectedPeerList.add(ssUrl);
+                    connectedPeerList.add(peerAddress);
                 } else {
-                    System.out.println("Failed connecting to signal server" + ssUrl);
+                    System.out.println("Failed connecting to " + peerAddress);
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {

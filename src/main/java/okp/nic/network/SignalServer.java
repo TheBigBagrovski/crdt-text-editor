@@ -5,12 +5,16 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class SignalServer extends WebSocketServer {
 
-    private final Set<WebSocket> clients = new HashSet<>();
+    private final Map<WebSocket, String> clients = new HashMap<>();
 
     public SignalServer(InetSocketAddress address) {
         super(address);
@@ -18,15 +22,16 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        String peerAddress = conn.getRemoteSocketAddress().toString();
+        String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("=")[1];
+
         System.out.println("New connection: " + peerAddress);
-        clients.add(conn);
+        clients.put(conn, peerAddress);
 
         // Send welcome message to the new client
         conn.send("SIGNAL:WELCOME");
-
+        conn.send(sendClientList(getConnectedClients()));
         // Broadcast new connection to other clients
-        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress);
+        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress, peerAddress);
     }
 
 //    @Override
@@ -45,9 +50,9 @@ public class SignalServer extends WebSocketServer {
         System.out.println("Closed connection: " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
         WebSocket clientToRemove = getClient(conn);
         if (clientToRemove != null) {
+            broadcastMessage("SIGNAL:DISCONNECTED:" + clientToRemove.getRemoteSocketAddress().toString(), clients.get(clientToRemove));
             clients.remove(clientToRemove);
             // Отправляем остальным клиентам информацию об отключении
-            broadcastMessage("SIGNAL:DISCONNECTED:" + clientToRemove.getRemoteSocketAddress().toString());
         }
     }
 
@@ -59,7 +64,7 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        System.err.println("An error occurred on connection " + conn.getRemoteSocketAddress() + ": " + ex);
+        System.err.println("An error occurred on connection " + conn + ": " + ex);
     }
 
     @Override
@@ -67,16 +72,18 @@ public class SignalServer extends WebSocketServer {
         System.out.println("Signal server started on port: " + getPort());
     }
 
-    private Set<String> getConnectedClients() {
+    private Set<String> getConnectedClients(/*WebSocket excluded*/) {
         Set<String> connectedClients = new HashSet<>();
-        for (WebSocket client : clients) {
-            connectedClients.add(client.getRemoteSocketAddress().toString());
+        for (WebSocket client : clients.keySet()) {
+//            if (!client.equals(excluded)) {
+                connectedClients.add(clients.get(client));
+//            }
         }
         return connectedClients;
     }
 
     private WebSocket getClient(WebSocket conn) {
-        for (WebSocket client : clients) {
+        for (WebSocket client : clients.keySet()) {
             if (client.equals(conn)) {
                 return client;
             }
@@ -84,11 +91,28 @@ public class SignalServer extends WebSocketServer {
         return null;
     }
 
-    private void broadcastMessage(String message) {
-        for (WebSocket client : clients) {
-            client.send(message);
+    private void broadcastMessage(String message, String excludedPeerAddress) {
+        for (WebSocket client : clients.keySet()) {
+            String peerAddress = clients.get(client); // Retrieve stored user-defined address
+            if (!peerAddress.equals(excludedPeerAddress)) { // Don't send to excluded peer
+                try {
+                    // Create a new ClientPeer instance to send the message
+                    ClientPeer tempPeer = new ClientPeer(new URI(peerAddress), null);
+                    tempPeer.connectBlocking();
+                    tempPeer.send(message);
+                    tempPeer.close();
+                } catch (InterruptedException | URISyntaxException e) {
+                    System.err.println("Error broadcasting message to " + peerAddress + ": " + e.getMessage());
+                }
+            }
         }
     }
+
+//    private void broadcastMessage(String message) {
+//        for (WebSocket client : clients.keySet()) {
+//            client.send(message);
+//        }
+//    }
 
     public String sendClientList(Set<String> clientList) {
         StringBuilder message = new StringBuilder("SIGNAL:INITIAL:");
