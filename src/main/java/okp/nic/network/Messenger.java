@@ -101,6 +101,7 @@ public class Messenger {
     }
 
     public void broadcastInsert(Char data) {
+        System.out.println(connectedPeerList);
         Operation op = new Operation(data, "insert");
         String payload = gson.toJson(op);
         serverPeer.broadcast(payload);
