@@ -5,6 +5,8 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientPeer extends WebSocketClient {
 
@@ -29,13 +31,46 @@ public class ClientPeer extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         System.out.println("CLIENT received message: " + message);
-        Operation op = gson.fromJson(message, Operation.class);
-        if (op.getType().equals("insert")) {
-            System.out.println("onMessage --> INSERT");
-            messenger.handleRemoteInsert(op.getData());
-        } else if (op.getType().equals("delete")) {
-            System.out.println("onMessage --> DELETE");
-            messenger.handleRemoteDelete(op.getData());
+        // Проверка, является ли сообщение от сигнального сервера
+        if (isSignalServerMessage(message)) {
+            // Обработка сообщения от сигнального сервера
+            handleSignalServerMessage(message);
+        } else {
+            // Обработка сообщения от других пиров
+            Operation op = gson.fromJson(message, Operation.class);
+            if (op.getType().equals("insert")) {
+                System.out.println("onMessage --> INSERT");
+                messenger.handleRemoteInsert(op.getData());
+            } else if (op.getType().equals("delete")) {
+                System.out.println("onMessage --> DELETE");
+                messenger.handleRemoteDelete(op.getData());
+            }
+        }
+    }
+
+    private boolean isSignalServerMessage(String message) {
+//         Здесь можно реализовать логику для определения, является ли сообщение от сигнального сервера
+//         Например, можно определить по формату сообщения или ключевым словам в сообщении
+//         В данном примере просто предполагается, что все сообщения от сигнального сервера начинаются с "SIGNAL:"
+        return message.startsWith("SIGNAL:");
+    }
+
+    private void handleSignalServerMessage(String message) {
+        // Обработка сообщения от сигнального сервера о подключении или отключении пира
+        // Здесь реализуется логика для извлечения информации из сообщения и вызов соответствующего метода в Messenger
+        if (message.startsWith("SIGNAL:CONNECTED:")) {
+            String peerAddress = message.substring("SIGNAL:CONNECTED:".length());
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            es.execute(() -> messenger.handleRemotePeerConnected(peerAddress));
+        } else if (message.startsWith("SIGNAL:DISCONNECTED:")) {
+            String peerAddress = message.substring("SIGNAL:DISCONNECTED:".length());
+            messenger.handleRemotePeerDisconnected(peerAddress);
+        } else if (message.startsWith("SIGNAL:INITIAL:")) {
+            String[] peers = message.substring("SIGNAL:INITIAL:".length()).split(", ");
+            for (String peer : peers) {
+                ExecutorService es = Executors.newSingleThreadExecutor();
+                es.execute(() -> messenger.handleRemotePeerConnected(peer));
+            }
         }
     }
 

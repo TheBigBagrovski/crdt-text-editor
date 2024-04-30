@@ -11,27 +11,27 @@ import java.util.List;
 public class Messenger {
     private final MessengerListener controller;
 
-    private final List<String> peerList;
     private final List<String> connectedPeerList = new ArrayList<>();
 
     private final String host;
     private final int port;
 
     private ServerPeer serverPeer;
-    
+
+    private String ssUrl = "ws://192.168.0.49:5556";
+
     private final Gson gson = new Gson();
 
-    public Messenger(String host, int port, MessengerListener controller, List<String> peerList) {
+    public Messenger(String host, int port, MessengerListener controller) {
         this.host = host;
         this.port = port;
         this.controller = controller;
-        this.peerList = peerList;
         init();
     }
 
     public void init() {
         startServerPeer();
-        startClientPeers();
+        connectToPeer(ssUrl); // Connect to the signal server
     }
 
     public void startServerPeer() {
@@ -39,30 +39,58 @@ public class Messenger {
         serverPeer.start();
     }
 
-    public void startClientPeers() {
+    public void handleRemotePeerConnected(String newPeer) {
+        connectToPeer(newPeer);
+    }
+
+//    public void handleRemotePeerConnected(String newPeer) {
+//        while (!connectedPeerList.contains(newPeer)) {
+//            try {
+//                ClientPeer peerNode = new ClientPeer(new URI(newPeer), this);
+//                boolean isSucceeded = peerNode.connectBlocking();
+//                if (isSucceeded) {
+//                    connectedPeerList.add(newPeer);
+//                } else {
+//                    System.out.println("Failed connecting to " + newPeer);
+//                    try {
+//                        Thread.sleep(2000);
+//                    } catch (InterruptedException e) {
+//                        System.out.println("error pas sleep bre");
+//                    }
+//                }
+//            } catch (Exception ex) {
+//                System.out.println("error tapi gpp");
+//            }
+//        }
+//
+//    }
+
+    public void handleRemotePeerDisconnected(String disconnectedPeer) {
+        for (String s : connectedPeerList) {
+            if (s.equals(disconnectedPeer)) {
+                connectedPeerList.remove(disconnectedPeer);
+            }
+        }
+    }
+
+    public void connectToPeer(String peerAddress) {
         System.out.println("MESSENGER - startClientPeers");
-        while (connectedPeerList.size() < (peerList.size())) {
-            for (String peer : peerList) {
-                if (!connectedPeerList.contains(peer)) {
+        while (!connectedPeerList.contains(ssUrl)) {
+            try {
+                ClientPeer peerNode = new ClientPeer(new URI(ssUrl), this);
+                boolean isSucceeded = peerNode.connectBlocking();
+                if (isSucceeded) {
+                    connectedPeerList.add(ssUrl);
+                } else {
+                    System.out.println("Failed connecting to signal server" + ssUrl);
                     try {
-                        ClientPeer peerNode = new ClientPeer(new URI(peer), this);
-                        boolean isSucceeded = peerNode.connectBlocking();
-                        if (isSucceeded) {
-                            connectedPeerList.add(peer);
-                        } else {
-                            System.out.println("Failed connecting to " + peer);
-                        }
-                    } catch (Exception ex) {
-                        System.out.println("error tapi gpp");
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        System.out.println("error pas sleep bre");
                     }
                 }
-            }
-            if (connectedPeerList.size() < (peerList.size())) {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    System.out.println("error pas sleep bre");
-                }
+            } catch (Exception ex) {
+                System.out.println("Error connecting to signal server");
             }
         }
     }

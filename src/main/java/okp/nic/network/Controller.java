@@ -27,12 +27,12 @@ public class Controller implements TextEditorListener, MessengerListener {
     private VersionVector versionVector;
     private List<Operation> deletionBuffer = new ArrayList<>();
 
-    public Controller(String host, int port, List<String> peers) {
+    public Controller(String host, int port) {
         siteId = "ws://" + host + ":" + port;
         versionVector = new VersionVector(siteId);
         crdt = new CRDT(siteId, this);
         textEditor.setTextEditorListener(this);
-        messenger = new Messenger(host, port, this, peers);
+        messenger = new Messenger(host, port, this);
     }
 
     public void start() {
