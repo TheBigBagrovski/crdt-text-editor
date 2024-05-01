@@ -34,17 +34,6 @@ public class SignalServer extends WebSocketServer {
         broadcastMessage("SIGNAL:CONNECTED:" + peerAddress + ", ");
     }
 
-//    @Override
-//    public void onOpen(WebSocket conn, ClientHandshake handshake) {
-//        String peerAddress = handshake.getResourceDescriptor().split("\\?")[1];
-//        System.out.println("New connection: " + peerAddress);
-//        clients.add(conn);
-//        // Отправляем новому клиенту список остальных клиентов
-//        conn.send(sendClientList(getConnectedClients()));
-//        // Отправляем остальным клиентам информацию о новом подключении
-//        broadcastMessage("SIGNAL:CONNECTED:" + conn.getLocalSocketAddress().toString());
-//    }
-
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         System.out.println("Closed connection: " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
