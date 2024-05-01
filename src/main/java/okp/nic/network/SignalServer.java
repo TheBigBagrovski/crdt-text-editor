@@ -31,7 +31,7 @@ public class SignalServer extends WebSocketServer {
         conn.send("SIGNAL:WELCOME");
         conn.send(sendClientList(getConnectedClients()));
         // Broadcast new connection to other clients
-        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress);
+        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress + ", ");
     }
 
 //    @Override
