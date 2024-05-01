@@ -20,20 +20,18 @@ public class Messenger {
 
     private ServerPeer serverPeer;
 
-    private String ssUrl = "ws://192.168.0.49:5556";
-
     private final Gson gson = new Gson();
 
-    public Messenger(String host, int port, MessengerListener controller) {
+    public Messenger(String host, int port, MessengerListener controller, String signalHost, int signalPort) {
         this.host = host;
         this.port = port;
         this.controller = controller;
-        init();
+        init(signalHost, signalPort);
     }
 
-    public void init() {
+    public void init(String signalHost, int signalPort) {
         startServerPeer();
-        connectToPeer(ssUrl); // Connect to the signal server
+        connectToPeer("ws://" + signalHost + ":" + signalPort); // Connect to the signal server
     }
 
     public void startServerPeer() {
@@ -44,28 +42,6 @@ public class Messenger {
     public void handleRemotePeerConnected(String newPeer) {
         connectToPeer(newPeer);
     }
-
-//    public void handleRemotePeerConnected(String newPeer) {
-//        while (!connectedPeerList.contains(newPeer)) {
-//            try {
-//                ClientPeer peerNode = new ClientPeer(new URI(newPeer), this);
-//                boolean isSucceeded = peerNode.connectBlocking();
-//                if (isSucceeded) {
-//                    connectedPeerList.add(newPeer);
-//                } else {
-//                    System.out.println("Failed connecting to " + newPeer);
-//                    try {
-//                        Thread.sleep(2000);
-//                    } catch (InterruptedException e) {
-//                        System.out.println("error pas sleep bre");
-//                    }
-//                }
-//            } catch (Exception ex) {
-//                System.out.println("error tapi gpp");
-//            }
-//        }
-//
-//    }
 
     public void handleRemotePeerDisconnected(String disconnectedPeer) {
         for (String s : connectedPeerList) {

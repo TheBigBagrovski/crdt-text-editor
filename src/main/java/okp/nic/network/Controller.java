@@ -27,26 +27,16 @@ public class Controller implements TextEditorListener, MessengerListener {
     private VersionVector versionVector;
     private List<Operation> deletionBuffer = new ArrayList<>();
 
-    public Controller(String host, int port) {
+    public Controller(String host, int port, String signalHost, int signalPort) {
         siteId = "ws://" + host + ":" + port;
         versionVector = new VersionVector(siteId);
         crdt = new CRDT(siteId, this);
         textEditor.setTextEditorListener(this);
-        messenger = new Messenger(host, port, this);
+        messenger = new Messenger(host, port, this, signalHost, signalPort);
     }
 
     public void start() {
         textEditor.show();
-//        for (int i = 1; i <= 5; i++) {
-//            try {
-//                TimeUnit.SECONDS.sleep(1);
-//                insertToTextEditor(Integer.toString(i), i);
-//
-//            } catch (InterruptedException ex) {
-//
-//            }
-//        }
-
     }
 
     @Override

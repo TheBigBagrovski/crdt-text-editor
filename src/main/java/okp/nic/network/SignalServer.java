@@ -4,9 +4,12 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -58,7 +61,7 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        System.out.println("Signal server started on port: " + getPort());
+        System.out.println("Signal server started on socket: " + getPort());
     }
 
     private Set<String> getConnectedClients(/*WebSocket excluded*/) {
@@ -108,8 +111,29 @@ public class SignalServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        int port = 5556; // Порт для WebSocket сервера
-        SignalServer server = new SignalServer(new InetSocketAddress(port));
-        server.start();
+        try {
+            // Порт для WebSocket сервера
+            int port = findAvailablePort();
+            InetAddress localhost = InetAddress.getLocalHost();
+            InetSocketAddress isa = new InetSocketAddress(localhost, port);
+            System.out.println("Сервер запущен на адресе: " + isa.getAddress().getHostAddress() + ", порт: " + port);
+            SignalServer server = new SignalServer(isa);
+            server.start();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Метод для нахождения доступного порта
+    private static int findAvailablePort() {
+        try {
+            ServerSocket serverSocket = new ServerSocket(0);
+            int port = serverSocket.getLocalPort();
+            serverSocket.close();
+            return port;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 }
