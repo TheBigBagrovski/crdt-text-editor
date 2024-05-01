@@ -61,6 +61,7 @@ public class ClientPeer extends WebSocketClient {
         System.out.println("На клиент " + messenger.getHost() + ":" + messenger.getPort() + " пришло сообщение: " + message);
         if (message.startsWith("SIGNAL:CONNECTED:")) {
             String peerAddress = message.substring("SIGNAL:CONNECTED:".length());
+            System.out.println("Дебаг");
             messenger.handleRemotePeerConnected(peerAddress);
 //            ExecutorService es = Executors.newSingleThreadExecutor();
 //            es.execute(() -> messenger.handleRemotePeerConnected(peerAddress));
