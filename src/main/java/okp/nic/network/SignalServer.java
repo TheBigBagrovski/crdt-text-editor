@@ -31,7 +31,7 @@ public class SignalServer extends WebSocketServer {
         conn.send("SIGNAL:WELCOME");
         conn.send(sendClientList(getConnectedClients()));
         // Broadcast new connection to other clients
-        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress + ", ");
+        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress, conn);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class SignalServer extends WebSocketServer {
         System.out.println("Closed connection: " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
         WebSocket clientToRemove = getClient(conn);
         if (clientToRemove != null) {
-            broadcastMessage("SIGNAL:DISCONNECTED:" + clientToRemove.getRemoteSocketAddress().toString());
+            broadcastMessage("SIGNAL:DISCONNECTED:" + clientToRemove.getRemoteSocketAddress().toString(), clientToRemove);
             clients.remove(clientToRemove);
             // Отправляем остальным клиентам информацию об отключении
         }
@@ -80,18 +80,16 @@ public class SignalServer extends WebSocketServer {
         return null;
     }
 
-    private void broadcastMessage(String message) {
+    private void broadcastMessage(String message, WebSocket exclude) {
         for (WebSocket client : clients.keySet()) {
-            String peerAddress = clients.get(client); // Retrieve stored user-defined address
-            try {
-                // Create a new ClientPeer instance to send the message
-                ClientPeer tempPeer = new ClientPeer(new URI(peerAddress), null);
-                tempPeer.connectBlocking();
-                tempPeer.send(message);
-                tempPeer.close();
-            } catch (InterruptedException | URISyntaxException e) {
-                System.err.println("Error broadcasting message to " + peerAddress + ": " + e.getMessage());
+//            String peerAddress = clients.get(client); // Retrieve stored user-defined address
+            // Create a new ClientPeer instance to send the message
+//                ClientPeer tempPeer = new ClientPeer(new URI(peerAddress), null);
+//                client.connectBlocking();
+            if (!client.equals(exclude)) {
+                client.send(message);
             }
+//                tempPeer.close();
         }
     }
 
