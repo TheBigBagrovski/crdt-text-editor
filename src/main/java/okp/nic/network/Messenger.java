@@ -2,6 +2,7 @@ package okp.nic.network;
 
 import com.google.gson.Gson;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Char;
 
 import java.net.InetSocketAddress;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Slf4j
 public class Messenger {
     private final MessengerListener controller;
 
@@ -18,7 +20,7 @@ public class Messenger {
     private final String host;
     private final int port;
 
-    private ServerPeer serverPeer;
+    private PeerServer peerServer;
 
     private final Gson gson = new Gson();
 
@@ -31,16 +33,45 @@ public class Messenger {
 
     public void init(String signalHost, int signalPort) {
         startServerPeer();
-        connectToPeer("ws://" + signalHost + ":" + signalPort); // Connect to the signal server
+        connectToSignalServer("ws://" + signalHost + ":" + signalPort);
     }
 
     public void startServerPeer() {
-        serverPeer = new ServerPeer(new InetSocketAddress(host, port));
-        serverPeer.start();
+        peerServer = new PeerServer(new InetSocketAddress(host, port));
+        peerServer.start();
     }
 
-    public void handleRemotePeerConnected(String newPeer) {
-        connectToPeer(newPeer);
+    public void connectToSignalServer(String serverAddress) {
+        try {
+            SignalClient signalClient = new SignalClient(new URI(serverAddress + "?address=" + "ws://" + host + ":" + port), this);
+            signalClient.connectBlocking();
+        } catch (Exception ex) {
+            log.error("Ошибка при подключении к сигнальному серверу: " + ex);
+        }
+    }
+
+    public void handleRemotePeerConnected(String peerAddress) {
+        String myFullAddress = "ws://" + host + ":" + port;
+        log.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
+        while (!connectedPeerList.contains(peerAddress)) {
+            try {
+                PeerClient peerNode = new PeerClient(new URI(peerAddress + "?address=" + myFullAddress), this);
+
+                boolean isSucceeded = peerNode.connectBlocking();
+                if (isSucceeded) {
+                    connectedPeerList.add(peerAddress);
+                } else {
+                    log.error("Не удалось подключиться к пиру " + peerAddress);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        log.error("Ошибка прерывания потока в ожидании");
+                    }
+                }
+            } catch (Exception ex) {
+                log.error("Ошибка при подключении к пиру");
+            }
+        }
     }
 
     public void handleRemotePeerDisconnected(String disconnectedPeer) {
@@ -51,47 +82,22 @@ public class Messenger {
         }
     }
 
-    public void connectToPeer(String peerAddress) {
-        System.out.println("MESSENGER - startClientPeers");
-        String myFullAddress = "ws://" + host + ":" + port; // Construct address string
-        while (!connectedPeerList.contains(peerAddress)) {
-            try {
-//                ClientPeer peerNode = new ClientPeer(new URI(peerAddress), this);
-                ClientPeer peerNode = new ClientPeer(new URI(peerAddress + "?address=" + myFullAddress), this); // Include address in URL
-
-                boolean isSucceeded = peerNode.connectBlocking();
-                if (isSucceeded) {
-                    connectedPeerList.add(peerAddress);
-                } else {
-                    System.out.println("Failed connecting to " + peerAddress);
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        System.out.println("error pas sleep bre");
-                    }
-                }
-            } catch (Exception ex) {
-                System.out.println("Error connecting to signal server");
-            }
-        }
-    }
-
     public void broadcastInsert(Char data) {
-        System.out.println(connectedPeerList);
+        log.info(connectedPeerList.toString());
         Operation op = new Operation(data, "insert");
         String payload = gson.toJson(op);
-        serverPeer.broadcast(payload);
+        peerServer.broadcast(payload);
     }
 
     public void broadcastDelete(Char data) {
-        System.out.println("[broadcastDelete] START");
-        System.out.println("[broadcastDelete] >> preparing delete operation");
+//        System.out.println("[broadcastDelete] START");
+//        System.out.println("[broadcastDelete] >> preparing delete operation");
         Operation op = new Operation(data, "delete");
-        System.out.println("[broadcastDelete] >> jsonify operation");
+//        System.out.println("[broadcastDelete] >> jsonify operation");
         String payload = gson.toJson(op);
-        System.out.println("[broadcastDelete] call serverPeer->broadcast");
-        serverPeer.broadcast(payload);
-        System.out.println("[broadcastDelete] FINISH");
+//        System.out.println("[broadcastDelete] call serverPeer->broadcast");
+        peerServer.broadcast(payload);
+//        System.out.println("[broadcastDelete] FINISH");
     }
 
     public void handleRemoteInsert(Char data) {
@@ -102,14 +108,3 @@ public class Messenger {
         controller.handleRemoteDelete(data);
     }
 }
-
-/*
-
-    public void addPeer(String peer) {
-        peerList.add(peer);
-        startClientPeers();
-    }
-
-
-
- */

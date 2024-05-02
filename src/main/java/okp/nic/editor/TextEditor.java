@@ -83,11 +83,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void keyReleased(KeyEvent e) {
-        // pass
     }
 
     public void keyTyped(KeyEvent e) {
-        // pass
     }
 
 }

@@ -1,22 +1,25 @@
 package okp.nic.network;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.Scanner;
 
+import static okp.nic.Utils.findAvailablePort;
+
+@Slf4j
+@Getter
 public class SignalServer extends WebSocketServer {
 
+    private boolean isRunning = false;
     private final Map<WebSocket, String> clients = new HashMap<>();
 
     public SignalServer(InetSocketAddress address) {
@@ -26,114 +29,60 @@ public class SignalServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("=")[1];
-
-        System.out.println("New connection: " + peerAddress);
+        log.info("Новое подключение к сигнальному серверу: " + peerAddress);
         clients.put(conn, peerAddress);
-
-        // Send welcome message to the new client
         conn.send("SIGNAL:WELCOME");
-        conn.send(sendClientList(getConnectedClients()));
-        // Broadcast new connection to other clients
-        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress, conn);
+        StringBuilder sb = new StringBuilder("SIGNAL:INITIAL:");
+        for (String socket : clients.values()) {
+            sb.append(socket).append(", ");
+        }
+        conn.send(sb.toString()); // Отправка новому пиру текущих подключенных клиентов
+        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress, conn); // Отправка подключенным клиентам данных о новом пире
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        System.out.println("Closed connection: " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
-        WebSocket clientToRemove = getClient(conn);
-        if (clientToRemove != null) {
-            broadcastMessage("SIGNAL:DISCONNECTED:" + clientToRemove.getRemoteSocketAddress().toString(), clientToRemove);
-            clients.remove(clientToRemove);
-            // Отправляем остальным клиентам информацию об отключении
+        log.info("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: " + reason);
+        if (clients.containsKey(conn)) {
+            broadcastMessage("SIGNAL:DISCONNECTED:" + conn.getRemoteSocketAddress().toString(), conn);
+            clients.remove(conn);
+        } else {
+            log.error(conn.getRemoteSocketAddress() + " не является клиентом сигнального сервера");
         }
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("Received message from " + conn.getRemoteSocketAddress() + ": " + message);
-        // Здесь можно обработать какие-то команды, если это необходимо
+        log.info("Сигнальный сервер получает сообщение от " + conn.getRemoteSocketAddress() + ": " + message);
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        System.err.println("An error occurred on connection " + conn + ": " + ex);
+        log.error("Ошибка при попытке подключиться к сигнальному серверу " + conn + ": " + ex);
     }
 
     @Override
     public void onStart() {
-        System.out.println("Signal server started on socket: " + getPort());
-    }
-
-    private Set<String> getConnectedClients(/*WebSocket excluded*/) {
-        Set<String> connectedClients = new HashSet<>();
-        for (WebSocket client : clients.keySet()) {
-//            if (!client.equals(excluded)) {
-            connectedClients.add(clients.get(client));
-//            }
-        }
-        return connectedClients;
-    }
-
-    private WebSocket getClient(WebSocket conn) {
-        for (WebSocket client : clients.keySet()) {
-            if (client.equals(conn)) {
-                return client;
-            }
-        }
-        return null;
+        isRunning = true;
+        log.info("Сигнальный сервер запущен на сокете: " + getAddress());
     }
 
     private void broadcastMessage(String message, WebSocket exclude) {
         for (WebSocket client : clients.keySet()) {
-//            String peerAddress = clients.get(client); // Retrieve stored user-defined address
-            // Create a new ClientPeer instance to send the message
-//                ClientPeer tempPeer = new ClientPeer(new URI(peerAddress), null);
-//                client.connectBlocking();
             if (!client.equals(exclude)) {
                 client.send(message);
             }
-//                tempPeer.close();
         }
-    }
-
-//    private void broadcastMessage(String message) {
-//        for (WebSocket client : clients.keySet()) {
-//            client.send(message);
-//        }
-//    }
-
-    public String sendClientList(Set<String> clientList) {
-        StringBuilder message = new StringBuilder("SIGNAL:INITIAL:");
-        for (String client : clientList) {
-            message.append(client).append(", ");
-        }
-        return message.toString();
     }
 
     public static void main(String[] args) {
-        try {
-            // Порт для WebSocket сервера
-            int port = findAvailablePort();
-            InetAddress localhost = InetAddress.getLocalHost();
-            InetSocketAddress isa = new InetSocketAddress(localhost, port);
-            System.out.println("Сервер запущен на адресе: " + isa.getAddress().getHostAddress() + ", порт: " + port);
-            SignalServer server = new SignalServer(isa);
-            server.start();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Введите адрес сигнального сервера: ");
+        String host = scanner.nextLine();
+        int port = findAvailablePort();
+        InetSocketAddress isa = new InetSocketAddress(host, port);
+        SignalServer server = new SignalServer(isa);
+        server.start();
     }
 
-    // Метод для нахождения доступного порта
-    private static int findAvailablePort() {
-        try {
-            ServerSocket serverSocket = new ServerSocket(0);
-            int port = serverSocket.getLocalPort();
-            serverSocket.close();
-            return port;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
 }

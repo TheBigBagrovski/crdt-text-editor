@@ -1,0 +1,28 @@
+<configuration>
+    <!-- Шаблон для цветов в консоли -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wex"/>
+
+    <!-- Настройка цветов для различных уровней логирования -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Уровень логирования INFO -->
+    <logger name="nic.okp" level="info" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!-- Уровень логирования ERROR -->
+    <logger name="nic.okp" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!-- Установка уровня логирования по умолчанию для всех остальных логгеров -->
+    <root level="error">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
