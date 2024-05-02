@@ -30,12 +30,12 @@ public class SignalServer extends WebSocketServer {
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("=")[1];
         log.info("Новое подключение к сигнальному серверу: " + peerAddress);
-        clients.put(conn, peerAddress);
         conn.send("SIGNAL:WELCOME");
         StringBuilder sb = new StringBuilder("SIGNAL:INITIAL:");
         for (String socket : clients.values()) {
             sb.append(socket).append(", ");
         }
+        clients.put(conn, peerAddress);
         conn.send(sb.toString()); // Отправка новому пиру текущих подключенных клиентов
         broadcastMessage("SIGNAL:CONNECTED:" + peerAddress, conn); // Отправка подключенным клиентам данных о новом пире
     }

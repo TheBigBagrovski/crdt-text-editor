@@ -45,9 +45,12 @@ public class SignalClient extends WebSocketClient {
             String peerAddress = message.substring("SIGNAL:DISCONNECTED:".length());
             messenger.handleRemotePeerDisconnected(peerAddress);
         } else if (message.startsWith("SIGNAL:INITIAL:")) {
-            String[] peers = message.substring("SIGNAL:INITIAL:".length()).split(", ");
-            for (String peer : peers) {
-                messenger.handleRemotePeerConnected(peer);
+            String peersList = message.substring("SIGNAL:INITIAL:".length());
+            if (!peersList.isBlank()) {
+                String[] peers = peersList.split(", ");
+                for (String peer : peers) {
+                    messenger.handleRemotePeerConnected(peer);
+                }
             }
         }
     }
