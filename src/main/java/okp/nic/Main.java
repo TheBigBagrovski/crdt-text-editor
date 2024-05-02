@@ -13,6 +13,14 @@ import java.util.List;
 import java.util.Scanner;
 
 import static okp.nic.Utils.findAvailablePort;
+//todo() цвета выводов
+
+
+
+
+//todo() тесты
+//todo() рефакторинг
+//todo() финальный смотр
 
 public class Main {
     public static void main(String[] args) {
