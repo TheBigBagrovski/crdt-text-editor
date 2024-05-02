@@ -46,7 +46,7 @@ public class SignalClient extends WebSocketClient {
             messenger.handleRemotePeerDisconnected(peerAddress);
         } else if (message.startsWith("SIGNAL:INITIAL:")) {
             String peersList = message.substring("SIGNAL:INITIAL:".length());
-            if (!peersList.isBlank()) {
+            if (!peersList.isEmpty()) {
                 String[] peers = peersList.split(", ");
                 for (String peer : peers) {
                     messenger.handleRemotePeerConnected(peer);

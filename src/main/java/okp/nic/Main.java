@@ -13,8 +13,14 @@ import java.util.List;
 import java.util.Scanner;
 
 import static okp.nic.Utils.findAvailablePort;
-//todo() цвета выводов
-
+//todo() тест на 3 пирах
+//todo() отказ сигнального сервера?
+//todo() показ имещегося текста при подключении
+//todo() никнеймы у пиров
+//todo() окно логов в интерфейсе + список подключенных участников
+//todo() сохранение и загрузка файла
+//todo() улетает каретка при изменениях от другого пира
+//todo() ctrl+c, ctrl+x, ctrl+v
 
 
 
@@ -24,17 +30,18 @@ import static okp.nic.Utils.findAvailablePort;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Введите адрес пира: ");
-        String host = scanner.nextLine();
-        int port = findAvailablePort();
-        System.out.println("Пир запущен на адресе: " + host + ", порт: " + port);
-        System.out.print("Введите адрес сигнального сервера: ");
-        String signalHost = scanner.nextLine();
-        System.out.print("Введите порт сигнального сервера: ");
-        int signalPort = Integer.parseInt(scanner.nextLine());
-        Controller controller = new Controller(host, port, signalHost, signalPort);
-        controller.start();
+        String[] peerInfo = InputDialogs.getPeerInfo();
+        if (peerInfo != null) {
+            String host = peerInfo[0];
+            String signalHost = peerInfo[1];
+            int signalPort = Integer.parseInt(peerInfo[2]);
+            int port = findAvailablePort();
+            System.out.println("Пир запущен на адресе: " + host + ", порт: " + port);
+            Controller controller = new Controller(host, port, signalHost, signalPort);
+            controller.start();
+        } else {
+            System.out.println("User cancelled input.");
+        }
     }
 
 }

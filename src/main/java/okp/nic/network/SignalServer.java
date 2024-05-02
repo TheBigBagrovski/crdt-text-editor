@@ -2,13 +2,15 @@ package okp.nic.network;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.InputDialogs;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
-import java.net.InetAddress;
+import javax.swing.*;
+import java.awt.*;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -19,7 +21,7 @@ import static okp.nic.Utils.findAvailablePort;
 @Getter
 public class SignalServer extends WebSocketServer {
 
-    private boolean isRunning = false;
+//    private boolean isRunning = false;
     private final Map<WebSocket, String> clients = new HashMap<>();
 
     public SignalServer(InetSocketAddress address) {
@@ -63,8 +65,9 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        isRunning = true;
-        log.info("Сигнальный сервер запущен на сокете: " + getAddress());
+        String socketAddress = getAddress().toString();
+        log.info("Сигнальный сервер запущен на сокете: " + socketAddress);
+        new SocketInfoWindow(socketAddress);
     }
 
     private void broadcastMessage(String message, WebSocket exclude) {
@@ -76,13 +79,33 @@ public class SignalServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Введите адрес сигнального сервера: ");
-        String host = scanner.nextLine();
-        int port = findAvailablePort();
-        InetSocketAddress isa = new InetSocketAddress(host, port);
-        SignalServer server = new SignalServer(isa);
-        server.start();
+        String host = InputDialogs.getSignalServerAddress();
+        if (host != null) {
+            int port = findAvailablePort();
+            InetSocketAddress isa = new InetSocketAddress(host, port);
+            SignalServer server = new SignalServer(isa);
+            server.start();
+        } else {
+            System.out.println("User cancelled input.");
+        }
+    }
+
+    static class SocketInfoWindow extends JFrame {
+
+        public SocketInfoWindow(String socketAddress) {
+            super(new String("Адрес сигнального сервера".getBytes(), StandardCharsets.UTF_8));
+            JLabel socketLabel = new JLabel(new String("Сигнальный сервер запущен на сокете: ".getBytes(), StandardCharsets.UTF_8) + socketAddress);
+            socketLabel.setFont(new Font("Arial", Font.BOLD, 18));
+            socketLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            JPanel panel = new JPanel();
+            panel.add(socketLabel);
+            panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+            add(panel);
+            setSize(600, 100);
+            setLocationRelativeTo(null);
+            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            setVisible(true);
+        }
     }
 
 }
