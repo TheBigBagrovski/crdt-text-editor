@@ -33,12 +33,12 @@ public class Messenger {
         this.port = port;
         this.controller = controller;
         serverAddress = "ws://" + signalHost + ":" + signalPort;
-        init(signalHost);
+        init();
     }
 
-    public void init(String serverAddress) {
+    public void init() {
         startServerPeer();
-        connectToSignalServer(serverAddress);
+        connectToSignalServer();
     }
 
     public void startServerPeer() {
@@ -46,7 +46,7 @@ public class Messenger {
         peerServer.start();
     }
 
-    public void connectToSignalServer(String serverAddress) {
+    public void connectToSignalServer() {
         try {
             signalClient = new SignalClient(new URI(serverAddress + "?address=" + "ws://" + host + ":" + port), this);
             signalClient.connectBlocking();
