@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static okp.nic.Utils.findAvailablePort;
+import static okp.nic.Utils.isPortAvailable;
 
 @Slf4j
 @Getter
@@ -59,7 +60,7 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        log.error("Ошибка при попытке подключиться к сигнальному серверу " + conn + ": " + ex);
+        log.error("Ошибка при попытке подключиться к сигнальному серверу по адресу " + conn.getRemoteSocketAddress());
     }
 
     @Override
@@ -78,15 +79,52 @@ public class SignalServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        String[] info = InputDialogs.getSignalServerInfo();
-        if (info != null && info[0] != null) {
-            int port = (info[1].isEmpty()) ? findAvailablePort() : Integer.parseInt(info[1]);
-            InetSocketAddress isa = new InetSocketAddress(info[0], port);
-            SignalServer server = new SignalServer(isa);
-            server.start();
-        } else {
-            System.out.println("User cancelled input.");
-        }
+        String address;
+        boolean validAddress = false;
+        do {
+            address = InputDialogs.getSignalServerAddress();
+            if (address == null) {
+                log.info("Пользователь отменил ввод");
+                return;
+            }
+            try {
+                InetSocketAddress testAddress = new InetSocketAddress(address, 0);
+                if (!testAddress.isUnresolved()) {
+                    validAddress = true;
+                } else {
+                    log.error("Введите корректный адрес");
+                }
+            } catch (IllegalArgumentException e) {
+                log.error("Некорретный формат адреса");
+            }
+        } while (!validAddress);
+
+        String port;
+        boolean validPort = false;
+        do {
+            port = InputDialogs.getSignalServerPort();
+            if (port == null) {
+                log.info("Пользователь отменил ввод");
+                return;
+            } else if (port.isEmpty()) {
+                port = String.valueOf(findAvailablePort());
+                break;
+            }
+            try {
+                int portNumber = Integer.parseInt(port);
+                if (isPortAvailable(portNumber)) {
+                    validPort = true;
+                } else {
+                    log.error("Порт " + portNumber + " недоступен");
+                }
+            } catch (NumberFormatException e) {
+                log.error("Некорректный номер порта");
+            }
+        } while (!validPort);
+
+        InetSocketAddress isa = new InetSocketAddress(address, Integer.parseInt(port));
+        SignalServer server = new SignalServer(isa);
+        server.start();
     }
 
     static class SocketInfoWindow extends JFrame {

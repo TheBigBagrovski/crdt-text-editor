@@ -127,6 +127,14 @@ public class Controller implements TextEditorListener, MessengerListener {
         return versionVector.hasBeenApplied(charVersion);
     }
 
+    public List<Char> getCurrentText() {
+        return crdt.getStruct();
+    }
+
+    public VersionVector getCurrentVersionVector() {
+        return crdt.getVersionVector();
+    }
+
 }
 
 

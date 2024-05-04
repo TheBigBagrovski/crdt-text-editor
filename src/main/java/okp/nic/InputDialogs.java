@@ -9,25 +9,35 @@ public class InputDialogs {
     private static final Font font = new Font("Arial", Font.BOLD, 16);
     private static final Dimension textFieldSize = new Dimension(200, 25);
 
-    public static String[] getSignalServerInfo() {
+    public static String getSignalServerAddress() {
         JTextField hostField = new JTextField(18);
         hostField.setPreferredSize(textFieldSize);
         hostField.setFont(font);
-        JTextField portField = new JTextField(18);
-        portField.setPreferredSize(textFieldSize);
-        portField.setFont(font);
-        JPanel panel = new JPanel(new GridLayout(2, 2));
+        JPanel panel = new JPanel(new GridLayout(1, 2));
         JLabel hostLabel = new JLabel(new String("Адрес сигнального сервера:".getBytes(), StandardCharsets.UTF_8));
-        JLabel portLabel = new JLabel(new String("Порт сигнального сервера:".getBytes(), StandardCharsets.UTF_8));
         hostLabel.setFont(font);
-        portLabel.setFont(font);
         panel.add(hostLabel);
         panel.add(hostField);
+        int result = JOptionPane.showConfirmDialog(null, panel, new String("Сигнальный сервер".getBytes(), StandardCharsets.UTF_8), JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            return hostField.getText();
+        } else {
+            return null;
+        }
+    }
+
+    public static String getSignalServerPort() {
+        JTextField portField = new JTextField(10);
+        portField.setPreferredSize(textFieldSize);
+        portField.setFont(font);
+        JPanel panel = new JPanel(new GridLayout(1, 2));
+        JLabel portLabel = new JLabel(new String("Порт сигнального сервера:".getBytes(), StandardCharsets.UTF_8));
+        portLabel.setFont(font);
         panel.add(portLabel);
         panel.add(portField);
         int result = JOptionPane.showConfirmDialog(null, panel, new String("Сигнальный сервер".getBytes(), StandardCharsets.UTF_8), JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            return new String[]{hostField.getText(), portField.getText()};
+            return portField.getText();
         } else {
             return null;
         }

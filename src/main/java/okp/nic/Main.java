@@ -2,16 +2,6 @@ package okp.nic;
 
 import okp.nic.network.Controller;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
 import static okp.nic.Utils.findAvailablePort;
 //todo() тест на 3 пирах
 //todo() показ имещегося текста при подключении

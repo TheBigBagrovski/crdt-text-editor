@@ -1,11 +1,13 @@
 package okp.nic.crdt;
 
+import lombok.Getter;
 import okp.nic.network.Controller;
 import okp.nic.vectorclock.VersionVector;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class CRDT {
     private final String siteId;
     private final List<Char> struct = new ArrayList<>();

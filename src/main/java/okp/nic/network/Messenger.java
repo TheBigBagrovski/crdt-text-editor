@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Char;
+import okp.nic.vectorclock.VersionVector;
+import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -13,7 +15,7 @@ import java.util.List;
 @Getter
 @Slf4j
 public class Messenger {
-    private final MessengerListener controller;
+    private final Controller controller;
 
     private final List<String> connectedPeerList = new ArrayList<>();
 
@@ -26,7 +28,7 @@ public class Messenger {
 
     private final Gson gson = new Gson();
 
-    public Messenger(String host, int port, MessengerListener controller, String signalHost, String signalPort) {
+    public Messenger(String host, int port, Controller controller, String signalHost, String signalPort) {
         this.host = host;
         this.port = port;
         this.controller = controller;
@@ -40,7 +42,7 @@ public class Messenger {
     }
 
     public void startServerPeer() {
-        peerServer = new PeerServer(new InetSocketAddress(host, port));
+        peerServer = new PeerServer(new InetSocketAddress(host, port), this);
         peerServer.start();
     }
 
@@ -110,4 +112,11 @@ public class Messenger {
     public void handleRemoteDelete(Char data) {
         controller.handleRemoteDelete(data);
     }
+
+    public void sendCurrentState(WebSocket conn) {
+        List<Char> text = controller.getCurrentText();
+        VersionVector versionVector = controller.getCurrentVersionVector();
+        conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
+    }
+
 }

@@ -1,11 +1,14 @@
 package okp.nic.network;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.crdt.Char;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,20 +31,27 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.info("Соединение с пир-клиентом прервано с кодом " + code + ", причина: " + reason);
-//        System.out.println("closed with exit code " + code + " additional info: " + reason);
     }
 
     @Override
     public void onMessage(String message) {
-//        System.out.println("CLIENT received message: " + message);
         log.info("Пир-клиент получил сообщение: " + message);
-        Operation op = gson.fromJson(message, Operation.class);
-        if (op.getType().equals("insert")) {
-            log.info("onMessage --> INSERT");
-            messenger.handleRemoteInsert(op.getData());
-        } else if (op.getType().equals("delete")) {
-            log.info("onMessage --> DELETE");
-            messenger.handleRemoteDelete(op.getData());
+        if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
+            String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
+            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
+            }.getType());
+            for (Char c : charList) {
+                messenger.handleRemoteInsert(c);
+            }
+        } else {
+            Operation op = gson.fromJson(message, Operation.class);
+            if (op.getType().equals("insert")) {
+                log.info("onMessage --> INSERT");
+                messenger.handleRemoteInsert(op.getData());
+            } else if (op.getType().equals("delete")) {
+                log.info("onMessage --> DELETE");
+                messenger.handleRemoteDelete(op.getData());
+            }
         }
     }
 
