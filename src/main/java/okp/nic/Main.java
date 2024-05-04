@@ -14,14 +14,13 @@ import java.util.Scanner;
 
 import static okp.nic.Utils.findAvailablePort;
 //todo() тест на 3 пирах
-//todo() отказ сигнального сервера?
 //todo() показ имещегося текста при подключении
 //todo() никнеймы у пиров
 //todo() окно логов в интерфейсе + список подключенных участников
 //todo() сохранение и загрузка файла
 //todo() улетает каретка при изменениях от другого пира
 //todo() ctrl+c, ctrl+x, ctrl+v
-
+//todo() безпоасный протокол
 
 
 //todo() тесты
@@ -34,7 +33,7 @@ public class Main {
         if (peerInfo != null) {
             String host = peerInfo[0];
             String signalHost = peerInfo[1];
-            int signalPort = Integer.parseInt(peerInfo[2]);
+            String signalPort = peerInfo[2];
             int port = findAvailablePort();
             System.out.println("Пир запущен на адресе: " + host + ", порт: " + port);
             Controller controller = new Controller(host, port, signalHost, signalPort);

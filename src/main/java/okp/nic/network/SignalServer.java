@@ -13,7 +13,6 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import static okp.nic.Utils.findAvailablePort;
 
@@ -79,10 +78,10 @@ public class SignalServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        String host = InputDialogs.getSignalServerAddress();
-        if (host != null) {
-            int port = findAvailablePort();
-            InetSocketAddress isa = new InetSocketAddress(host, port);
+        String[] info = InputDialogs.getSignalServerInfo();
+        if (info != null && info[0] != null) {
+            int port = (info[1].isEmpty()) ? findAvailablePort() : Integer.parseInt(info[1]);
+            InetSocketAddress isa = new InetSocketAddress(info[0], port);
             SignalServer server = new SignalServer(isa);
             server.start();
         } else {

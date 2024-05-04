@@ -27,7 +27,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     private VersionVector versionVector;
     private List<Operation> deletionBuffer = new ArrayList<>();
 
-    public Controller(String host, int port, String signalHost, int signalPort) {
+    public Controller(String host, int port, String signalHost, String signalPort) {
         siteId = "ws://" + host + ":" + port;
         versionVector = new VersionVector(siteId);
         crdt = new CRDT(siteId, this);

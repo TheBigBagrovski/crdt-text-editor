@@ -21,19 +21,22 @@ public class Messenger {
     private final int port;
 
     private PeerServer peerServer;
+    private SignalClient signalClient;
+    private final String serverAddress;
 
     private final Gson gson = new Gson();
 
-    public Messenger(String host, int port, MessengerListener controller, String signalHost, int signalPort) {
+    public Messenger(String host, int port, MessengerListener controller, String signalHost, String signalPort) {
         this.host = host;
         this.port = port;
         this.controller = controller;
-        init(signalHost, signalPort);
+        serverAddress = "ws://" + signalHost + ":" + signalPort;
+        init(signalHost);
     }
 
-    public void init(String signalHost, int signalPort) {
+    public void init(String serverAddress) {
         startServerPeer();
-        connectToSignalServer("ws://" + signalHost + ":" + signalPort);
+        connectToSignalServer(serverAddress);
     }
 
     public void startServerPeer() {
@@ -43,7 +46,7 @@ public class Messenger {
 
     public void connectToSignalServer(String serverAddress) {
         try {
-            SignalClient signalClient = new SignalClient(new URI(serverAddress + "?address=" + "ws://" + host + ":" + port), this);
+            signalClient = new SignalClient(new URI(serverAddress + "?address=" + "ws://" + host + ":" + port), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
             log.error("Ошибка при подключении к сигнальному серверу: " + ex);
