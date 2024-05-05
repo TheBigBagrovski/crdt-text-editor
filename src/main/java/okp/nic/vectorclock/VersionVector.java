@@ -16,6 +16,17 @@ public class VersionVector {
         versions.add(localVersion);
     }
 
+    public void reset() {
+        // Clear the versions list
+        versions.clear();
+
+        // Reset the local version counter
+        localVersion.setCounter(0);
+
+        // Add the reset local version back to the list
+        versions.add(localVersion);
+    }
+
     public void incrementLocalVersion() {
         localVersion.incrementCounter();
     }

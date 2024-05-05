@@ -1,6 +1,7 @@
 package okp.nic.editor;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import okp.nic.network.Controller;
 
 import javax.swing.*;
@@ -11,38 +12,133 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Objects;
 
-@Getter
+import static okp.nic.Utils.getString;
+
+@Slf4j
 public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener {
-    private final JFrame frame = new JFrame("Peer to Peer Collaborative Text Editor with CRDT");
+
+    private static final int FRAME_WIDTH = 1000;
+    private static final int FRAME_HEIGHT = 800;
+    private static final Dimension FRAME_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
+    private static final int PEERS_WIDTH = 200;
+    private static final int PEERS_HEIGHT = 300;
+    private static final Dimension PEERS_SIZE = new Dimension(PEERS_WIDTH, PEERS_HEIGHT);
+    private static final int LOG_WIDTH = 200;
+    private static final int LOG_HEIGHT = 500;
+    private static final Dimension LOG_SIZE = new Dimension(LOG_WIDTH, LOG_HEIGHT);
+    private static final int RIGHT_PANEL_WIDTH = 200;
+    private static final int RIGHT_PANEL_HEIGHT = 800;
+    private static final Dimension RIGHT_PANEL_SIZE = new Dimension(RIGHT_PANEL_WIDTH, RIGHT_PANEL_HEIGHT);
+
+    @Getter
     private final JTextArea textArea = new JTextArea();
-    private final JPanel panel = new JPanel();
+
     private Controller controller;
 
+    @Getter
     private int cursorPos;
 
-    public TextEditor(int width, int height) {
-        panel.setLayout(new BorderLayout());
+    public TextEditor() {
+        // настройки фрейма
+        JFrame frame = new JFrame("Peer to Peer Collaborative Text Editor with CRDT");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+        frame.setIconImage(logo.getImage());
+        frame.setMinimumSize(FRAME_SIZE);
+        frame.setVisible(true);
+        // настройки основной панели
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setVisible(true);
+        JScrollPane scrollPane = new JScrollPane(textArea,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(scrollPane);
+        // настройки текстового поля
+        textArea.setFont(new Font("Courier New", Font.PLAIN, 18));
         textArea.addCaretListener(this);
         textArea.addKeyListener(this);
         textArea.getDocument().addDocumentListener(this);
+        // настройки панели логов
+        JPanel logPanel = new JPanel();
+        logPanel.setSize(LOG_SIZE);
+        JScrollPane logScrollPane = new JScrollPane(logPanel,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        // настройки панели пиров
+        JPanel peersPanel = new JPanel();
+        peersPanel.setPreferredSize(PEERS_SIZE);
+        JScrollPane peersScrollPane = new JScrollPane(peersPanel,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        // правая панель
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setPreferredSize(RIGHT_PANEL_SIZE);
+        rightPanel.add(peersScrollPane, BorderLayout.NORTH);
+        rightPanel.add(logScrollPane, BorderLayout.CENTER);
+        // настройки меню
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu(getString("Файл"));
+        menuBar.add(fileMenu);
+        JMenuItem saveMenuItem = new JMenuItem(getString("Сохранить"));
+        JMenuItem loadMenuItem = new JMenuItem(getString("Загрузить"));
+        fileMenu.add(saveMenuItem);
+        fileMenu.add(loadMenuItem);
+        saveMenuItem.addActionListener(e -> saveFile());
+        loadMenuItem.addActionListener(e -> loadFile());
+        frame.setJMenuBar(menuBar);
+        // финальные настройки
+        frame.add(mainPanel, BorderLayout.CENTER);
+        frame.add(rightPanel, BorderLayout.EAST);
         addKeyListener(this);
-        panel.add(textArea);
-        frame.add(panel);
-        frame.setSize(width, height);
+        frame.setVisible(true);
     }
 
     public void setTextEditorListener(Controller controller) {
         this.controller = controller;
     }
 
-    public void show() {
-        frame.show();
+    private void saveFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showSaveDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try (FileWriter writer = new FileWriter(selectedFile)) {
+                writer.write(textArea.getText());
+            } catch (IOException ex) {
+                log.error("Ошибка при сохранении файла: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void loadFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
+                StringBuilder fileContent = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    fileContent.append(line).append("\n");
+                }
+                controller.loadTextInEditor(fileContent.toString().toCharArray());
+            } catch (IOException ex) {
+                log.error("Ошибка при загрузке файла: " + ex.getMessage());
+            }
+        }
     }
 
     @Override
     public void caretUpdate(CaretEvent e) {
-        System.out.println("[caretUpdate] curPos = " + e.getDot());
+//        System.out.println("[caretUpdate] curPos = " + e.getDot());
         cursorPos = e.getDot();
     }
 
@@ -79,7 +175,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             value = e.getKeyChar();
             controller.onInsert(value, this.getCursorPos());
         }
-        System.out.println("keyPressed");
     }
 
     public void keyReleased(KeyEvent e) {

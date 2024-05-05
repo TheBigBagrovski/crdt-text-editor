@@ -20,11 +20,22 @@ public class CRDT {
         this.versionVector = controller.getVersionVector();
     }
 
+    public void clearText() {
+        struct.clear();
+        versionVector.reset();
+    }
+
+    public void loadText(char[] text) {
+        clearText();
+        for (int i = 0; i < text.length; i++) {
+            localInsert(text[i], i);
+        }
+    }
+
     public Char localInsert(char value, int index) {
         versionVector.incrementLocalVersion();
         Char curChar = generateChar(value, index);
         struct.add(index, curChar);
-        printString();
         return curChar;
     }
 
@@ -65,30 +76,22 @@ public class CRDT {
     }
 
     public Char localDelete(int index) {
-        System.out.println("[localDelete] START");
-        System.out.println("[localDelete] >> increment vector");
         versionVector.incrementLocalVersion();
         Char c = struct.get(index - 1);
-        System.out.println("[localDelete] >> remove char from local struct");
         struct.remove(index - 1);
-        printString();
-        System.out.println("[localDelete] FINISH");
+//        printString();
         return c;
     }
 
     public void remoteDelete(Char c) {
-        System.out.println("[remoteDelete] START");
         int index = findPosition(c);
-        System.out.println("[remoteDelete] >> delete index = " + index);
         if (index == -1) {
             System.out.println("no matching index found");
             return;
         }
-        System.out.println("[remoteDelete] >> remove char at index");
         struct.remove(index);
-        System.out.println("[remoteDelete] >> delete on text editor");
         controller.deleteToTextEditor(index);
-        printString();
+//        printString();
     }
 
     public int findPosition(Char c) {
@@ -124,8 +127,6 @@ public class CRDT {
                                    List<Identifier> posAfter,
                                    List<Identifier> newPos,
                                    int level) {
-        System.out.println("[generatePosBetween] START");
-
         int base = 32;
         int newBase = (int) Math.pow(2, level) * base;
         char boundaryStrategy = retrieveStrategy();
@@ -209,12 +210,12 @@ public class CRDT {
         return (int) Math.floor(Math.random() * (max - min)) + min;
     }
 
-    public void printString() {
-        for (Char c : struct) {
-            System.out.print(c.getValue());
-        }
-        System.out.println();
-    }
+//    public void printString() {
+//        for (Char c : struct) {
+//            System.out.print(c.getValue());
+//        }
+//        System.out.println();
+//    }
 }
 
 

@@ -88,7 +88,7 @@ public class Messenger {
     }
 
     public void broadcastInsert(Char data) {
-        log.info(connectedPeerList.toString());
+//        log.info(connectedPeerList.toString());
         Operation op = new Operation(data, "insert");
         String payload = gson.toJson(op);
         peerServer.broadcast(payload);
@@ -115,7 +115,6 @@ public class Messenger {
 
     public void sendCurrentState(WebSocket conn) {
         List<Char> text = controller.getCurrentText();
-        VersionVector versionVector = controller.getCurrentVersionVector();
         conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
     }
 

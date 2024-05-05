@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static okp.nic.Utils.findAvailablePort;
+import static okp.nic.Utils.getString;
 import static okp.nic.Utils.isPortAvailable;
 
 @Slf4j
@@ -130,8 +131,8 @@ public class SignalServer extends WebSocketServer {
     static class SocketInfoWindow extends JFrame {
 
         public SocketInfoWindow(String socketAddress) {
-            super(new String("Адрес сигнального сервера".getBytes(), StandardCharsets.UTF_8));
-            JLabel socketLabel = new JLabel(new String("Сигнальный сервер запущен на сокете: ".getBytes(), StandardCharsets.UTF_8) + socketAddress);
+            super(getString("Адрес сигнального сервера"));
+            JLabel socketLabel = new JLabel(getString("Сигнальный сервер запущен на сокете: ") + socketAddress);
             socketLabel.setFont(new Font("Arial", Font.BOLD, 18));
             socketLabel.setHorizontalAlignment(SwingConstants.CENTER);
             JPanel panel = new JPanel();
