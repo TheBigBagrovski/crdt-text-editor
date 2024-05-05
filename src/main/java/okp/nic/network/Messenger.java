@@ -118,8 +118,12 @@ public class Messenger {
 //        conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
 //    }
     public void sendCurrentState(WebSocket conn) {
-        List<Char> text = controller.getCurrentText();
-        conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
+//        List<Char> text = controller.getCurrentText();
+        StringBuilder sb = new StringBuilder();
+        for (Char c : controller.getCurrentText()) {
+            sb.append(c.getValue());
+        }
+        conn.send("SIGNAL:INITIAL_STATE:" + sb);
     }
 
 }
