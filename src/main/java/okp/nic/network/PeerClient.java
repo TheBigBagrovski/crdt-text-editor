@@ -41,10 +41,11 @@ public class PeerClient extends WebSocketClient {
 //            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
 //            }.getType());
             char[] arr = payload.toCharArray();
-            int index = 0;
-            for (char c : arr) {
-                messenger.getController().insertToTextEditor(c, index++);
-            }
+//            int index = 0;
+            messenger.getController().loadTextInEditor(arr);
+//            for (char c : arr) {
+//                messenger.getController().insertToTextEditor(c, index++);
+//            }
         } else {
             Operation op = gson.fromJson(message, Operation.class);
             if (op.getType().equals("insert")) {
