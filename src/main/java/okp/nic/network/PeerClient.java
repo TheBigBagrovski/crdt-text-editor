@@ -38,10 +38,12 @@ public class PeerClient extends WebSocketClient {
         log.info("Пир-клиент получил сообщение: " + message);
         if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
             String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
-            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
-            }.getType());
-            for (Char c : charList) {
-                messenger.handleRemoteInsert(c);
+//            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
+//            }.getType());
+            char[] arr = payload.toCharArray();
+            int index = 0;
+            for (char c : arr) {
+                messenger.getController().insertToTextEditor(c, index++);
             }
         } else {
             Operation op = gson.fromJson(message, Operation.class);

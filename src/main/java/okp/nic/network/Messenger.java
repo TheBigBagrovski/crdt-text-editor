@@ -113,6 +113,10 @@ public class Messenger {
         controller.handleRemoteDelete(data);
     }
 
+//    public void sendCurrentState(WebSocket conn) {
+//        List<Char> text = controller.getCurrentText();
+//        conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
+//    }
     public void sendCurrentState(WebSocket conn) {
         List<Char> text = controller.getCurrentText();
         conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));

@@ -40,11 +40,13 @@ public class Controller implements TextEditorListener, MessengerListener {
 //    }
 
     public void loadTextInEditor(char[] text) {
+        System.out.println(text);
         crdt.loadText(text);
         StringBuilder sb = new StringBuilder();
         for (Char c : crdt.getStruct()) {
             sb.append(c.getValue());
         }
+        System.out.println(sb);
         textEditor.getTextArea().setText(sb.toString());
     }
 
