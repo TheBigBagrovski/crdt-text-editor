@@ -50,7 +50,6 @@ public class Controller implements TextEditorListener, MessengerListener {
 //            Char charToDelete = document.ithVisible(position - 1);
 //            document.integrateDelete(charToDelete);
             document.delete(position);
-
             messenger.broadcastDelete(position);
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,10 +68,10 @@ public class Controller implements TextEditorListener, MessengerListener {
         System.out.println("попытка стереть символ с индексом " + index);
         textEditor.getTextArea().replaceRange("", index - 1, index);
 
-//        int curPos = textEditor.getCursorPos();
-//        if (index <= curPos) {
-//            textEditor.getTextArea().setCaretPosition(0);
-//        }
+        int curPos = textEditor.getCursorPos();
+        if (index <= curPos) {
+            textEditor.getTextArea().setCaretPosition(textEditor.getCursorPos() - 1);
+        }
     }
 
     @Override
