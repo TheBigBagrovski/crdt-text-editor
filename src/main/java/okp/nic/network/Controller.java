@@ -66,11 +66,11 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public void deleteToTextEditor(int index) {
-        textEditor.getTextArea().replaceRange("", index, index + 1);
-        int curPos = textEditor.getCursorPos();
-        if (index <= curPos) {
-            textEditor.getTextArea().setCaretPosition(0);
-        }
+        textEditor.getTextArea().replaceRange("", index - 1, index);
+//        int curPos = textEditor.getCursorPos();
+//        if (index <= curPos) {
+//            textEditor.getTextArea().setCaretPosition(0);
+//        }
     }
 
     @Override
