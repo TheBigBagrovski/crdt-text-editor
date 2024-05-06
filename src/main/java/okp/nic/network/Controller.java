@@ -66,7 +66,9 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public void deleteToTextEditor(int index) {
+        System.out.println("попытка стереть символ с индексом " + index);
         textEditor.getTextArea().replaceRange("", index - 1, index);
+
 //        int curPos = textEditor.getCursorPos();
 //        if (index <= curPos) {
 //            textEditor.getTextArea().setCaretPosition(0);
