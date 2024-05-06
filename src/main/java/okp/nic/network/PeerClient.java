@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Char;
+import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -46,7 +47,9 @@ public class PeerClient extends WebSocketClient {
             int index = 0;
             for (char c : arr) {
                 System.out.println("onMessage");
-                messenger.handleRemoteInsert(messenger.getController().getCrdt().generateChar(c, index++));
+                Char data = messenger.getController().getCrdt().generateChar(c, index++);
+                data.setSiteId("anotherPeer");
+                messenger.handleRemoteInsert(data);
             }
 //            for (char c : arr) {
 //                messenger.getController().insertToTextEditor(c, index++);
