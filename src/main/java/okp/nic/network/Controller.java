@@ -70,8 +70,10 @@ public class Controller implements TextEditorListener, MessengerListener {
 
         int curPos = textEditor.getCursorPos();
         if (index <= curPos) {
-            textEditor.getTextArea().setCaretPosition(curPos - 1);
-            System.out.println(textEditor.getCursorPos());
+            textEditor.setCursorPos(curPos - 1);
+//            textEditor.caretUpdate();
+//            textEditor.getTextArea().setCaretPosition(curPos - 1);
+//            System.out.println(textEditor.getCursorPos());
         }
     }
 

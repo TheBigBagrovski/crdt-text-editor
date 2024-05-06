@@ -1,6 +1,7 @@
 package okp.nic.editor;
 
 import lombok.Getter;
+import lombok.Setter;
 import okp.nic.network.Controller;
 
 import javax.swing.*;
@@ -13,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 @Getter
+@Setter
 public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener {
     private final JFrame frame = new JFrame("Peer to Peer Collaborative Text Editor with CRDT");
     private final JTextArea textArea = new JTextArea();
