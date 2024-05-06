@@ -53,8 +53,11 @@ public class CRDT {
         } else if (index == struct.size()) {
             return 1.0;
         } else {
+            System.out.println(struct);
             Char before = struct.get(index - 1);
             Char after = struct.get(index);
+            System.out.println(before);
+            System.out.println(after);
             return (before.getPosition() + after.getPosition()) / 2;
         }
     }
