@@ -50,7 +50,6 @@ public class Controller implements TextEditorListener, MessengerListener {
 //            Char charToDelete = document.ithVisible(position - 1);
 //            document.integrateDelete(charToDelete);
             document.delete(position);
-            textEditor.getTextArea().setCaretPosition(textEditor.getCursorPos() - 1);
             messenger.broadcastDelete(position);
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,7 +70,8 @@ public class Controller implements TextEditorListener, MessengerListener {
 
         int curPos = textEditor.getCursorPos();
         if (index <= curPos) {
-            textEditor.getTextArea().setCaretPosition(textEditor.getCursorPos() - 1);
+            textEditor.getTextArea().setCaretPosition(curPos - 1);
+            System.out.println(textEditor.getCursorPos());
         }
     }
 
