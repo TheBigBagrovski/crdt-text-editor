@@ -101,6 +101,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         System.out.println("ConhandleRemoteInsert");
         Version operationVersion = new Version(c.getSiteId(), c.getCounter());
         if (versionVector.hasBeenApplied(operationVersion)) {
+            System.out.println("bad");
             return;
         }
         crdt.remoteInsert(c);
