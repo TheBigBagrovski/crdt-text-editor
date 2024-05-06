@@ -3,12 +3,14 @@ package okp.nic.crdt;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 public class Char implements Comparable<Char> {
     private char value;
     private List<Identifier> position;
