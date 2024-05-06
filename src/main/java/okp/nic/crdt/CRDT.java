@@ -40,7 +40,6 @@ public class CRDT {
     }
 
     public void remoteInsert(Char c) {
-//        System.out.println("crdtremoteinsert");
         int index = findInsertIndex(c);
         struct.add(index, c);
         controller.insertToTextEditor(c.getValue(), index);
@@ -56,31 +55,56 @@ public class CRDT {
             return struct.size();
         }
 
-        while ((left + 1) < right) {
-            int mid = (int) Math.floor(left + (double) (right - left) / 2);
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
             int compareNum = val.compareTo(struct.get(mid));
 
             if (compareNum == 0) {
                 return mid;
             } else if (compareNum > 0) {
-                left = mid;
+                left = mid + 1;
             } else {
-                right = mid;
+                right = mid - 1;
             }
         }
 
-        if (val.compareTo(struct.get(left)) == 0) {
-            return left;
-        } else {
-            return right;
-        }
+        return left;
     }
+
+//    public int findInsertIndex(Char val) {
+//        int left = 0;
+//        int right = struct.size() - 1;
+//
+//        if (struct.isEmpty() || val.compareTo(struct.get(left)) < 1) {
+//            return left;
+//        } else if (val.compareTo(struct.get(right)) > 0) {
+//            return struct.size();
+//        }
+//
+//        while ((left + 1) < right) {
+//            int mid = (int) Math.floor(left + (double) (right - left) / 2);
+//            int compareNum = val.compareTo(struct.get(mid));
+//
+//            if (compareNum == 0) {
+//                return mid;
+//            } else if (compareNum > 0) {
+//                left = mid;
+//            } else {
+//                right = mid;
+//            }
+//        }
+//
+//        if (val.compareTo(struct.get(left)) == 0) {
+//            return left;
+//        } else {
+//            return right;
+//        }
+//    }
 
     public Char localDelete(int index) {
         versionVector.incrementLocalVersion();
         Char c = struct.get(index - 1);
         struct.remove(index - 1);
-//        printString();
         return c;
     }
 
@@ -92,7 +116,6 @@ public class CRDT {
         }
         struct.remove(index);
         controller.deleteToTextEditor(index);
-//        printString();
     }
 
     public int findPosition(Char c) {
@@ -104,89 +127,100 @@ public class CRDT {
         return -1;
     }
 
+//    public Char generateChar(char value, int index) {
+//        List<Identifier> posBefore;
+//        if (((index - 1) >= 0) && ((index - 1) < struct.size())) {
+//            posBefore = struct.get(index - 1).getPosition();
+//        } else {
+//            posBefore = new ArrayList<>();
+//        }
+//
+//        List<Identifier> posAfter;
+//        if (((index) >= 0) && ((index) < struct.size())) {
+//            posAfter = struct.get(index).getPosition();
+//        } else {
+//            posAfter = new ArrayList<>();
+//        }
+//
+//        List<Identifier> newPos = new ArrayList<>();
+//        generatePosBetween(posBefore, posAfter, newPos, 0);
+//        return new Char(value, newPos, siteId, versionVector.getLocalVersion().getCounter());
+//    }
+
     public Char generateChar(char value, int index) {
-        List<Identifier> posBefore;
-        if (((index - 1) >= 0) && ((index - 1) < struct.size())) {
-            posBefore = struct.get(index - 1).getPosition();
+        long pos;
+        if (index > 0 && index <= struct.size()) {
+            pos = struct.get(index - 1).getPosition() + 1;
         } else {
-            posBefore = new ArrayList<>();
+            pos = 0;
         }
 
-        List<Identifier> posAfter;
-        if (((index) >= 0) && ((index) < struct.size())) {
-            posAfter = struct.get(index).getPosition();
-        } else {
-            posAfter = new ArrayList<>();
-        }
-
-        List<Identifier> newPos = new ArrayList<>();
-        generatePosBetween(posBefore, posAfter, newPos, 0);
-        return new Char(value, newPos, siteId, versionVector.getLocalVersion().getCounter());
+        return new Char(value, pos, siteId, versionVector.getLocalVersion().getCounter());
     }
 
-    public void generatePosBetween(List<Identifier> posBefore,
-                                   List<Identifier> posAfter,
-                                   List<Identifier> newPos,
-                                   int level) {
-        int base = 32;
-        int newBase = (int) Math.pow(2, level) * base;
-        char boundaryStrategy = retrieveStrategy();
-
-        Identifier idBefore;
-        if (!posBefore.isEmpty()) {
-            idBefore = posBefore.get(0);
-        } else {
-            idBefore = new Identifier(0, siteId);
-        }
-        Identifier idAfter;
-        if (!posAfter.isEmpty()) {
-            idAfter = posAfter.get(0);
-        } else {
-            idAfter = new Identifier(newBase, siteId);
-        }
-
-        if ((idAfter.getDigit() - idBefore.getDigit()) > 1) {
-            int newDigit = generateIdBetween(idBefore.getDigit(),
-                    idAfter.getDigit(),
-                    boundaryStrategy);
-            newPos.add(new Identifier(newDigit, siteId));
-        } else if ((idAfter.getDigit() - idBefore.getDigit()) == 1) {
-            newPos.add(idBefore);
-            if (!posBefore.isEmpty()) {
-                posBefore = posBefore.subList(1, posBefore.size());
-            }
-            generatePosBetween(posBefore,
-                    new ArrayList<>(),
-                    newPos,
-                    level + 1);
-        } else if (idBefore.getDigit() == idAfter.getDigit()) {
-            int comSiteId = idBefore.getSiteId().compareTo(idAfter.getSiteId());
-            if (comSiteId < 0) {
-                newPos.add(idBefore);
-                if (!posBefore.isEmpty()) {
-                    posBefore = posBefore.subList(1, posBefore.size());
-                }
-                generatePosBetween(posBefore,
-                        new ArrayList<>(),
-                        newPos,
-                        level + 1);
-            } else if (comSiteId == 0) {
-                newPos.add(idBefore);
-                if (!posBefore.isEmpty()) {
-                    posBefore = posBefore.subList(1, posBefore.size());
-                }
-                if (!posAfter.isEmpty()) {
-                    posAfter = posAfter.subList(1, posAfter.size());
-                }
-                generatePosBetween(posBefore,
-                        posAfter,
-                        newPos,
-                        level + 1);
-            } else {
-                throw new Error("u no gud at coding");
-            }
-        }
-    }
+//    public void generatePosBetween(List<Identifier> posBefore,
+//                                   List<Identifier> posAfter,
+//                                   List<Identifier> newPos,
+//                                   int level) {
+//        int base = 32;
+//        int newBase = (int) Math.pow(2, level) * base;
+//        char boundaryStrategy = retrieveStrategy();
+//
+//        Identifier idBefore;
+//        if (!posBefore.isEmpty()) {
+//            idBefore = posBefore.get(0);
+//        } else {
+//            idBefore = new Identifier(0, siteId);
+//        }
+//        Identifier idAfter;
+//        if (!posAfter.isEmpty()) {
+//            idAfter = posAfter.get(0);
+//        } else {
+//            idAfter = new Identifier(newBase, siteId);
+//        }
+//
+//        if ((idAfter.getDigit() - idBefore.getDigit()) > 1) {
+//            int newDigit = generateIdBetween(idBefore.getDigit(),
+//                    idAfter.getDigit(),
+//                    boundaryStrategy);
+//            newPos.add(new Identifier(newDigit, siteId));
+//        } else if ((idAfter.getDigit() - idBefore.getDigit()) == 1) {
+//            newPos.add(idBefore);
+//            if (!posBefore.isEmpty()) {
+//                posBefore = posBefore.subList(1, posBefore.size());
+//            }
+//            generatePosBetween(posBefore,
+//                    new ArrayList<>(),
+//                    newPos,
+//                    level + 1);
+//        } else if (idBefore.getDigit() == idAfter.getDigit()) {
+//            int comSiteId = idBefore.getSiteId().compareTo(idAfter.getSiteId());
+//            if (comSiteId < 0) {
+//                newPos.add(idBefore);
+//                if (!posBefore.isEmpty()) {
+//                    posBefore = posBefore.subList(1, posBefore.size());
+//                }
+//                generatePosBetween(posBefore,
+//                        new ArrayList<>(),
+//                        newPos,
+//                        level + 1);
+//            } else if (comSiteId == 0) {
+//                newPos.add(idBefore);
+//                if (!posBefore.isEmpty()) {
+//                    posBefore = posBefore.subList(1, posBefore.size());
+//                }
+//                if (!posAfter.isEmpty()) {
+//                    posAfter = posAfter.subList(1, posAfter.size());
+//                }
+//                generatePosBetween(posBefore,
+//                        posAfter,
+//                        newPos,
+//                        level + 1);
+//            } else {
+//                throw new Error("u no gud at coding");
+//            }
+//        }
+//    }
 
     public char retrieveStrategy() {
         if (Math.round(Math.random()) == 1) {
@@ -211,51 +245,4 @@ public class CRDT {
         return (int) Math.floor(Math.random() * (max - min)) + min;
     }
 
-//    public void printString() {
-//        for (Char c : struct) {
-//            System.out.print(c.getValue());
-//        }
-//        System.out.println();
-//    }
 }
-
-
-
-
-
-/*
-    public void printLocation(Char c) {
-        System.out.print("[printLocation] loc = [");
-        List<Identifier> location = c.getPosition();
-        for (int i = 0; i < location.size(); i++) {
-            if (i > 0) {
-                System.out.print(", ");
-            }
-            System.out.print(location.get(i).getDigit());
-        }
-        System.out.println("]");
-    }
-
-
-        public int findInsertPosition(Char c) {
-        int maxIndex = struct.size() - 1;
-        if (struct.isEmpty() || c.compareTo(struct.get(0)) <= 0) {
-            return 0;
-        }
-        Char lastChar = struct.get(maxIndex);
-        if (c.compareTo(lastChar) > 0) {
-            return struct.size();
-        }
-        for (int i = 1; i < (struct.size() - 1); i++) {
-            Char leftChar = struct.get(i - 1);
-            Char rightChar = struct.get(i + 1);
-            if (c.compareTo(rightChar) == 0) {
-                return i;
-            }
-            if ((c.compareTo(leftChar) > 0) && (c.compareTo(rightChar) < 0)) {
-                return i;
-            }
-        }
-        return 0;
-    }
- */

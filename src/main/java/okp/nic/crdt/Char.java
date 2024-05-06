@@ -11,27 +11,55 @@ import java.util.List;
 @Setter
 public class Char implements Comparable<Char> {
     private char value;
-    private List<Identifier> position;
+    private long position; // Use a single long for position
     private String siteId;
     private int counter;
 
     public int compareTo(Char other) {
-        List<Identifier> thisPosition = this.position;
-        List<Identifier> otherPosition = other.position;
-
-        int thisPosSize = thisPosition.size();
-        int otherPosSize = otherPosition.size();
-
-        int minPosSize = Math.min(thisPosSize, otherPosSize);
-        for (int i = 0; i < minPosSize; i++) {
-            Identifier thisIndex = thisPosition.get(i);
-            Identifier otherIndex = otherPosition.get(i);
-            if (thisIndex.compareTo(otherIndex) != 0) {
-                return thisIndex.compareTo(otherIndex);
-            }
+        int posComparison = Long.compare(this.position, other.position);
+        if (posComparison != 0) {
+            return posComparison;
         }
-
-        return Integer.compare(thisPosSize, otherPosSize);
+        return this.siteId.compareTo(other.siteId);
     }
 
+    // Helper method to extract the level from the position
+    public int getLevel() {
+        return (int) (position & 0b11111); // Extract the 5 least significant bits
+    }
+
+    // Helper method to extract the digit from the position
+    public int getDigit() {
+        return (int) ((position >>> 5) & 0x1FFFFFF); // Extract the next 27 bits
+    }
 }
+
+//@AllArgsConstructor
+//@Getter
+//@Setter
+//public class Char implements Comparable<Char> {
+//    private char value;
+//    private List<Identifier> position;
+//    private String siteId;
+//    private int counter;
+//
+//    public int compareTo(Char other) {
+//        List<Identifier> thisPosition = this.position;
+//        List<Identifier> otherPosition = other.position;
+//
+//        int thisPosSize = thisPosition.size();
+//        int otherPosSize = otherPosition.size();
+//
+//        int minPosSize = Math.min(thisPosSize, otherPosSize);
+//        for (int i = 0; i < minPosSize; i++) {
+//            Identifier thisIndex = thisPosition.get(i);
+//            Identifier otherIndex = otherPosition.get(i);
+//            if (thisIndex.compareTo(otherIndex) != 0) {
+//                return thisIndex.compareTo(otherIndex);
+//            }
+//        }
+//
+//        return Integer.compare(thisPosSize, otherPosSize);
+//    }
+//
+//}
