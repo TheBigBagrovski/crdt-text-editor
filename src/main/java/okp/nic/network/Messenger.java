@@ -123,9 +123,12 @@ public class Messenger {
 //        List<Char> text = controller.getCurrentText();
         StringBuilder sb = new StringBuilder();
         for (Char c : controller.getCurrentText()) {
-            sb.append(c.getValue());
+//            sb.append(c.getValue());
+            Operation op = new Operation(c, "insert");
+            String payload = gson.toJson(op);
+            conn.send(payload);
         }
-        conn.send("SIGNAL:INITIAL_STATE:" +  "ws://" + host + ":" + port + ":FROM" + sb);
+//        conn.send("SIGNAL:INITIAL_STATE:" +  "ws://" + host + ":" + port + ":FROM" + sb);
     }
 
 }

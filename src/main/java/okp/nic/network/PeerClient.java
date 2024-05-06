@@ -38,12 +38,12 @@ public class PeerClient extends WebSocketClient {
     public void onMessage(String message) {
         log.info("Пир-клиент получил сообщение: " + message);
         if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
-            String siteId = message.substring(message.indexOf("SIGNAL:INITIAL_STATE:") + 1,
+            String siteId = message.substring(message.indexOf("SIGNAL:INITIAL_STATE:") + "SIGNAL:INITIAL_STATE:".length(),
                     message.indexOf(":FROM"));
+            System.out.println(siteId);
             String payload = message.substring(("SIGNAL:INITIAL_STATE:" + siteId + ":FROM").length());
 //            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
 //            }.getType());
-            System.out.println(siteId);
             char[] arr = payload.toCharArray();
 //            int index = 0;
 //            messenger.getController().loadTextInEditor(arr);
