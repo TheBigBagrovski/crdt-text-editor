@@ -32,11 +32,58 @@ public class CRDT {
         }
     }
 
+//    public Char localInsert(char value, int index) {
+//        versionVector.incrementLocalVersion();
+//        Char curChar = generateChar(value, index);
+//        struct.add(index, curChar);
+//        return curChar;
+//    }
+
     public Char localInsert(char value, int index) {
         versionVector.incrementLocalVersion();
-        Char curChar = generateChar(value, index);
+        double newPosition = calculatePosition(index);
+        Char curChar = new Char(value, newPosition, siteId, versionVector.getLocalVersion().getCounter());
         struct.add(index, curChar);
         return curChar;
+    }
+
+    private double calculatePosition(int index) {
+        if (index == 0) {
+            return 0.0;
+        } else if (index == struct.size()) {
+            return 1.0;
+        } else {
+            Char before = struct.get(index - 1);
+            Char after = struct.get(index);
+            return (before.getPosition() + after.getPosition()) / 2;
+        }
+    }
+
+    public Char generateChar(char value, int index) {
+        double position = calculatePosition(index);
+        return new Char(value, position, siteId, versionVector.getLocalVersion().getCounter());
+    }
+
+    public int findInsertIndex(Char val) {
+        int left = 0;
+        int right = struct.size() - 1;
+
+        if (struct.isEmpty() || val.getPosition() <= struct.get(left).getPosition()) {
+            return left;
+        } else if (val.getPosition() >= struct.get(right).getPosition()) {
+            return struct.size();
+        }
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (val.getPosition() <= struct.get(mid).getPosition()) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return right;
     }
 
     public void remoteInsert(Char c) {
@@ -45,32 +92,61 @@ public class CRDT {
         controller.insertToTextEditor(c.getValue(), index);
     }
 
-    public int findInsertIndex(Char val) {
-        int left = 0;
-        int right = struct.size() - 1;
-
-        if (struct.isEmpty() || val.compareTo(struct.get(left)) < 1) {
-            return left;
-        } else if (val.compareTo(struct.get(right)) > 0) {
-            return struct.size();
-        }
-
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            int compareNum = val.compareTo(struct.get(mid));
-
-            if (compareNum == 0) {
-                return mid;
-            } else if (compareNum > 0) {
-                left = mid + 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-
-        return left;
-    }
-
+    //    public int findInsertIndex(Char val) {
+//        int left = 0;
+//        int right = struct.size() - 1;
+//
+//        if (struct.isEmpty() || val.compareTo(struct.get(left)) < 1) {
+//            return left;
+//        } else if (val.compareTo(struct.get(right)) > 0) {
+//            return struct.size();
+//        }
+//
+//        while (left <= right) {
+//            int mid = left + (right - left) / 2;
+//            int compareNum = val.compareTo(struct.get(mid));
+//
+//            if (compareNum == 0) {
+//                return mid;
+//            } else if (compareNum > 0) {
+//                left = mid + 1;
+//            } else {
+//                right = mid - 1;
+//            }
+//        }
+//
+//        return left;
+//    }
+//    public int findInsertIndex(Char val) {
+//        double targetPos = val.getPosition().get(0).getDigit();
+//
+//        int left = 0;
+//        int right = struct.size() - 1;
+//
+//        // Handle empty struct or target position at the boundaries
+//        if (struct.isEmpty() || targetPos <= struct.get(left).getPosition().get(0).getDigit()) {
+//            return left;
+//        } else if (targetPos >= struct.get(right).getPosition().get(0).getDigit()) {
+//            return struct.size();
+//        }
+//
+//        // Binary search to find the insertion point
+//        while (left <= right) {
+//            int mid = left + (right - left) / 2;
+//            double midPos = struct.get(mid).getPosition().get(0).getDigit();
+//
+//            if (midPos == targetPos) {
+//                return mid; // Exact match found
+//            } else if (midPos < targetPos) {
+//                left = mid + 1; // Search right
+//            } else {
+//                right = mid - 1; // Search left
+//            }
+//        }
+//
+//        // Return the index where the character should be inserted
+//        return left;
+//    }
 //    public int findInsertIndex(Char val) {
 //        int left = 0;
 //        int right = struct.size() - 1;
@@ -147,16 +223,46 @@ public class CRDT {
 //        return new Char(value, newPos, siteId, versionVector.getLocalVersion().getCounter());
 //    }
 
-    public Char generateChar(char value, int index) {
-        long pos;
-        if (index > 0 && index <= struct.size()) {
-            pos = struct.get(index - 1).getPosition() + 1;
-        } else {
-            pos = 0;
-        }
+//    public Char generateChar(char value, int index) {
+//        long pos;
+//        if (index > 0 && index <= struct.size()) {
+//            pos = struct.get(index - 1).getPosition() + 1;
+//        } else {
+//            pos = 0;
+//        }
+//
+//        return new Char(value, pos, siteId, versionVector.getLocalVersion().getCounter());
+//    }
 
-        return new Char(value, pos, siteId, versionVector.getLocalVersion().getCounter());
-    }
+//    public Char generateChar(char value, double index) {
+//        // Find the characters before and after the insertion point
+//        Char charBefore = findCharBefore(index);
+//        Char charAfter = findCharAfter(index);
+//
+//        // Extract their positions as fractional indices
+//        double posBefore = charBefore != null ? charBefore.getPosition().getDigit() : 0.0;
+//        double posAfter = charAfter != null ? charAfter.getPosition().get(0).getDigit() : 1.0;
+//
+//        // Calculate the new fractional index
+//        double newPos = (posBefore + posAfter) / 2.0;
+//
+//        // Create and return the new Char object
+//        return new Char(value, new Identifier(newPos, siteId), siteId, versionVector.getLocalVersion().getCounter());
+//    }
+//
+//    // Helper methods to find characters before and after the index
+//    private Char findCharBefore(double index) {
+//        // ... (Implementation to find the character immediately before the given index)
+//    }
+//
+//    private Char findCharAfter(double index) {
+//        // ... (Implementation to find the character immediately after the given index)
+//    }
+//
+//    public void generatePosBetween(double posBefore, double posAfter, double newPos) {
+//        newPos = (posBefore + posAfter) / 2; // Simple averaging
+//        // Or use a weighted average based on specific logic
+//    }
 
 //    public void generatePosBetween(List<Identifier> posBefore,
 //                                   List<Identifier> posAfter,

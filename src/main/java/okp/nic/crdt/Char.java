@@ -11,28 +11,77 @@ import java.util.List;
 @Setter
 public class Char implements Comparable<Char> {
     private char value;
-    private long position; // Use a single long for position
+    private double position;
     private String siteId;
     private int counter;
 
+    @Override
     public int compareTo(Char other) {
-        int posComparison = Long.compare(this.position, other.position);
-        if (posComparison != 0) {
-            return posComparison;
+        if (this.position < other.position) {
+            return -1;
+        } else if (this.position > other.position) {
+            return 1;
+        } else {
+            return Integer.compare(this.counter, other.counter);
         }
-        return this.siteId.compareTo(other.siteId);
-    }
-
-    // Helper method to extract the level from the position
-    public int getLevel() {
-        return (int) (position & 0b11111); // Extract the 5 least significant bits
-    }
-
-    // Helper method to extract the digit from the position
-    public int getDigit() {
-        return (int) ((position >>> 5) & 0x1FFFFFF); // Extract the next 27 bits
     }
 }
+
+//@AllArgsConstructor
+//@Getter
+//@Setter
+//public class Char implements Comparable<Char> {
+//    private char value;
+//    private Identifier position; // Identifier remains the same
+//    private String siteId;
+//    private int counter;
+//
+//    public int compareTo(Char other) {
+//        // Comparison logic remains the same
+//        return this.position.compareTo(other.position);
+//    }
+//}
+
+//@Getter
+//@Setter
+//public class Char implements Comparable<Char> {
+//    private char value;
+//    private Double position;
+//    private String siteId;
+//    private int counter;
+//
+//    public int compareTo(Char other) {
+//        return Double.compare(this.position, other.position);
+//    }
+//}
+
+//@AllArgsConstructor
+//@Getter
+//@Setter
+//public class Char implements Comparable<Char> {
+//    private char value;
+//    private long position; // Use a single long for position
+//    private String siteId;
+//    private int counter;
+//
+//    public int compareTo(Char other) {
+//        int posComparison = Long.compare(this.position, other.position);
+//        if (posComparison != 0) {
+//            return posComparison;
+//        }
+//        return this.siteId.compareTo(other.siteId);
+//    }
+//
+//     Helper method to extract the level from the position
+//    public int getLevel() {
+//        return (int) (position & 0b11111); // Extract the 5 least significant bits
+//    }
+//
+//     Helper method to extract the digit from the position
+//    public int getDigit() {
+//        return (int) ((position >>> 5) & 0x1FFFFFF); // Extract the next 27 bits
+//    }
+//}
 
 //@AllArgsConstructor
 //@Getter
