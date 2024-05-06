@@ -45,6 +45,7 @@ public class PeerClient extends WebSocketClient {
 //            messenger.getController().loadTextInEditor(arr);
             int index = 0;
             for (char c : arr) {
+                System.out.println("onMessage");
                 messenger.handleRemoteInsert(messenger.getController().getCrdt().generateChar(c, index++));
             }
 //            for (char c : arr) {

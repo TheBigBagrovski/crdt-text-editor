@@ -106,6 +106,8 @@ public class Messenger {
     }
 
     public void handleRemoteInsert(Char data) {
+        System.out.println("MeshandleRemoteInsert");
+
         controller.handleRemoteInsert(data);
     }
 
