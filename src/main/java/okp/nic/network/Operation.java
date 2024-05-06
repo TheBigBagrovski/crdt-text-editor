@@ -9,6 +9,7 @@ import okp.nic.crdt.Char;
 @Getter
 @Setter
 public class Operation {
-    private Char data;
+    private char data;
     private String type;
+    private int position;
 }

@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Char;
-import okp.nic.vectorclock.VersionVector;
-import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -87,17 +85,17 @@ public class Messenger {
         }
     }
 
-    public void broadcastInsert(Char data) {
-        log.info(connectedPeerList.toString());
-        Operation op = new Operation(data, "insert");
+    public void broadcastInsert(char value, int position) {
+//        log.info(connectedPeerList.toString());
+        Operation op = new Operation(value, "insert", position);
         String payload = gson.toJson(op);
         peerServer.broadcast(payload);
     }
 
-    public void broadcastDelete(Char data) {
+    public void broadcastDelete(int position) {
 //        System.out.println("[broadcastDelete] START");
 //        System.out.println("[broadcastDelete] >> preparing delete operation");
-        Operation op = new Operation(data, "delete");
+        Operation op = new Operation('!', "delete", position);
 //        System.out.println("[broadcastDelete] >> jsonify operation");
         String payload = gson.toJson(op);
 //        System.out.println("[broadcastDelete] call serverPeer->broadcast");
@@ -105,18 +103,18 @@ public class Messenger {
 //        System.out.println("[broadcastDelete] FINISH");
     }
 
-    public void handleRemoteInsert(Char data) {
-        controller.handleRemoteInsert(data);
+    public void handleRemoteInsert(int position, char value) {
+        controller.handleRemoteInsert( value, position);
     }
 
-    public void handleRemoteDelete(Char data) {
-        controller.handleRemoteDelete(data);
+    public void handleRemoteDelete(int position) {
+        controller.handleRemoteDelete(position);
     }
 
-    public void sendCurrentState(WebSocket conn) {
-        List<Char> text = controller.getCurrentText();
-        VersionVector versionVector = controller.getCurrentVersionVector();
-        conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
-    }
+//    public void sendCurrentState(WebSocket conn) {
+//        List<Char> text = controller.getCurrentText();
+//        VersionVector versionVector = controller.getCurrentVersionVector();
+//        conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
+//    }
 
 }

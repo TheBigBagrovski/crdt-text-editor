@@ -36,23 +36,23 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("Пир-клиент получил сообщение: " + message);
-        if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
-            String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
-            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
-            }.getType());
-            for (Char c : charList) {
-                messenger.handleRemoteInsert(c);
-            }
-        } else {
+//        if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
+//            String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
+//            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
+//            }.getType());
+//            for (Char c : charList) {
+//                messenger.handleRemoteInsert(c);
+//            }
+//        } else {
             Operation op = gson.fromJson(message, Operation.class);
             if (op.getType().equals("insert")) {
                 log.info("onMessage --> INSERT");
-                messenger.handleRemoteInsert(op.getData());
+                messenger.handleRemoteInsert(op.getPosition(), op.getData());
             } else if (op.getType().equals("delete")) {
                 log.info("onMessage --> DELETE");
-                messenger.handleRemoteDelete(op.getData());
+                messenger.handleRemoteDelete(op.getPosition());
             }
-        }
+//        }
     }
 
     @Override

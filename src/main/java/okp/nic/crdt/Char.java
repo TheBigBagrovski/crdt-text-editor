@@ -4,34 +4,27 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @AllArgsConstructor
 @Getter
 @Setter
 public class Char implements Comparable<Char> {
+    private String id;
+    private boolean visible;
     private char value;
-    private List<Identifier> position;
-    private String siteId;
-    private int counter;
+    private String idPrevious;
+    private String idNext;
 
-    public int compareTo(Char other) {
-        List<Identifier> thisPosition = this.position;
-        List<Identifier> otherPosition = other.position;
+    public static Char startChar() {
+        return new Char("start", false, '!', "", "end");
+    }
 
-        int thisPosSize = thisPosition.size();
-        int otherPosSize = otherPosition.size();
+    public static Char endChar() {
+        return new Char("end", false, '!', "start", "");
+    }
 
-        int minPosSize = Math.min(thisPosSize, otherPosSize);
-        for (int i = 0; i < minPosSize; i++) {
-            Identifier thisIndex = thisPosition.get(i);
-            Identifier otherIndex = otherPosition.get(i);
-            if (thisIndex.compareTo(otherIndex) != 0) {
-                return thisIndex.compareTo(otherIndex);
-            }
-        }
-
-        return Integer.compare(thisPosSize, otherPosSize);
+    @Override
+    public int compareTo(Char o) {
+        return this.id.compareTo(o.getId());
     }
 
 }
