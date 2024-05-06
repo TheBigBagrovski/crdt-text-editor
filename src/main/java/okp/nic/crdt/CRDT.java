@@ -24,6 +24,7 @@ public class CRDT {
         versionVector.incrementLocalVersion();
         Char curChar = generateChar(value, index);
         struct.add(index, curChar);
+        System.out.println(struct);
         printString();
         return curChar;
     }
