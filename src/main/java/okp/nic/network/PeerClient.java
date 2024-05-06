@@ -43,7 +43,7 @@ public class PeerClient extends WebSocketClient {
             String payload = message.substring(("SIGNAL:INITIAL_STATE:" + siteId + ":FROM").length());
 //            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
 //            }.getType());
-
+            System.out.println(siteId);
             char[] arr = payload.toCharArray();
 //            int index = 0;
 //            messenger.getController().loadTextInEditor(arr);
