@@ -38,9 +38,12 @@ public class PeerClient extends WebSocketClient {
     public void onMessage(String message) {
         log.info("Пир-клиент получил сообщение: " + message);
         if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
-            String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
+            String siteId = message.substring(message.indexOf("SIGNAL:INITIAL_STATE:") + 1,
+                    message.indexOf(":FROM"));
+            String payload = message.substring(("SIGNAL:INITIAL_STATE:" + siteId + ":FROM").length());
 //            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
 //            }.getType());
+
             char[] arr = payload.toCharArray();
 //            int index = 0;
 //            messenger.getController().loadTextInEditor(arr);
@@ -48,7 +51,7 @@ public class PeerClient extends WebSocketClient {
             for (char c : arr) {
                 System.out.println("onMessage");
                 Char data = messenger.getController().getCrdt().generateChar(c, index++);
-                data.setSiteId("anotherPeer");
+                data.setSiteId(siteId);
                 messenger.handleRemoteInsert(data);
             }
 //            for (char c : arr) {

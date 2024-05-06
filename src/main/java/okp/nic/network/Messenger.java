@@ -125,7 +125,7 @@ public class Messenger {
         for (Char c : controller.getCurrentText()) {
             sb.append(c.getValue());
         }
-        conn.send("SIGNAL:INITIAL_STATE:" + sb);
+        conn.send("SIGNAL:INITIAL_STATE:" +  "ws://" + host + ":" + port + ":FROM" + sb);
     }
 
 }
