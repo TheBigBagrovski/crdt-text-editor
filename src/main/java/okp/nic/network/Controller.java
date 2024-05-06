@@ -50,6 +50,7 @@ public class Controller implements TextEditorListener, MessengerListener {
 //            Char charToDelete = document.ithVisible(position - 1);
 //            document.integrateDelete(charToDelete);
             document.delete(position);
+            textEditor.getTextArea().setCaretPosition(textEditor.getCursorPos() - 1);
             messenger.broadcastDelete(position);
         } catch (Exception e) {
             e.printStackTrace();
