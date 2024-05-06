@@ -28,7 +28,7 @@ public class CRDT {
     public void loadText(char[] text) {
         clearText();
         for (int i = 0; i < text.length; i++) {
-            localInsert(text[i], i);
+            controller.onInsert(text[i], i);
         }
     }
 
