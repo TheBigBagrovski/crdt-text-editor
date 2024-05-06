@@ -36,7 +36,7 @@ public class PeerClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        log.info("Пир-клиент получил сообщение: " + message);
+//        log.info("Пир-клиент получил сообщение: " + message);
         if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
             String siteId = message.substring(message.indexOf("SIGNAL:INITIAL_STATE:") + "SIGNAL:INITIAL_STATE:".length(),
                     message.indexOf(":FROM"));
@@ -49,7 +49,7 @@ public class PeerClient extends WebSocketClient {
 //            messenger.getController().loadTextInEditor(arr);
             int index = 0;
             for (char c : arr) {
-                System.out.println("onMessage");
+//                System.out.println("onMessage");
                 Char data = messenger.getController().getCrdt().generateChar(c, index++);
                 data.setSiteId(siteId);
                 messenger.handleRemoteInsert(data);
@@ -60,7 +60,7 @@ public class PeerClient extends WebSocketClient {
         } else {
             Operation op = gson.fromJson(message, Operation.class);
             if (op.getType().equals("insert")) {
-                log.info("onMessage --> INSERT");
+//                log.info("onMessage --> INSERT");
                 messenger.handleRemoteInsert(op.getData());
             } else if (op.getType().equals("delete")) {
                 log.info("onMessage --> DELETE");

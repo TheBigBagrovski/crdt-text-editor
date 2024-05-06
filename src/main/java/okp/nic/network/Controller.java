@@ -98,7 +98,7 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     @Override
     public void handleRemoteInsert(Char c) {
-        System.out.println("ConhandleRemoteInsert");
+//        System.out.println("ConhandleRemoteInsert");
         Version operationVersion = new Version(c.getSiteId(), c.getCounter());
         if (versionVector.hasBeenApplied(operationVersion)) {
             System.out.println("bad");

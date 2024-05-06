@@ -40,7 +40,7 @@ public class CRDT {
     }
 
     public void remoteInsert(Char c) {
-        System.out.println("crdtremoteinsert");
+//        System.out.println("crdtremoteinsert");
         int index = findInsertIndex(c);
         struct.add(index, c);
         controller.insertToTextEditor(c.getValue(), index);
