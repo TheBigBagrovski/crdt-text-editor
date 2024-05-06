@@ -175,6 +175,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             value = e.getKeyChar();
             controller.onInsert(value, this.getCursorPos());
         }
+        System.out.println(getCursorPos());
     }
 
     public void keyReleased(KeyEvent e) {
