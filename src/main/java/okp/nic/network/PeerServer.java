@@ -33,7 +33,7 @@ public class PeerServer extends WebSocketServer {
         log.info("Пир-сервер получает сообщение от " + " ws:/" + conn.getRemoteSocketAddress() + ": " + message);
         if (message.startsWith("CURRENT_STATE:")) {
             String from = message.substring("CURRENT_STATE:".length(), message.indexOf(":FROM:"));
-            String payload = message.substring("CURRENT_STATE:".length());
+            String payload = message.substring(("CURRENT_STATE:" + from).length());
             messenger.getController().clear();
             int i = 0;
             for (char c : payload.toCharArray()) {

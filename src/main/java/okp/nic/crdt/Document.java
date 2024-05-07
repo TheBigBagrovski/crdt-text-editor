@@ -152,7 +152,7 @@ public class Document {
         return integrateInsert(charToInsert, subsequence.get(i - 1), subsequence.get(i));
     }
 
-    public void generateInsert(int position, char value) {
+    public void generateInsert(String from, int position, char value) {
         controller.incrementLocalClock();
 
         Char charPrev = ithVisible(position);
@@ -166,7 +166,7 @@ public class Document {
         }
 
         Char charToInsert = new Char(
-                controller.getSiteId() + controller.getLocalClock(),
+                from + controller.getLocalClock(),
                 true,
                 value,
                 charPrev.getId(),
@@ -189,12 +189,12 @@ public class Document {
         integrateDelete(charToDelete);
     }
 
-    public void insert(int position, char value) {
+    public void insert(String from, int position, char value) {
         for (Char aChar : chars) {
             System.out.println(aChar);
         }
         try {
-            generateInsert(position, value);
+            generateInsert(from, position, value);
         } catch (Exception e) {
             content();
         }

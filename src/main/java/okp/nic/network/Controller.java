@@ -34,7 +34,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Override
     public void onInsert(char value, int position) {
         try {
-            document.insert(position, value);
+            document.insert(siteId, position, value);
             messenger.broadcastInsert(value, position);
         } catch (Exception e) {
             log.info("Ошибка при вставке символа " + value + " на поизицию " + position);
@@ -74,8 +74,8 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     @Override
-    public void handleRemoteInsert(String siteId, char value, int position) {
-        document.insert(position, value);
+    public void handleRemoteInsert(String from, char value, int position) {
+        document.insert(from, position, value);
         insertToTextEditor(value, position);
     }
 
