@@ -72,7 +72,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         }
         int curPos = textEditor.getCursorPos();
         if (index <= curPos) {
-            textEditor.setCursorPos(curPos - 1);
+            textEditor.setCursorPos(curPos);
         }
         textEditor.getTextArea().replaceRange("", index - 1, index);
 
