@@ -59,10 +59,13 @@ public class SignalClient extends WebSocketClient {
         } else if (message.startsWith("INITIAL_TEXT_REQ_TO:")) {
             String peer = message.substring("INITIAL_TEXT_REQ_TO:".length());
             try {
-                WebSocket ws = new PeerClient(new URI(peer));
+                PeerClient ws = new PeerClient(new URI(peer));
+                ws.connectBlocking();
                 messenger.sendCurrentState(ws);
             } catch (URISyntaxException e) {
                 e.printStackTrace();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }
