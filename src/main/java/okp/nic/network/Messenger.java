@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +86,12 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
+    public void broadcastClear() {
+        Operation op = new Operation('!', "clear", 0);
+        String payload = gson.toJson(op);
+        peerServer.broadcast(payload);
+    }
+
     public void handleRemoteInsert(int position, char value) {
         controller.handleRemoteInsert(value, position);
     }
@@ -96,11 +101,10 @@ public class Messenger {
     }
 
     public void handleRemoteCurrentStateRequest(String peerAddress) {
-        String text = controller.getDocument().content();
+        String text = controller.getText();
         try {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
-                System.out.println(peer.getRemotePeerAddress());
                 if (peerAddress.equals("ws://" + peer.getRemotePeerAddress())) {
                     peer.send("CURRENT_STATE:" + text);
                     isSucceeded = true;
@@ -112,6 +116,10 @@ public class Messenger {
         } catch (Exception ex) {
             log.error("Ошибка при подключении к пиру");
         }
+    }
+
+    public void handleRemoteClear() {
+        controller.clear();
     }
 
 }

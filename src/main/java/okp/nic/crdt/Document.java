@@ -194,7 +194,7 @@ public class Document {
             content();
         }
     }
-//
+
     public void delete(int position) {
         generateDelete(position);
     }

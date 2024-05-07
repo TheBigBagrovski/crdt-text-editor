@@ -2,7 +2,6 @@ package okp.nic.network;
 
 import com.google.gson.Gson;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -37,12 +36,19 @@ public class PeerClient extends WebSocketClient {
     public void onMessage(String message) {
         log.info("От " + remotePeerAddress + " получено сообщение: " + message);
         Operation op = gson.fromJson(message, Operation.class);
-        if (op.getType().equals("insert")) {
-            log.info("onMessage --> INSERT");
-            messenger.handleRemoteInsert(op.getPosition(), op.getData());
-        } else if (op.getType().equals("delete")) {
-            log.info("onMessage --> DELETE");
-            messenger.handleRemoteDelete(op.getPosition());
+        switch (op.getType()) {
+            case "insert":
+                log.info("onMessage --> INSERT");
+                messenger.handleRemoteInsert(op.getPosition(), op.getData());
+                break;
+            case "delete":
+                log.info("onMessage --> DELETE");
+                messenger.handleRemoteDelete(op.getPosition());
+                break;
+            case "clear":
+                log.info("onMessage --> CLEAR");
+                messenger.handleRemoteClear();
+                break;
         }
     }
 

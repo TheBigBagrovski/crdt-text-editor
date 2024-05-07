@@ -4,11 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class Utils {
 
-    // Метод для нахождения доступного порта
+    // метод инкапсуляции текста в UTF-8 для Swing
+    public static String getString(String str) {
+        return new String(str.getBytes(), StandardCharsets.UTF_8);
+    }
+
+    // метод для нахождения доступного порта
     public static int findAvailablePort() {
         try {
             ServerSocket serverSocket = new ServerSocket(0);
@@ -21,6 +27,7 @@ public class Utils {
         }
     }
 
+    // метод определения доступности порта
     public static boolean isPortAvailable(int port) {
         boolean portFree;
         try (ServerSocket ignored = new ServerSocket(port)) {

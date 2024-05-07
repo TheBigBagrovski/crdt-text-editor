@@ -1,35 +1,32 @@
 package okp.nic.network;
 
 import lombok.Getter;
-import lombok.Setter;
-import okp.nic.crdt.Char;
+import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Document;
 import okp.nic.editor.TextEditor;
 import okp.nic.editor.TextEditorListener;
 
-@Getter
-@Setter
+@Slf4j
 public class Controller implements TextEditorListener, MessengerListener {
 
-    private String host;
-    private int port;
+    private final Document document;
 
-    private Document document;
-    private String siteId;
-    private TextEditor textEditor = new TextEditor(400, 400);
-    private Messenger messenger;
+    @Getter
+    private final String siteId;
+    private TextEditor textEditor;
+    private final Messenger messenger;
 
+    @Getter
     private int localClock = 0;
 
     public Controller(String host, int port, String signalHost, String signalPort) {
         siteId = "ws://" + host + ":" + port;
         document = new Document(this);
-        textEditor.setTextEditorListener(this);
         messenger = new Messenger(host, port, this, signalHost, signalPort);
     }
 
     public void start() {
-        textEditor.show();
+        textEditor = new TextEditor(this);
     }
 
     public void clear() {
@@ -43,7 +40,7 @@ public class Controller implements TextEditorListener, MessengerListener {
             document.insert(position, value);
             messenger.broadcastInsert(value, position);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("Ошибка при вставке символа " + value + " на поизицию " + position);
         }
     }
 
@@ -53,7 +50,8 @@ public class Controller implements TextEditorListener, MessengerListener {
             document.delete(position);
             messenger.broadcastDelete(position);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("Ошибка при удалении символа на позиции " + position);
+
         }
     }
 
@@ -89,9 +87,25 @@ public class Controller implements TextEditorListener, MessengerListener {
         document.delete(position);
         deleteToTextEditor(position);
     }
+
     public void incrementLocalClock() {
         localClock++;
     }
 
+    public void importTextFromFile(char[] text) {
+        clear();
+        messenger.broadcastClear();
+        int i = 0;
+        for (char c : text) {
+            onInsert(c, i);
+            textEditor.getTextArea().insert(String.valueOf(c), i);
+//            insertToTextEditor(c, i);
+            i++;
+        }
+    }
+
+    public String getText() {
+        return document.content();
+    }
 
 }

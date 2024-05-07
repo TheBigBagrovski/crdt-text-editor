@@ -4,7 +4,6 @@ import okp.nic.network.Controller;
 
 import static okp.nic.Utils.findAvailablePort;
 //todo() тест на 3 пирах
-//todo() показ имещегося текста при подключении
 //todo() никнеймы у пиров
 //todo() окно логов в интерфейсе + список подключенных участников
 //todo() сохранение и загрузка файла
@@ -29,7 +28,7 @@ public class Main {
             Controller controller = new Controller(host, port, signalHost, signalPort);
             controller.start();
         } else {
-            System.out.println("User cancelled input.");
+            System.out.println("Пользователь отменил ввод");
         }
     }
 

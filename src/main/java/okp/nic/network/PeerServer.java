@@ -6,8 +6,6 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class PeerServer extends WebSocketServer {
@@ -50,7 +48,7 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        System.out.println("Пир-сервер успешно запущен на сокете " + "ws:/" + getAddress());
+        log.info("Пир-сервер успешно запущен на сокете " + "ws:/" + getAddress());
     }
 
 }
