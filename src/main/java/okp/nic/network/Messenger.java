@@ -102,7 +102,7 @@ public class Messenger {
             for (PeerClient peer : connectedPeerList) {
                 System.out.println(peer.getRemotePeerAddress());
                 if (peerAddress.equals("ws://" + peer.getRemotePeerAddress())) {
-                    peer.getConnection().send("CURRENT_STATE:" + text);
+                    peerServer.broadcast("CURRENT_STATE:" + text);
 //                    peer.send("CURRENT_STATE:" + text);
                     isSucceeded = true;
                 }
