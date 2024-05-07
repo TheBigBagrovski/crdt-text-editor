@@ -102,6 +102,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public String getText() {
+        System.out.println(document.content());
         return document.content();
     }
 
