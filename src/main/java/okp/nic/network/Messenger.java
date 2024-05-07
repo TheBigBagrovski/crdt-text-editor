@@ -71,7 +71,7 @@ public class Messenger {
     }
 
     public void handleRemotePeerDisconnected(String disconnectedPeer) {
-        connectedPeerList.removeIf(peer -> peer.getRemotePeerAddress().equals(disconnectedPeer));
+        connectedPeerList.removeIf(peer -> peer.getRemotePeerAddress().equals("ws://" + disconnectedPeer));
     }
 
     public void broadcastInsert(char value, int position) {
@@ -99,8 +99,10 @@ public class Messenger {
         try {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
+                System.out.println(peer.getRemotePeerAddress());
                 if (peerAddress.equals(peer.getRemotePeerAddress())) {
-                    peer.send("CURRENT_STATE:" + text);
+                    peer.send(text);
+//                    peer.send("CURRENT_STATE:" + text);
                     isSucceeded = true;
                 }
             }

@@ -56,7 +56,7 @@ public class SignalServer extends WebSocketServer {
         log.info("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: " + reason);
         if (clients.containsKey(conn)) {
             clients.remove(conn);
-            broadcastMessage("SIGNAL:DISCONNECTED:" + conn.getRemoteSocketAddress().toString());
+            broadcastMessage("SIGNAL:DISCONNECTED:" + "ws:/" + conn.getRemoteSocketAddress().toString());
         } else {
             log.error(conn.getRemoteSocketAddress() + " не является клиентом сигнального сервера");
         }

@@ -116,7 +116,7 @@ public class Document {
     }
 
     public Document localInsert(Char charToInsert, int position) {
-        if (position <= 0 || position >= length()) {
+        if (position < 0 || position >= length()) {
             System.out.println(position);
             System.out.println(length());
             throw new IndexOutOfBoundsException("Position out of bounds");

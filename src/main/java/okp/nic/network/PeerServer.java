@@ -6,6 +6,7 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class PeerServer extends WebSocketServer {
@@ -20,6 +21,7 @@ public class PeerServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake clientHandshake) {
         log.info("К пир-серверу подключается " + conn.getRemoteSocketAddress());
+
     }
 
     @Override
