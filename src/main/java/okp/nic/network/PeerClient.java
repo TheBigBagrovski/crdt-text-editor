@@ -9,31 +9,33 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 
 @Slf4j
-@Setter
 public class PeerClient extends WebSocketClient {
 
     private final Gson gson = new Gson();
-    private Messenger messenger;
+    private final String remotePeerAddress;
+    private final Messenger messenger;
 
-    public PeerClient(URI serverURI) {
+    public PeerClient(URI serverURI, Messenger messenger) {
         super(serverURI);
+        remotePeerAddress = serverURI.getHost() + ":" + serverURI.getPort();
+        this.messenger = messenger;
     }
 
     @Override
     public void onOpen(ServerHandshake handshakeData) {
-        log.info("Новое соединение с пир-клиентом");
+        log.info("Установлено соединение с " + remotePeerAddress);
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.info("Соединение с пир-клиентом прервано с кодом " + code + ", причина: " + reason);
+        log.info("Соединение с " + remotePeerAddress + " прервано с кодом " + code + ", причина: " + reason);
     }
 
     @Override
     public void onMessage(String message) {
-        log.info("Пир-клиент получил сообщение: " + message);
-        if (message.startsWith("INITIAL_STATE:")) {
-            String payload = message.substring("INITIAL_STATE:".length());
+        log.info("От " + remotePeerAddress + " получено сообщение: " + message);
+        if (message.startsWith("CURRENT_STATE:")) {
+            String payload = message.substring("CURRENT_STATE:".length());
 //            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
 //            }.getType());
 //            for (Char c : charList) {
@@ -53,11 +55,11 @@ public class PeerClient extends WebSocketClient {
                 messenger.handleRemoteDelete(op.getPosition());
             }
         }
-
     }
 
     @Override
     public void onError(Exception ex) {
-        log.error("Возникла ошибка в пир-клиенте: " + ex);
+        log.error("При соединении с " + remotePeerAddress + " возникла ошибка: " + ex);
     }
+
 }

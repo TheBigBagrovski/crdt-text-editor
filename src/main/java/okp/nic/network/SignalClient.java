@@ -48,25 +48,26 @@ public class SignalClient extends WebSocketClient {
         } else if (message.startsWith("SIGNAL:DISCONNECTED:")) {
             String peerAddress = message.substring("SIGNAL:DISCONNECTED:".length());
             messenger.handleRemotePeerDisconnected(peerAddress);
-        } else if (message.startsWith("SIGNAL:INITIAL:")) {
-            String peersList = message.substring("SIGNAL:INITIAL:".length());
-            if (!peersList.isEmpty()) {
+        } else if (message.startsWith("SIGNAL:PEERS:")) {
+            String peersList = message.substring("SIGNAL:PEERS:".length());
+            if (!peersList.isEmpty() && !peersList.equals("FIRST")) {
                 String[] peers = peersList.split(", ");
                 for (String peer : peers) {
                     messenger.handleRemotePeerConnected(peer);
                 }
             }
-        } else if (message.startsWith("INITIAL_TEXT_REQ_TO:")) {
-            String peer = message.substring("INITIAL_TEXT_REQ_TO:".length());
-            try {
-                PeerClient ws = new PeerClient(new URI(peer));
-                ws.connectBlocking();
-                messenger.sendCurrentState(ws);
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
+//        else if (message.startsWith("INITIAL_TEXT_REQ_TO:")) {
+//            String peer = message.substring("INITIAL_TEXT_REQ_TO:".length());
+//            try {
+//                PeerClient ws = new PeerClient(new URI(peer));
+//                ws.connectBlocking();
+//                messenger.sendCurrentState(ws);
+//            } catch (URISyntaxException e) {
+//                e.printStackTrace();
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
     }
 }

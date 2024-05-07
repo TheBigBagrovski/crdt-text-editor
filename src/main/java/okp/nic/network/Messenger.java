@@ -22,7 +22,6 @@ public class Messenger {
 
     private PeerServer peerServer;
     private SignalClient signalClient;
-    private final String serverAddress;
 
     private final Gson gson = new Gson();
 
@@ -30,24 +29,18 @@ public class Messenger {
         this.host = host;
         this.port = port;
         this.controller = controller;
-        serverAddress = "ws://" + signalHost + ":" + signalPort;
-        init();
-    }
-
-    public void init() {
         startServerPeer();
-        connectToSignalServer();
+        connectToSignalServer("ws://" + signalHost + ":" + signalPort);
     }
 
     public void startServerPeer() {
-        peerServer = new PeerServer(new InetSocketAddress(host, port));
-        peerServer.setMessenger(this);
+        peerServer = new PeerServer(new InetSocketAddress(host, port), this);
         peerServer.start();
     }
 
-    public void connectToSignalServer() {
+    public void connectToSignalServer(String signalServerAddress) {
         try {
-            signalClient = new SignalClient(new URI(serverAddress + "?address=" + "ws://" + host + ":" + port), this);
+            signalClient = new SignalClient(new URI(signalServerAddress + "?address=" + "ws://" + host + ":" + port), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
             log.error("Ошибка при подключении к сигнальному серверу: " + ex);
@@ -59,8 +52,7 @@ public class Messenger {
         log.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
         while (!connectedPeerList.contains(peerAddress)) {
             try {
-                PeerClient peerNode = new PeerClient(new URI(peerAddress + "?address=" + myFullAddress));
-                peerNode.setMessenger(this);
+                PeerClient peerNode = new PeerClient(new URI(peerAddress), this);
                 boolean isSucceeded = peerNode.connectBlocking();
                 if (isSucceeded) {
                     connectedPeerList.add(peerAddress);
@@ -87,21 +79,15 @@ public class Messenger {
     }
 
     public void broadcastInsert(char value, int position) {
-//        log.info(connectedPeerList.toString());
         Operation op = new Operation(value, "insert", position);
         String payload = gson.toJson(op);
         peerServer.broadcast(payload);
     }
 
     public void broadcastDelete(int position) {
-//        System.out.println("[broadcastDelete] START");
-//        System.out.println("[broadcastDelete] >> preparing delete operation");
         Operation op = new Operation('!', "delete", position);
-//        System.out.println("[broadcastDelete] >> jsonify operation");
         String payload = gson.toJson(op);
-//        System.out.println("[broadcastDelete] call serverPeer->broadcast");
         peerServer.broadcast(payload);
-//        System.out.println("[broadcastDelete] FINISH");
     }
 
     public void handleRemoteInsert(int position, char value) {
@@ -112,9 +98,9 @@ public class Messenger {
         controller.handleRemoteDelete(position);
     }
 
-    public void sendCurrentState(WebSocket conn) {
+    public void handleCurrentStateRequest(WebSocket conn) {
         String text = controller.getDocument().content();
-        conn.send("INITIAL_STATE:" + text);
+        conn.send("CURRENT_STATE:" + text);
     }
 
 }

@@ -34,12 +34,17 @@ public class SignalServer extends WebSocketServer {
         String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("=")[1];
         log.info("Новое подключение к сигнальному серверу: " + peerAddress);
         conn.send("SIGNAL:WELCOME");
-        StringBuilder sb = new StringBuilder("SIGNAL:INITIAL:");
-        for (String socket : clients.values()) {
-            sb.append(socket).append(", ");
+        StringBuilder sb = new StringBuilder("SIGNAL:PEERS:");
+        if (!clients.isEmpty()) {
+            for (String socket : clients.values()) {
+                sb.append(socket).append(", ");
+            }
+            sb.delete(sb.length() - 2, sb.length());
+        } else {
+            sb.append("FIRST");
         }
-        conn.send(sb.toString()); // Отправка новому пиру текущих подключенных клиентов
-        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress); // Отправка подключенным клиентам данных о новом пире
+        conn.send(sb.toString()); // отправка новому пиру текущих подключенных клиентов
+        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress); // отправка подключенным клиентам данных о новом пире
         if (!clients.isEmpty()) {
             Iterator<WebSocket> iterator = clients.keySet().iterator();
             iterator.next().send("INITIAL_TEXT_REQ_TO:" + peerAddress);

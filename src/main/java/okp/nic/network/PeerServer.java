@@ -1,7 +1,5 @@
 package okp.nic.network;
 
-
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -10,14 +8,14 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 
 @Slf4j
-@Setter
 public class PeerServer extends WebSocketServer {
 
-    private Messenger messenger;
+    private final Messenger messenger;
 
-    public PeerServer(InetSocketAddress address) {
+    public PeerServer(InetSocketAddress address, Messenger messenger) {
         super(address);
-        address.getHostName();
+        this.messenger = messenger;
+//        address.getHostName();
     }
 
     @Override
