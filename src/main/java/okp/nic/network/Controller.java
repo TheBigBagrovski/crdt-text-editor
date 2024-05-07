@@ -22,11 +22,8 @@ public class Controller implements TextEditorListener, MessengerListener {
     public Controller(String host, int port, String signalHost, String signalPort) {
         siteId = "ws://" + host + ":" + port;
         document = new Document(this);
-        messenger = new Messenger(host, port, this, signalHost, signalPort);
-    }
-
-    public void start() {
         textEditor = new TextEditor(this);
+        messenger = new Messenger(host, port, this, signalHost, signalPort);
     }
 
     public void clear() {

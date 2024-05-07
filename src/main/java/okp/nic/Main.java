@@ -26,7 +26,6 @@ public class Main {
             int port = findAvailablePort();
             System.out.println("Пир запущен на адресе: " + host + ", порт: " + port);
             Controller controller = new Controller(host, port, signalHost, signalPort);
-            controller.start();
         } else {
             System.out.println("Пользователь отменил ввод");
         }
