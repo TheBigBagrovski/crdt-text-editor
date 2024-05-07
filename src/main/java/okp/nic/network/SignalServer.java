@@ -22,7 +22,6 @@ import static okp.nic.Utils.isPortAvailable;
 @Getter
 public class SignalServer extends WebSocketServer {
 
-    //    private boolean isRunning = false;
     private final Map<WebSocket, String> clients = new HashMap<>();
 
     public SignalServer(InetSocketAddress address) {

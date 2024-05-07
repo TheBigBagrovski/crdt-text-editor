@@ -15,7 +15,6 @@ public class PeerServer extends WebSocketServer {
     public PeerServer(InetSocketAddress address, Messenger messenger) {
         super(address);
         this.messenger = messenger;
-//        address.getHostName();
     }
 
     @Override

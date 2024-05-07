@@ -1,14 +1,10 @@
 package okp.nic.network;
 
 import lombok.extern.slf4j.Slf4j;
-import org.java_websocket.WebSocket;
-import org.java_websocket.WebSocketImpl;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 @Slf4j
 public class SignalClient extends WebSocketClient {
@@ -56,18 +52,10 @@ public class SignalClient extends WebSocketClient {
                     messenger.handleRemotePeerConnected(peer);
                 }
             }
+        } else if (message.startsWith("SIGNAL:INITIAL_TEXT_REQ_TO:")) {
+            String peerAddress = message.substring("SIGNAL:INITIAL_TEXT_REQ_TO:".length());
+            messenger.handleRemoteCurrentStateRequest(peerAddress);
         }
-//        else if (message.startsWith("INITIAL_TEXT_REQ_TO:")) {
-//            String peer = message.substring("INITIAL_TEXT_REQ_TO:".length());
-//            try {
-//                PeerClient ws = new PeerClient(new URI(peer));
-//                ws.connectBlocking();
-//                messenger.sendCurrentState(ws);
-//            } catch (URISyntaxException e) {
-//                e.printStackTrace();
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
     }
+
 }

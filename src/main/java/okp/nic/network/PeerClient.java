@@ -1,6 +1,7 @@
 package okp.nic.network;
 
 import com.google.gson.Gson;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
@@ -9,6 +10,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 
 @Slf4j
+@Getter
 public class PeerClient extends WebSocketClient {
 
     private final Gson gson = new Gson();
@@ -36,10 +38,6 @@ public class PeerClient extends WebSocketClient {
         log.info("От " + remotePeerAddress + " получено сообщение: " + message);
         if (message.startsWith("CURRENT_STATE:")) {
             String payload = message.substring("CURRENT_STATE:".length());
-//            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
-//            }.getType());
-//            for (Char c : charList) {
-//                messenger.handleRemoteInsert(c);
             messenger.getController().clear();
             int i = 0;
             for (char c : payload.toCharArray()) {
