@@ -25,7 +25,7 @@ public class PeerClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakeData) {
-        log.info("Установлено соединение с " + remotePeerAddress);
+        log.info("Установлено соединение с " + "ws://" + remotePeerAddress);
     }
 
     @Override

@@ -20,7 +20,7 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake clientHandshake) {
-        log.info("К пир-серверу подключается " + conn.getRemoteSocketAddress());
+        log.info("К пир-серверу подключается " + "ws:/" + conn.getRemoteSocketAddress());
 
     }
 
@@ -41,7 +41,7 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        System.out.println("Пир-сервер успешно запущен на сокете " + getAddress());
+        System.out.println("Пир-сервер успешно запущен на сокете " + "ws:/" + getAddress());
     }
 
 }
