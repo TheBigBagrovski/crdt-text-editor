@@ -92,8 +92,8 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
-    public void handleRemoteInsert(int position, char value) {
-        controller.handleRemoteInsert(value, position);
+    public void handleRemoteInsert(String from, int position, char value) {
+        controller.handleRemoteInsert(from, value, position);
     }
 
     public void handleRemoteDelete(int position) {
@@ -106,7 +106,7 @@ public class Messenger {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
                 if (peerAddress.equals("ws://" + peer.getRemotePeerAddress())) {
-                    peer.send("CURRENT_STATE:" + text);
+                    peer.send("CURRENT_STATE:" + peer.getRemotePeerAddress() + ":FROM:" + text);
                     isSucceeded = true;
                 }
             }

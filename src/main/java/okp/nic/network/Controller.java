@@ -13,7 +13,7 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     @Getter
     private final String siteId;
-    private TextEditor textEditor;
+    private final TextEditor textEditor;
     private final Messenger messenger;
 
     @Getter
@@ -74,7 +74,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     @Override
-    public void handleRemoteInsert(char value, int position) {
+    public void handleRemoteInsert(String siteId, char value, int position) {
         document.insert(position, value);
         insertToTextEditor(value, position);
     }

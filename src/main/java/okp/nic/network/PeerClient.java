@@ -39,7 +39,7 @@ public class PeerClient extends WebSocketClient {
         switch (op.getType()) {
             case "insert":
                 log.info("onMessage --> INSERT");
-                messenger.handleRemoteInsert(op.getPosition(), op.getData());
+                messenger.handleRemoteInsert(remotePeerAddress, op.getPosition(), op.getData());
                 break;
             case "delete":
                 log.info("onMessage --> DELETE");
