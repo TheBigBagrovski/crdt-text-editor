@@ -46,7 +46,7 @@ public class SignalServer extends WebSocketServer {
         broadcastMessage("SIGNAL:CONNECTED:" + peerAddress); // отправка подключенным клиентам данных о новом пире
         if (!clients.isEmpty()) {
             Iterator<WebSocket> iterator = clients.keySet().iterator();
-            iterator.next().send("INITIAL_TEXT_REQ_TO:" + peerAddress);
+            iterator.next().send("SIGNAL:INITIAL_TEXT_REQ_TO:" + peerAddress);
         }
         clients.put(conn, peerAddress);
     }
