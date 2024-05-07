@@ -22,6 +22,8 @@ public class Document {
 
     public void clearDocument() {
         chars.clear();
+        chars.add(Char.startChar());
+        chars.add(Char.endChar());
     }
 
     public String content() {
