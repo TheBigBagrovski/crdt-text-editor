@@ -117,6 +117,8 @@ public class Document {
 
     public Document localInsert(Char charToInsert, int position) {
         if (position <= 0 || position >= length()) {
+            System.out.println(position);
+            System.out.println(length());
             throw new IndexOutOfBoundsException("Position out of bounds");
         }
 
@@ -148,7 +150,7 @@ public class Document {
         return integrateInsert(charToInsert, subsequence.get(i - 1), subsequence.get(i));
     }
 
-    public void generateInsert(int position, char value) {
+    public Document generateInsert(int position, char value) {
         controller.incrementLocalClock();
 
         Char charPrev = ithVisible(position - 1);
@@ -169,36 +171,36 @@ public class Document {
                 charNext.getId()
         );
 
-        integrateInsert(charToInsert, charPrev, charNext);
+        return integrateInsert(charToInsert, charPrev, charNext);
     }
 
-    public void integrateDelete(Char charToDelete) {
+    public Document integrateDelete(Char charToDelete) {
         int position = position(charToDelete.getId());
         if (position == -1) {
-            return;
+            return this;
         }
         chars.get(position - 1).setVisible(false);
+        return this;
     }
 
-    public void generateDelete(int position) {
+    public Document generateDelete(int position) {
         Char charToDelete = ithVisible(position);
-        integrateDelete(charToDelete);
+        return integrateDelete(charToDelete);
     }
 
-//    public void insert(int position, char value) {
-//        Document newDoc;
-//        try {
-//            newDoc = generateInsert(position, value);
-//        } catch (Exception e) {
-//            content();
-//            return;
-//        }
-//        newDoc.content();
-//    }
-//
-//    public void delete(int position) {
-//        Document newDoc = generateDelete(position);
-//        newDoc.content();
-//    }
+    public String insert(int position, char value) {
+        Document newDoc;
+        try {
+            newDoc = generateInsert(position, value);
+        } catch (Exception e) {
+            return content();
+        }
+        return newDoc.content();
+    }
+
+    public String delete(int position) {
+        Document newDoc = generateDelete(position);
+        return newDoc.content();
+    }
 
 }
