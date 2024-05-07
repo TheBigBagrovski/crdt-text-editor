@@ -12,6 +12,7 @@ import java.awt.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static okp.nic.Utils.findAvailablePort;
@@ -21,7 +22,7 @@ import static okp.nic.Utils.isPortAvailable;
 @Getter
 public class SignalServer extends WebSocketServer {
 
-//    private boolean isRunning = false;
+    //    private boolean isRunning = false;
     private final Map<WebSocket, String> clients = new HashMap<>();
 
     public SignalServer(InetSocketAddress address) {
@@ -37,17 +38,21 @@ public class SignalServer extends WebSocketServer {
         for (String socket : clients.values()) {
             sb.append(socket).append(", ");
         }
-        clients.put(conn, peerAddress);
         conn.send(sb.toString()); // Отправка новому пиру текущих подключенных клиентов
-        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress, conn); // Отправка подключенным клиентам данных о новом пире
+        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress); // Отправка подключенным клиентам данных о новом пире
+        if (!clients.isEmpty()) {
+            Iterator<WebSocket> iterator = clients.keySet().iterator();
+            iterator.next().send("INITIAL_TEXT_REQ_TO:" + peerAddress);
+        }
+        clients.put(conn, peerAddress);
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         log.info("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: " + reason);
         if (clients.containsKey(conn)) {
-            broadcastMessage("SIGNAL:DISCONNECTED:" + conn.getRemoteSocketAddress().toString(), conn);
             clients.remove(conn);
+            broadcastMessage("SIGNAL:DISCONNECTED:" + conn.getRemoteSocketAddress().toString());
         } else {
             log.error(conn.getRemoteSocketAddress() + " не является клиентом сигнального сервера");
         }
@@ -70,11 +75,9 @@ public class SignalServer extends WebSocketServer {
         new SocketInfoWindow(socketAddress);
     }
 
-    private void broadcastMessage(String message, WebSocket exclude) {
+    private void broadcastMessage(String message) {
         for (WebSocket client : clients.keySet()) {
-            if (!client.equals(exclude)) {
-                client.send(message);
-            }
+            client.send(message);
         }
     }
 

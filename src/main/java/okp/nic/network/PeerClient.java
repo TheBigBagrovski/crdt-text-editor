@@ -1,6 +1,7 @@
 package okp.nic.network;
 
 import com.google.gson.Gson;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -8,14 +9,14 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 
 @Slf4j
+@Setter
 public class PeerClient extends WebSocketClient {
 
     private final Gson gson = new Gson();
-    private final Messenger messenger;
+    private Messenger messenger;
 
-    public PeerClient(URI serverURI, Messenger messenger) {
+    public PeerClient(URI serverURI) {
         super(serverURI);
-        this.messenger = messenger;
     }
 
     @Override
@@ -31,8 +32,8 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("Пир-клиент получил сообщение: " + message);
-        if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
-            String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
+        if (message.startsWith("INITIAL_STATE:")) {
+            String payload = message.substring("INITIAL_STATE:".length());
 //            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
 //            }.getType());
 //            for (Char c : charList) {

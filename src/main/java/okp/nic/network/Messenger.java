@@ -3,7 +3,6 @@ package okp.nic.network;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import okp.nic.crdt.Char;
 import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
@@ -41,7 +40,8 @@ public class Messenger {
     }
 
     public void startServerPeer() {
-        peerServer = new PeerServer(new InetSocketAddress(host, port), this);
+        peerServer = new PeerServer(new InetSocketAddress(host, port));
+        peerServer.setMessenger(this);
         peerServer.start();
     }
 
@@ -59,8 +59,8 @@ public class Messenger {
         log.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
         while (!connectedPeerList.contains(peerAddress)) {
             try {
-                PeerClient peerNode = new PeerClient(new URI(peerAddress + "?address=" + myFullAddress), this);
-
+                PeerClient peerNode = new PeerClient(new URI(peerAddress + "?address=" + myFullAddress));
+                peerNode.setMessenger(this);
                 boolean isSucceeded = peerNode.connectBlocking();
                 if (isSucceeded) {
                     connectedPeerList.add(peerAddress);
@@ -114,7 +114,7 @@ public class Messenger {
 
     public void sendCurrentState(WebSocket conn) {
         String text = controller.getDocument().content();
-        conn.send("SIGNAL:INITIAL_STATE:" + text);
+        conn.send("INITIAL_STATE:" + text);
     }
 
 }

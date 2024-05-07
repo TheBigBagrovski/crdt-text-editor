@@ -1,6 +1,7 @@
 package okp.nic.network;
 
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -9,20 +10,19 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 
 @Slf4j
+@Setter
 public class PeerServer extends WebSocketServer {
 
-    private final Messenger messenger;
+    private Messenger messenger;
 
-    public PeerServer(InetSocketAddress address, Messenger messenger) {
+    public PeerServer(InetSocketAddress address) {
         super(address);
-        this.messenger = messenger;
         address.getHostName();
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake clientHandshake) {
         log.info("К пир-серверу подключается " + conn.getRemoteSocketAddress());
-        messenger.sendCurrentState(conn);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        System.out.println("Пир-сервер успешно запущен");
+        System.out.println("Пир-сервер успешно запущен на сокете " + getAddress());
     }
 
 }
