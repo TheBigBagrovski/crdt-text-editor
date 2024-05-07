@@ -96,7 +96,7 @@ public class Messenger {
     }
 
     public void handleRemoteCurrentStateRequest(String peerAddress) {
-        String text = new String(controller.getDocument().content().getBytes(), StandardCharsets.UTF_8);
+        String text = controller.getDocument().content();
         try {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
