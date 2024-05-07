@@ -32,10 +32,15 @@ public class Controller implements TextEditorListener, MessengerListener {
         textEditor.show();
     }
 
+    public void clear() {
+        document.clearDocument();
+        textEditor.clearTextArea();
+    }
+
     @Override
     public void onInsert(char value, int position) {
         try {
-            document.insert(position, value);
+            document.generateInsert(position, value);
 //            Char c = generateChar(position, String.valueOf(value));
 //            document.localInsert(c, position);
             messenger.broadcastInsert(value, position);
@@ -49,7 +54,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         try {
 //            Char charToDelete = document.ithVisible(position - 1);
 //            document.integrateDelete(charToDelete);
-            document.delete(position);
+            document.generateDelete(position);
             messenger.broadcastDelete(position);
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,6 +71,9 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     public void deleteToTextEditor(int index) {
         System.out.println("попытка стереть символ с индексом " + index);
+        if (index == 0) {
+            return;
+        }
         textEditor.getTextArea().replaceRange("", index - 1, index);
 
         int curPos = textEditor.getCursorPos();
@@ -79,13 +87,13 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     @Override
     public void handleRemoteInsert(char value, int position) {
-        document.insert(position, value);
+        document.generateInsert(position, value);
         insertToTextEditor(value, position);
     }
 
     @Override
     public void handleRemoteDelete(int position) {
-        document.delete(position);
+        document.generateDelete(position);
         deleteToTextEditor(position);
     }
     public void incrementLocalClock() {

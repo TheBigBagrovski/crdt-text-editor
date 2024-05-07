@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Char;
+import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -111,10 +112,9 @@ public class Messenger {
         controller.handleRemoteDelete(position);
     }
 
-//    public void sendCurrentState(WebSocket conn) {
-//        List<Char> text = controller.getCurrentText();
-//        VersionVector versionVector = controller.getCurrentVersionVector();
-//        conn.send("SIGNAL:INITIAL_STATE:" + gson.toJson(text));
-//    }
+    public void sendCurrentState(WebSocket conn) {
+        String text = controller.getDocument().content();
+        conn.send("SIGNAL:INITIAL_STATE:" + text);
+    }
 
 }

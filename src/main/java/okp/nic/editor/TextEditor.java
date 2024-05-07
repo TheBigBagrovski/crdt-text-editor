@@ -34,6 +34,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.setSize(width, height);
     }
 
+    public void clearTextArea() {
+        textArea.setText("");
+    }
+
     public void setTextEditorListener(Controller controller) {
         this.controller = controller;
     }

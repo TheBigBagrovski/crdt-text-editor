@@ -1,16 +1,11 @@
 package okp.nic.network;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import okp.nic.crdt.Char;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 public class PeerClient extends WebSocketClient {
@@ -36,14 +31,18 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("Пир-клиент получил сообщение: " + message);
-//        if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
-//            String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
+        if (message.startsWith("SIGNAL:INITIAL_STATE:")) {
+            String payload = message.substring("SIGNAL:INITIAL_STATE:".length());
 //            List<Char> charList = gson.fromJson(payload, new TypeToken<List<Char>>() {
 //            }.getType());
 //            for (Char c : charList) {
 //                messenger.handleRemoteInsert(c);
-//            }
-//        } else {
+            messenger.getController().clear();
+            int i = 0;
+            for (char c : payload.toCharArray()) {
+                messenger.handleRemoteInsert(i++, c);
+            }
+        } else {
             Operation op = gson.fromJson(message, Operation.class);
             if (op.getType().equals("insert")) {
                 log.info("onMessage --> INSERT");
@@ -52,12 +51,12 @@ public class PeerClient extends WebSocketClient {
                 log.info("onMessage --> DELETE");
                 messenger.handleRemoteDelete(op.getPosition());
             }
-//        }
+        }
+
     }
 
     @Override
     public void onError(Exception ex) {
         log.error("Возникла ошибка в пир-клиенте: " + ex);
     }
-
 }

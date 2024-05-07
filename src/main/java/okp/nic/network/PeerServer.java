@@ -22,7 +22,7 @@ public class PeerServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake clientHandshake) {
         log.info("К пир-серверу подключается " + conn.getRemoteSocketAddress());
-//        messenger.sendCurrentState(conn);
+        messenger.sendCurrentState(conn);
     }
 
     @Override

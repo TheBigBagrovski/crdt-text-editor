@@ -20,6 +20,10 @@ public class Document {
         chars.add(Char.endChar());
     }
 
+    public void clearDocument() {
+        chars.clear();
+    }
+
     public String content() {
         StringBuilder sb = new StringBuilder();
         for (Char c : chars) {
@@ -47,12 +51,12 @@ public class Document {
         return chars.size();
     }
 
-    public Char elementAt(int position) {
-        if (position < 0 || position >= length()) {
-            throw new IndexOutOfBoundsException("Position out of bounds");
-        }
-        return chars.get(position);
-    }
+//    public Char elementAt(int position) {
+//        if (position < 0 || position >= length()) {
+//            throw new IndexOutOfBoundsException("Position out of bounds");
+//        }
+//        return chars.get(position);
+//    }
 
     public int position(String charID) {
         for (int i = 0; i < chars.size(); i++) {
@@ -63,25 +67,25 @@ public class Document {
         return -1;
     }
 
-    public String left(String charID) {
-        int i = position(charID);
-        if (i <= 0) {
-            return chars.get(i).getId();
-        }
-        return chars.get(i - 1).getId();
-    }
-
-    public String right(String charID) {
-        int i = position(charID);
-        if (i >= chars.size() - 1) {
-            return chars.get(i - 1).getId();
-        }
-        return chars.get(i + 1).getId();
-    }
-
-    public boolean contains(String charID) {
-        return position(charID) != -1;
-    }
+//    public String left(String charID) {
+//        int i = position(charID);
+//        if (i <= 0) {
+//            return chars.get(i).getId();
+//        }
+//        return chars.get(i - 1).getId();
+//    }
+//
+//    public String right(String charID) {
+//        int i = position(charID);
+//        if (i >= chars.size() - 1) {
+//            return chars.get(i - 1).getId();
+//        }
+//        return chars.get(i + 1).getId();
+//    }
+//
+//    public boolean contains(String charID) {
+//        return position(charID) != -1;
+//    }
 
     public Char find(String id) {
         for (Char c : chars) {
@@ -130,27 +134,21 @@ public class Document {
 
     public Document integrateInsert(Char charToInsert, Char charPrev, Char charNext) {
         List<Char> subsequence = subseq(charPrev, charNext);
-
         int position = position(charNext.getId()) - 1;
-
         if (subsequence.isEmpty()) {
             return localInsert(charToInsert, position);
         }
-
         if (subsequence.size() == 1) {
             return localInsert(charToInsert, position - 1);
         }
-
         int i = 1;
         while (i < subsequence.size() - 1 && subsequence.get(i).getId().compareTo(charToInsert.getId()) < 0) {
             i++;
         }
-
         return integrateInsert(charToInsert, subsequence.get(i - 1), subsequence.get(i));
     }
 
-    public Document generateInsert(int position, char value) {
-        // Increment local clock
+    public void generateInsert(int position, char value) {
         controller.incrementLocalClock();
 
         Char charPrev = ithVisible(position - 1);
@@ -171,65 +169,36 @@ public class Document {
                 charNext.getId()
         );
 
-        return integrateInsert(charToInsert, charPrev, charNext);
+        integrateInsert(charToInsert, charPrev, charNext);
     }
 
-    public Document integrateDelete(Char charToDelete) {
+    public void integrateDelete(Char charToDelete) {
         int position = position(charToDelete.getId());
         if (position == -1) {
-            return this;
+            return;
         }
         chars.get(position - 1).setVisible(false);
-        return this;
     }
 
-    public Document generateDelete(int position) {
+    public void generateDelete(int position) {
         Char charToDelete = ithVisible(position);
-        return integrateDelete(charToDelete);
+        integrateDelete(charToDelete);
     }
 
-    // Find Char at a specific index
-    public Char findCharAtIndex(int index) {
-        if (index < 0 || index >= chars.size()) {
-            return null; // Or throw an exception 
-        }
-        return chars.get(index);
-    }
+//    public void insert(int position, char value) {
+//        Document newDoc;
+//        try {
+//            newDoc = generateInsert(position, value);
+//        } catch (Exception e) {
+//            content();
+//            return;
+//        }
+//        newDoc.content();
+//    }
+//
+//    public void delete(int position) {
+//        Document newDoc = generateDelete(position);
+//        newDoc.content();
+//    }
 
-    // Find Char by its ID
-    public Char findCharById(String charId) {
-        for (Char Char : chars) {
-            if (Char.getId().equals(charId)) {
-                return Char;
-            }
-        }
-        return null; // Or throw an exception
-    }
-
-    // Find the index of a Char by its ID
-    public int findCharIndexById(String charId) {
-        for (int i = 0; i < chars.size(); i++) {
-            if (chars.get(i).getId().equals(charId)) {
-                return i;
-            }
-        }
-        return -1; // Or throw an exception
-    }
-
-    public String insert(int position, char value) {
-        Document newDoc;
-        try {
-            newDoc = generateInsert(position, value);
-        } catch (Exception e) {
-            return content();
-        }
-        return newDoc.content();
-    }
-
-    public String delete(int position) {
-        Document newDoc = generateDelete(position);
-        return newDoc.content();
-    }
-
-    // Getters and setters omitted for brevity
 }
