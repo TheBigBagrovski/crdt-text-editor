@@ -41,8 +41,10 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void onInsert(char value, int position) {
         try {
             document.insert(position, value);
-//            Char c = generateChar(position, String.valueOf(value));
-//            document.localInsert(c, position);
+            for (Char aChar : document.getChars()) {
+                System.out.println(aChar.toString());
+            }
+            System.out.println(document.content());
             messenger.broadcastInsert(value, position);
         } catch (Exception e) {
             e.printStackTrace();
