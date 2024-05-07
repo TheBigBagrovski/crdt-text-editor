@@ -100,8 +100,8 @@ public class Messenger {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
                 System.out.println(peer.getRemotePeerAddress());
-                if (peerAddress.equals("ws:/" + peer.getRemotePeerAddress())) {
-                    peer.send(text);
+                if (peerAddress.equals("ws://" + peer.getRemotePeerAddress())) {
+                    peer.send("CURRENT_STATE:" + text);
 //                    peer.send("CURRENT_STATE:" + text);
                     isSucceeded = true;
                 }
