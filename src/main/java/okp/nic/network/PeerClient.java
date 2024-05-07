@@ -36,22 +36,13 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("От " + remotePeerAddress + " получено сообщение: " + message);
-        if (message.startsWith("CURRENT_STATE:")) {
-            String payload = message.substring("CURRENT_STATE:".length());
-            messenger.getController().clear();
-            int i = 0;
-            for (char c : payload.toCharArray()) {
-                messenger.handleRemoteInsert(i++, c);
-            }
-        } else {
-            Operation op = gson.fromJson(message, Operation.class);
-            if (op.getType().equals("insert")) {
-                log.info("onMessage --> INSERT");
-                messenger.handleRemoteInsert(op.getPosition(), op.getData());
-            } else if (op.getType().equals("delete")) {
-                log.info("onMessage --> DELETE");
-                messenger.handleRemoteDelete(op.getPosition());
-            }
+        Operation op = gson.fromJson(message, Operation.class);
+        if (op.getType().equals("insert")) {
+            log.info("onMessage --> INSERT");
+            messenger.handleRemoteInsert(op.getPosition(), op.getData());
+        } else if (op.getType().equals("delete")) {
+            log.info("onMessage --> DELETE");
+            messenger.handleRemoteDelete(op.getPosition());
         }
     }
 
