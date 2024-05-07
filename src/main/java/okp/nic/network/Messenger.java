@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,13 +96,13 @@ public class Messenger {
     }
 
     public void handleRemoteCurrentStateRequest(String peerAddress) {
-        String text = controller.getDocument().content();
+        String text = new String(controller.getDocument().content().getBytes(), StandardCharsets.UTF_8);
         try {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
                 System.out.println(peer.getRemotePeerAddress());
                 if (peerAddress.equals("ws://" + peer.getRemotePeerAddress())) {
-                    peer.send("CURRENT_STATE:" + text);
+                    peer.getConnection().send("CURRENT_STATE:" + text);
 //                    peer.send("CURRENT_STATE:" + text);
                     isSucceeded = true;
                 }

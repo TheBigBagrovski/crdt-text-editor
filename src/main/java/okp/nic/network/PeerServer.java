@@ -31,12 +31,12 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        log.info("Пир-сервер получает сообщение от "	+ conn.getRemoteSocketAddress() + ": " + message);
+        log.info("Пир-сервер получает сообщение от " + " ws:/" + conn.getRemoteSocketAddress() + ": " + message);
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        log.error("Ошибка при подключении " + conn.getRemoteSocketAddress()  + " к пир-серверу:" + ex);
+        log.error("Ошибка при подключении " + conn.getRemoteSocketAddress() + " к пир-серверу:" + ex);
     }
 
     @Override
