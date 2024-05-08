@@ -192,9 +192,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void pause() {
-        importDialog = new JDialog(this, "Импорт текста", true);
+        importDialog = new JDialog(this, getString("Импорт текста"), true);
         importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        JLabel messageLabel = new JLabel("Идет импорт текста...");
+        JLabel messageLabel = new JLabel(getString("Идет импорт текста..."));
         importDialog.add(messageLabel);
         importDialog.pack();
         importDialog.setLocationRelativeTo(this);
