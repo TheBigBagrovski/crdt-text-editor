@@ -106,7 +106,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public void insertText(String from, String text) {
-        int i = 0;
+        int i = textEditor.getCursorPos();
         for (char c : text.toCharArray()) {
             handleRemoteInsert(from, c, i++);
         }
