@@ -35,8 +35,8 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("От " + remotePeerAddress + " получено сообщение: " + message);
-        if (message.startsWith("TEXT:")) {
-            messenger.handleRemoteTextInsert(remotePeerAddress, message.substring("TEXT:".length()));
+        if (message.startsWith("COMPRESSED_TEXT_BLOCK:")) {
+            messenger.handleRemoteTextInsert(remotePeerAddress, message.substring("COMPRESSED_TEXT_BLOCK:".length()));
         } else {
             Operation op = gson.fromJson(message, Operation.class);
             switch (op.getType()) {

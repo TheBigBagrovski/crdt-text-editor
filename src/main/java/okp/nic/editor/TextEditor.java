@@ -43,6 +43,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     @Getter
     private final JTextArea textArea = new JTextArea();
 
+    private JProgressBar progressBar;
+
     @Getter
     @Setter
     private int cursorPos;
@@ -97,6 +99,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         saveMenuItem.addActionListener(e -> saveFile());
         loadMenuItem.addActionListener(e -> loadFile());
         frame.setJMenuBar(menuBar);
+        // инициализация прогресс бара
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setVisible(false);
+        rightPanel.add(progressBar, BorderLayout.SOUTH);
         // финальные настройки
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
@@ -143,7 +149,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             value = e.getKeyChar();
             controller.onInsert(value, this.getCursorPos());
         }
-//        System.out.println("keyPressed");
     }
 
     public void keyReleased(KeyEvent e) {
@@ -176,7 +181,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
-                StringBuilder fileContent = new StringBuilder();
+//                StringBuilder fileContent = new StringBuilder();
                 String line;
                 controller.clear();
                 controller.getMessenger().broadcastClear();
@@ -189,6 +194,19 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 log.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
         }
+    }
+
+    // Метод для отображения прогресса
+    public void showProgress(int progress) {
+        progressBar.setValue(progress);
+        progressBar.setVisible(true);
+        textArea.setEnabled(false);
+    }
+
+    // Метод для скрытия прогресса
+    public void hideProgress() {
+        progressBar.setVisible(false);
+        textArea.setEnabled(true);
     }
 
 }

@@ -53,13 +53,6 @@ public class Document {
         return chars.size();
     }
 
-//    public Char elementAt(int position) {
-//        if (position < 0 || position >= length()) {
-//            throw new IndexOutOfBoundsException("Position out of bounds");
-//        }
-//        return chars.get(position);
-//    }
-
     public int position(String charID) {
         for (int i = 0; i < chars.size(); i++) {
             if (chars.get(i).getId().equals(charID)) {
@@ -68,26 +61,6 @@ public class Document {
         }
         return -1;
     }
-
-//    public String left(String charID) {
-//        int i = position(charID);
-//        if (i <= 0) {
-//            return chars.get(i).getId();
-//        }
-//        return chars.get(i - 1).getId();
-//    }
-//
-//    public String right(String charID) {
-//        int i = position(charID);
-//        if (i >= chars.size() - 1) {
-//            return chars.get(i - 1).getId();
-//        }
-//        return chars.get(i + 1).getId();
-//    }
-//
-//    public boolean contains(String charID) {
-//        return position(charID) != -1;
-//    }
 
     public Char find(String id) {
         for (Char c : chars) {
@@ -190,9 +163,6 @@ public class Document {
     }
 
     public void insert(String from, int position, char value) {
-//        for (Char aChar : chars) {
-//            System.out.println(aChar);
-//        }
         try {
             generateInsert(from, position, value);
         } catch (Exception e) {
@@ -202,6 +172,13 @@ public class Document {
 
     public void delete(int position) {
         generateDelete(position);
+    }
+
+    public Document insertBlock(String from, int position, String text) {
+        for (char c : text.toCharArray()) {
+            insert(from, position++, c);
+        }
+        return this;
     }
 
 }

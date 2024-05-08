@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Getter
@@ -92,10 +93,10 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
-    public void broadcastText(String text) {
-        String payload = "TEXT:" + text;
-        peerServer.broadcast(payload);
-    }
+//    public void broadcastText(byte[] text) {
+//        String payload = "TEXT:" + text;
+//        peerServer.broadcast(payload);
+//    }
 
     public void handleRemoteInsert(String from, int position, char value) {
         controller.handleRemoteInsert(from, value, position);
@@ -127,9 +128,18 @@ public class Messenger {
         controller.clear();
     }
 
-    public void handleRemoteTextInsert(String from, String text) {
-//        controller.clear();
-        controller.insertText(from, text);
+//    public void handleRemoteTextInsert(String from, String text) {
+//        controller.insertText(from, text);
+//    }
+
+    public void broadcastTextBlock(byte[] compressedBlock) {
+        String payload = "COMPRESSED_TEXT_BLOCK:" + Base64.getEncoder().encodeToString(compressedBlock);
+        peerServer.broadcast(payload);
+    }
+
+    public void handleRemoteTextInsert(String from, String compressedText) {
+        byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
+        controller.insertText(from, decodedBlock);
     }
 
 }
