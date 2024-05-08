@@ -190,9 +190,9 @@ public class Document {
     }
 
     public void insert(String from, int position, char value) {
-        for (Char aChar : chars) {
-            System.out.println(aChar);
-        }
+//        for (Char aChar : chars) {
+//            System.out.println(aChar);
+//        }
         try {
             generateInsert(from, position, value);
         } catch (Exception e) {
