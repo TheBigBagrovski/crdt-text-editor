@@ -94,7 +94,7 @@ public class Controller implements TextEditorListener, MessengerListener {
 //        messenger.broadcastClear();
         int i = 0;
         for (char c : text.toCharArray()) {
-            onInsert(c, i);
+            document.insert(siteId, i, c);
             textEditor.getTextArea().insert(String.valueOf(c), i);
             i++;
         }
