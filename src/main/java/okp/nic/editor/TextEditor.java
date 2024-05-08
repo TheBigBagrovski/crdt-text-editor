@@ -153,6 +153,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void clearTextArea() {
+        textArea.setCaretPosition(0);
         textArea.setText("");
     }
 
