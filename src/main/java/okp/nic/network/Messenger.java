@@ -125,8 +125,8 @@ public class Messenger {
     }
 
     public void handleRemoteTextInsert(String from, String compressedText) {
-        byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
-        controller.insertText(from, decodedBlock);
+//        byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
+        controller.insertText(from, compressedText.getBytes());
     }
 
 }

@@ -55,7 +55,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         JFrame frame = new JFrame("CRDT");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
-        frame.setLocationRelativeTo(null);
         frame.setIconImage(logo.getImage());
         frame.setMinimumSize(FRAME_SIZE);
         frame.setVisible(true);
