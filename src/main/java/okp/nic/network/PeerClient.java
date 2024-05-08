@@ -41,11 +41,11 @@ public class PeerClient extends WebSocketClient {
             Operation op = gson.fromJson(message, Operation.class);
             switch (op.getType()) {
                 case "insert":
-                    log.info("onMessage --> INSERT");
+//                    log.info("onMessage --> INSERT");
                     messenger.handleRemoteInsert(remotePeerAddress, op.getPosition(), op.getData());
                     break;
                 case "delete":
-                    log.info("onMessage --> DELETE");
+//                    log.info("onMessage --> DELETE");
                     messenger.handleRemoteDelete(op.getPosition());
                     break;
 //                case "clear":

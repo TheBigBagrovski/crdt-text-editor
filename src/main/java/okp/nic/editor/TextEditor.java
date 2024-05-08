@@ -106,7 +106,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Override
     public void caretUpdate(CaretEvent e) {
-        System.out.println("[caretUpdate] curPos = " + e.getDot());
+//        System.out.println("[caretUpdate] curPos = " + e.getDot());
         cursorPos = e.getDot();
     }
 
@@ -143,7 +143,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             value = e.getKeyChar();
             controller.onInsert(value, this.getCursorPos());
         }
-        System.out.println("keyPressed");
+//        System.out.println("keyPressed");
     }
 
     public void keyReleased(KeyEvent e) {
