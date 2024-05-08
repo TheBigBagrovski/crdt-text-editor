@@ -180,6 +180,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
+            textArea.setEnabled(false);
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
 //                StringBuilder fileContent = new StringBuilder();
                 String line;
@@ -190,6 +191,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 //                    fileContent.append(line).append("\n");
                 }
 //                controller.importTextFromFile(fileContent.toString());
+                textArea.setEnabled(true);
             } catch (IOException ex) {
                 log.error("Ошибка при загрузке файла: " + ex.getMessage());
             }

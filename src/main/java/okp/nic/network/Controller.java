@@ -149,10 +149,12 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public void insertText(String from, String text) {
+        textEditor.showProgress(0);
         int i = textEditor.getCursorPos();
         for (char c : text.toCharArray()) {
             handleRemoteInsert(from, c, i++);
         }
+        textEditor.hideProgress();
     }
 
     private byte[] compress(String text) {
