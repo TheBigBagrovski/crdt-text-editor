@@ -89,21 +89,27 @@ public class Controller implements TextEditorListener, MessengerListener {
         localClock++;
     }
 
-    public void importTextFromFile(char[] text) {
+    public void importTextFromFile(String text) {
         clear();
-        messenger.broadcastClear();
+//        messenger.broadcastClear();
         int i = 0;
-        for (char c : text) {
+        for (char c : text.toCharArray()) {
             onInsert(c, i);
             textEditor.getTextArea().insert(String.valueOf(c), i);
-//            insertToTextEditor(c, i);
             i++;
         }
+        messenger.broadcastText(text);
     }
 
     public String getText() {
-        System.out.println(document.content());
         return document.content();
+    }
+
+    public void insertText(String from, String text) {
+        int i = 0;
+        for (char c : text.toCharArray()) {
+            handleRemoteInsert(from, c, i++);
+        }
     }
 
 }

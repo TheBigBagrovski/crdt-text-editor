@@ -180,7 +180,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 while ((line = reader.readLine()) != null) {
                     fileContent.append(line).append("\n");
                 }
-                controller.importTextFromFile(fileContent.toString().toCharArray());
+                controller.importTextFromFile(fileContent.toString());
             } catch (IOException ex) {
                 log.error("Ошибка при загрузке файла: " + ex.getMessage());
             }

@@ -5,9 +5,9 @@ import okp.nic.network.Controller;
 import static okp.nic.Utils.findAvailablePort;
 //todo() тест на 3 пирах
 //todo() никнеймы у пиров
+//todo() объединить типы сообщений и операций
+//todo() паттерны и принципы
 //todo() окно логов в интерфейсе + список подключенных участников
-//todo() сохранение и загрузка файла
-//todo() улетает каретка при изменениях от другого пира
 //todo() ctrl+c, ctrl+x, ctrl+v
 //todo() безпоасный протокол
 

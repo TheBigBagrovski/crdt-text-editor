@@ -18,13 +18,13 @@ public class PeerClient extends WebSocketClient {
 
     public PeerClient(URI serverURI, Messenger messenger) {
         super(serverURI);
-        remotePeerAddress = serverURI.getHost() + ":" + serverURI.getPort();
+        remotePeerAddress = "ws://" + serverURI.getHost() + ":" + serverURI.getPort();
         this.messenger = messenger;
     }
 
     @Override
     public void onOpen(ServerHandshake handshakeData) {
-        log.info("Установлено соединение с " + "ws://" + remotePeerAddress);
+        log.info("Установлено соединение с " + remotePeerAddress);
     }
 
     @Override
@@ -35,20 +35,24 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("От " + remotePeerAddress + " получено сообщение: " + message);
-        Operation op = gson.fromJson(message, Operation.class);
-        switch (op.getType()) {
-            case "insert":
-                log.info("onMessage --> INSERT");
-                messenger.handleRemoteInsert(remotePeerAddress, op.getPosition(), op.getData());
-                break;
-            case "delete":
-                log.info("onMessage --> DELETE");
-                messenger.handleRemoteDelete(op.getPosition());
-                break;
-            case "clear":
-                log.info("onMessage --> CLEAR");
-                messenger.handleRemoteClear();
-                break;
+        if (message.startsWith("TEXT:")) {
+            messenger.handleRemoteTextInsert(remotePeerAddress, message.substring("TEXT:".length()));
+        } else {
+            Operation op = gson.fromJson(message, Operation.class);
+            switch (op.getType()) {
+                case "insert":
+                    log.info("onMessage --> INSERT");
+                    messenger.handleRemoteInsert(remotePeerAddress, op.getPosition(), op.getData());
+                    break;
+                case "delete":
+                    log.info("onMessage --> DELETE");
+                    messenger.handleRemoteDelete(op.getPosition());
+                    break;
+//                case "clear":
+//                    log.info("onMessage --> CLEAR");
+//                    messenger.handleRemoteClear();
+//                    break;
+            }
         }
     }
 
