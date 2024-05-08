@@ -178,10 +178,13 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
                 StringBuilder fileContent = new StringBuilder();
                 String line;
+                controller.clear();
+                controller.getMessenger().broadcastClear();
                 while ((line = reader.readLine()) != null) {
-                    fileContent.append(line).append("\n");
+                    controller.importTextFromFile(line);
+//                    fileContent.append(line).append("\n");
                 }
-                controller.importTextFromFile(fileContent.toString());
+//                controller.importTextFromFile(fileContent.toString());
             } catch (IOException ex) {
                 log.error("Ошибка при загрузке файла: " + ex.getMessage());
             }

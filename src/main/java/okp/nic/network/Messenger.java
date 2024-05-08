@@ -86,11 +86,11 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
-//    public void broadcastClear() {
-//        Operation op = new Operation('!', "clear", 0);
-//        String payload = gson.toJson(op);
-//        peerServer.broadcast(payload);
-//    }
+    public void broadcastClear() {
+        Operation op = new Operation('!', "clear", 0);
+        String payload = gson.toJson(op);
+        peerServer.broadcast(payload);
+    }
 
     public void broadcastText(String text) {
         String payload = "TEXT:" + text;
@@ -123,12 +123,12 @@ public class Messenger {
         }
     }
 
-//    public void handleRemoteClear() {
-//        controller.clear();
-//    }
+    public void handleRemoteClear() {
+        controller.clear();
+    }
 
     public void handleRemoteTextInsert(String from, String text) {
-        controller.clear();
+//        controller.clear();
         controller.insertText(from, text);
     }
 

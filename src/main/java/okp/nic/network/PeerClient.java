@@ -48,10 +48,10 @@ public class PeerClient extends WebSocketClient {
 //                    log.info("onMessage --> DELETE");
                     messenger.handleRemoteDelete(op.getPosition());
                     break;
-//                case "clear":
+                case "clear":
 //                    log.info("onMessage --> CLEAR");
-//                    messenger.handleRemoteClear();
-//                    break;
+                    messenger.handleRemoteClear();
+                    break;
             }
         }
     }

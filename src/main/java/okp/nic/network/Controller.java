@@ -14,6 +14,8 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Getter
     private final String siteId;
     private final TextEditor textEditor;
+
+    @Getter
     private final Messenger messenger;
 
     @Getter
@@ -90,8 +92,6 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public void importTextFromFile(String text) {
-        clear();
-//        messenger.broadcastClear();
         int i = 0;
         for (char c : text.toCharArray()) {
             document.insert(siteId, i, c);
