@@ -182,15 +182,15 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             File selectedFile = fileChooser.getSelectedFile();
             textArea.setEnabled(false);
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
-//                StringBuilder fileContent = new StringBuilder();
+                StringBuilder fileContent = new StringBuilder();
                 String line;
                 controller.clear();
                 controller.getMessenger().broadcastClear();
                 while ((line = reader.readLine()) != null) {
-                    controller.importTextFromFile(line + "\n");
-//                    fileContent.append(line).append("\n");
+//                    controller.importTextFromFile(line + "\n");
+                    fileContent.append(line).append("\n");
                 }
-//                controller.importTextFromFile(fileContent.toString());
+                controller.importTextFromFile(fileContent.toString());
                 textArea.setEnabled(true);
             } catch (IOException ex) {
                 log.error("Ошибка при загрузке файла: " + ex.getMessage());
@@ -200,14 +200,14 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     // Метод для отображения прогресса
     public void showProgress(int progress) {
-        progressBar.setValue(progress);
-        progressBar.setVisible(true);
+//        progressBar.setValue(progress);
+//        progressBar.setVisible(true);
         textArea.setEnabled(false);
     }
 
     // Метод для скрытия прогресса
     public void hideProgress() {
-        progressBar.setVisible(false);
+//        progressBar.setVisible(false);
         textArea.setEnabled(true);
     }
 

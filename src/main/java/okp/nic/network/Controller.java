@@ -110,28 +110,33 @@ public class Controller implements TextEditorListener, MessengerListener {
 //    }
 
     public void importTextFromFile(String text) {
-        int totalBlocks = (int) Math.ceil((double) text.length() / BLOCK_SIZE);
-        int currentBlock = 0;
-        textEditor.showProgress(0);
-        for (int j = 0; j < text.length(); j += BLOCK_SIZE) {
-            String block = text.substring(j, Math.min(j + BLOCK_SIZE, text.length()));
-            document.insertBlock(siteId, textEditor.getCursorPos(), block);
-            textEditor.getTextArea().insert(block, textEditor.getCursorPos());
-            byte[] compressedBlock = compress(block);
+//        int totalBlocks = (int) Math.ceil((double) text.length() / BLOCK_SIZE);
+//        int currentBlock = 0;
+//        textEditor.showProgress(0);
+//        for (int j = 0; j < text.length(); j += BLOCK_SIZE) {
+//            String block = text.substring(j, Math.min(j + BLOCK_SIZE, text.length()));
+            document.insertBlock(siteId, textEditor.getCursorPos(), text);
+            textEditor.getTextArea().insert(text, textEditor.getCursorPos());
+            byte[] compressedBlock = compress(text);
             messenger.broadcastTextBlock(compressedBlock);
-            currentBlock++;
-            textEditor.showProgress((int) Math.round(((double) currentBlock / totalBlocks) * 100));
-        }
-        textEditor.hideProgress();
+//            currentBlock++;
+//            textEditor.showProgress((int) Math.round(((double) currentBlock / totalBlocks) * 100));
+//        }
+//        textEditor.hideProgress();
     }
 
     public void insertText(String from, byte[] compressedText) {
         String text = decompress(compressedText);
-        int i = textEditor.getCursorPos();
         textEditor.showProgress(0);
-        for (char c : text.toCharArray()) {
-            handleRemoteInsert(from, c, i++);
-        }
+        document.insertBlock(from, 0, text);
+        textEditor.getTextArea().insert(text, 0);
+        textEditor.hideProgress();
+
+//        int i = textEditor.getCursorPos();
+//        textEditor.showProgress(0);
+//        for (char c : text.toCharArray()) {
+//            handleRemoteInsert(from, c, i++);
+//        }
 //        int totalBlocks = (int) Math.ceil((double) text.length() / BLOCK_SIZE);
 //        int currentBlock = 0;
 //        for (int j = 0; j < text.length(); j += BLOCK_SIZE) {
@@ -141,7 +146,6 @@ public class Controller implements TextEditorListener, MessengerListener {
 //            currentBlock++;
 //            textEditor.showProgress((int) Math.round(((double) currentBlock / totalBlocks) * 100));
 //        }
-        textEditor.hideProgress();
     }
 
     public String getText() {
