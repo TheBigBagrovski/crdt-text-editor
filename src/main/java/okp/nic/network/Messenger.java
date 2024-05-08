@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -66,7 +67,7 @@ public class Messenger {
 //    }
 
     public void broadcastTextBlock(byte[] compressedBlock) {
-        String payload = "COMPRESSED_TEXT:" + ((compressedBlock.length == 0) ? "" : compressedBlock);
+        String payload = "COMPRESSED_TEXT:" + ((compressedBlock.length == 0) ? "" : Arrays.toString(compressedBlock));
         peerServer.broadcast(payload);
     }
 
@@ -111,7 +112,7 @@ public class Messenger {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
                 if (peerAddress.equals(peer.getRemotePeerAddress())) {
-                    peer.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + ((text.length == 0) ? "" : text));
+                    peer.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + ((text.length == 0) ? "" : Arrays.toString(text)));
                     isSucceeded = true;
                 }
             }
