@@ -92,7 +92,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public void importTextFromFile(String text) {
-        int i = 0;
+        int i = textEditor.getCursorPos();
         for (char c : text.toCharArray()) {
             document.insert(siteId, i, c);
             textEditor.getTextArea().insert(String.valueOf(c), i);
