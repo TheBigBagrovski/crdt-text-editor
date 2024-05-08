@@ -35,23 +35,20 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("От " + remotePeerAddress + " получено сообщение: " + message);
-        if (message.startsWith("COMPRESSED_TEXT_BLOCK:")) {
-            messenger.handleRemoteTextInsert(remotePeerAddress, message.substring("COMPRESSED_TEXT_BLOCK:".length()));
+        if (message.startsWith("COMPRESSED_TEXT:")) {
+            messenger.handleRemoteTextInsert(remotePeerAddress, message.substring("COMPRESSED_TEXT:".length()));
         } else {
             Operation op = gson.fromJson(message, Operation.class);
             switch (op.getType()) {
                 case "insert":
-//                    log.info("onMessage --> INSERT");
                     messenger.handleRemoteInsert(remotePeerAddress, op.getPosition(), op.getData());
                     break;
                 case "delete":
-//                    log.info("onMessage --> DELETE");
                     messenger.handleRemoteDelete(op.getPosition());
                     break;
-                case "clear":
-//                    log.info("onMessage --> CLEAR");
-                    messenger.handleRemoteClear();
-                    break;
+//                case "clear":
+//                    messenger.handleRemoteClear();
+//                    break;
             }
         }
     }

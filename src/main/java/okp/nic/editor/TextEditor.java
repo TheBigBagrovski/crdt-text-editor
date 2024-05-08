@@ -43,7 +43,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     @Getter
     private final JTextArea textArea = new JTextArea();
 
-    private JProgressBar progressBar;
+    private JDialog importDialog;
 
     @Getter
     @Setter
@@ -55,6 +55,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         JFrame frame = new JFrame("CRDT");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+        frame.setLocationRelativeTo(null);
         frame.setIconImage(logo.getImage());
         frame.setMinimumSize(FRAME_SIZE);
         frame.setVisible(true);
@@ -99,10 +100,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         saveMenuItem.addActionListener(e -> saveFile());
         loadMenuItem.addActionListener(e -> loadFile());
         frame.setJMenuBar(menuBar);
-        // инициализация прогресс бара
-        progressBar = new JProgressBar(0, 100);
-        progressBar.setVisible(false);
-        rightPanel.add(progressBar, BorderLayout.SOUTH);
         // финальные настройки
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
@@ -112,7 +109,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Override
     public void caretUpdate(CaretEvent e) {
-//        System.out.println("[caretUpdate] curPos = " + e.getDot());
         cursorPos = e.getDot();
     }
 
@@ -180,34 +176,38 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            textArea.setEnabled(false);
+            pause();
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
                 StringBuilder fileContent = new StringBuilder();
                 String line;
                 controller.clear();
-                controller.getMessenger().broadcastClear();
                 while ((line = reader.readLine()) != null) {
-//                    controller.importTextFromFile(line + "\n");
                     fileContent.append(line).append("\n");
                 }
                 controller.importTextFromFile(fileContent.toString());
-                textArea.setEnabled(true);
+                unpause();
             } catch (IOException ex) {
                 log.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
         }
     }
 
-    // Метод для отображения прогресса
-    public void showProgress(int progress) {
-//        progressBar.setValue(progress);
-//        progressBar.setVisible(true);
+    public void pause() {
+        importDialog = new JDialog(this, "Импорт текста", true);
+        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        JLabel messageLabel = new JLabel("Идет импорт текста...");
+        importDialog.add(messageLabel);
+        importDialog.pack();
+        importDialog.setLocationRelativeTo(this);
+        importDialog.setVisible(true);
         textArea.setEnabled(false);
     }
 
-    // Метод для скрытия прогресса
-    public void hideProgress() {
-//        progressBar.setVisible(false);
+    public void unpause() {
+        if (importDialog != null) {
+            importDialog.dispose();
+            importDialog = null;
+        }
         textArea.setEnabled(true);
     }
 

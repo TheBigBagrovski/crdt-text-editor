@@ -34,12 +34,7 @@ public class PeerServer extends WebSocketServer {
         if (message.startsWith("CURRENT_STATE:")) {
             String from = message.substring("CURRENT_STATE:".length(), message.indexOf(":FROM:"));
             String payload = message.substring(("CURRENT_STATE:" + from + ":FROM:").length());
-            messenger.getController().clear();
-            messenger.getController().insertText(from, payload);
-//            int i = 0;
-//            for (char c : payload.toCharArray()) {
-//                messenger.handleRemoteInsert(from, i++, c);
-//            }
+            messenger.handleRemoteTextInsert(from, payload);
         }
     }
 

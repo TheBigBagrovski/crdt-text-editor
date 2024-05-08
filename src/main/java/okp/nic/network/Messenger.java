@@ -48,6 +48,29 @@ public class Messenger {
         }
     }
 
+    public void broadcastInsert(char value, int position) {
+        Operation op = new Operation(value, "insert", position);
+        String payload = gson.toJson(op);
+        peerServer.broadcast(payload);
+    }
+
+    public void broadcastDelete(int position) {
+        Operation op = new Operation('!', "delete", position);
+        String payload = gson.toJson(op);
+        peerServer.broadcast(payload);
+    }
+
+//    public void broadcastClear() {
+//        Operation op = new Operation('!', "clear", 0);
+//        String payload = gson.toJson(op);
+//        peerServer.broadcast(payload);
+//    }
+
+    public void broadcastTextBlock(byte[] compressedBlock) {
+        String payload = "COMPRESSED_TEXT:" + Base64.getEncoder().encodeToString(compressedBlock);
+        peerServer.broadcast(payload);
+    }
+
     public void handleRemotePeerConnected(String peerAddress) {
         String myFullAddress = "ws://" + host + ":" + port;
         log.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
@@ -75,29 +98,6 @@ public class Messenger {
         connectedPeerList.removeIf(peer -> peer.getRemotePeerAddress().equals("ws://" + disconnectedPeer));
     }
 
-    public void broadcastInsert(char value, int position) {
-        Operation op = new Operation(value, "insert", position);
-        String payload = gson.toJson(op);
-        peerServer.broadcast(payload);
-    }
-
-    public void broadcastDelete(int position) {
-        Operation op = new Operation('!', "delete", position);
-        String payload = gson.toJson(op);
-        peerServer.broadcast(payload);
-    }
-
-    public void broadcastClear() {
-        Operation op = new Operation('!', "clear", 0);
-        String payload = gson.toJson(op);
-        peerServer.broadcast(payload);
-    }
-
-//    public void broadcastText(byte[] text) {
-//        String payload = "TEXT:" + text;
-//        peerServer.broadcast(payload);
-//    }
-
     public void handleRemoteInsert(String from, int position, char value) {
         controller.handleRemoteInsert(from, value, position);
     }
@@ -107,7 +107,7 @@ public class Messenger {
     }
 
     public void handleRemoteCurrentStateRequest(String peerAddress) {
-        String text = controller.getText();
+        byte[] text = controller.getCompressedText();
         try {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
@@ -122,19 +122,6 @@ public class Messenger {
         } catch (Exception ex) {
             log.error("Ошибка при подключении к пиру");
         }
-    }
-
-    public void handleRemoteClear() {
-        controller.clear();
-    }
-
-//    public void handleRemoteTextInsert(String from, String text) {
-//        controller.insertText(from, text);
-//    }
-
-    public void broadcastTextBlock(byte[] compressedBlock) {
-        String payload = "COMPRESSED_TEXT_BLOCK:" + Base64.getEncoder().encodeToString(compressedBlock);
-        peerServer.broadcast(payload);
     }
 
     public void handleRemoteTextInsert(String from, String compressedText) {

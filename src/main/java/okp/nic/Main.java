@@ -5,6 +5,7 @@ import okp.nic.network.Controller;
 import static okp.nic.Utils.findAvailablePort;
 //todo() тест на 3 пирах
 //todo() никнеймы у пиров
+//todo() пароль комнаты на сигнальном сервере
 //todo() объединить типы сообщений и операций
 //todo() паттерны и принципы
 //todo() окно логов в интерфейсе + список подключенных участников

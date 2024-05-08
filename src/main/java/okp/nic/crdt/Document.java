@@ -2,7 +2,6 @@ package okp.nic.crdt;
 
 import lombok.Getter;
 import lombok.Setter;
-import okp.nic.network.Controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +9,11 @@ import java.util.List;
 @Getter
 @Setter
 public class Document {
-    private final List<Char> chars;
-    private final Controller controller;
 
-    public Document(Controller controller) {
-        this.controller = controller;
+    private final List<Char> chars;
+    private int localClock = 0;
+
+    public Document() {
         chars = new ArrayList<>();
         chars.add(Char.startChar());
         chars.add(Char.endChar());
@@ -26,7 +25,7 @@ public class Document {
         chars.add(Char.endChar());
     }
 
-    public String content() {
+    public String getContent() {
         StringBuilder sb = new StringBuilder();
         for (Char c : chars) {
             if (c.isVisible()) {
@@ -53,6 +52,10 @@ public class Document {
         return chars.size();
     }
 
+    public void incrementLocalClock() {
+        localClock++;
+    }
+
     public int position(String charID) {
         for (int i = 0; i < chars.size(); i++) {
             if (chars.get(i).getId().equals(charID)) {
@@ -71,16 +74,12 @@ public class Document {
         return new Char("-1", false, '!', "", "");
     }
 
-    public List<Char> subseq(Char wCharStart, Char wCharEnd) {
+    public List<Char> subsequence(Char wCharStart, Char wCharEnd) {
         int startPosition = position(wCharStart.getId());
         int endPosition = position(wCharEnd.getId());
 
-        if (startPosition == -1 || endPosition == -1) {
-            throw new IllegalArgumentException("Subsequence bound(s) not present");
-        }
-
-        if (startPosition > endPosition) {
-            throw new IllegalArgumentException("Subsequence bound(s) not present");
+        if (startPosition == -1 || endPosition == -1 || startPosition > endPosition) {
+            throw new IllegalArgumentException("Неверные границы подпоследовательности");
         }
 
         if (startPosition == endPosition) {
@@ -92,13 +91,11 @@ public class Document {
 
     public Document localInsert(Char charToInsert, int position) {
         if (position < 0 || position >= length()) {
-            System.out.println(position);
-            System.out.println(length());
-            throw new IndexOutOfBoundsException("Position out of bounds");
+            throw new IndexOutOfBoundsException("Выход за границы");
         }
 
         if (charToInsert.getId().isEmpty()) {
-            throw new IllegalArgumentException("Empty Char ID provided");
+            throw new IllegalArgumentException("Пустой Char ID");
         }
 
         chars.add(position, charToInsert);
@@ -110,7 +107,7 @@ public class Document {
     }
 
     public Document integrateInsert(Char charToInsert, Char charPrev, Char charNext) {
-        List<Char> subsequence = subseq(charPrev, charNext);
+        List<Char> subsequence = subsequence(charPrev, charNext);
         int position = position(charNext.getId());
         if (subsequence.isEmpty()) {
             return localInsert(charToInsert, position);
@@ -126,7 +123,7 @@ public class Document {
     }
 
     public void generateInsert(String from, int position, char value) {
-        controller.incrementLocalClock();
+        incrementLocalClock();
 
         Char charPrev = ithVisible(position);
         Char charNext = ithVisible(position + 1);
@@ -139,7 +136,7 @@ public class Document {
         }
 
         Char charToInsert = new Char(
-                from + controller.getLocalClock(),
+                from + ":" + localClock,
                 true,
                 value,
                 charPrev.getId(),
@@ -162,23 +159,22 @@ public class Document {
         integrateDelete(charToDelete);
     }
 
-    public void insert(String from, int position, char value) {
+    public void insertChar(String from, int position, char value) {
         try {
             generateInsert(from, position, value);
         } catch (Exception e) {
-            content();
+            getContent();
         }
     }
 
-    public void delete(int position) {
+    public void deleteChar(int position) {
         generateDelete(position);
     }
 
-    public Document insertBlock(String from, int position, String text) {
-        for (char c : text.toCharArray()) {
-            insert(from, position++, c);
+    public void updateContent(String from, String text) {
+        for (int i = 0; i < text.length(); i++) {
+            generateInsert(from, i, text.charAt(i));
         }
-        return this;
     }
 
 }

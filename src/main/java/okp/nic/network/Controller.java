@@ -15,23 +15,17 @@ import java.util.zip.GZIPOutputStream;
 @Slf4j
 public class Controller implements TextEditorListener, MessengerListener {
 
-    private static final int BLOCK_SIZE = 1000;
-
-    private final Document document;
-
     @Getter
-    private final String siteId;
+    private final Messenger messenger;
+    private final Document document;
     private final TextEditor textEditor;
 
     @Getter
-    private final Messenger messenger;
-
-    @Getter
-    private int localClock = 0;
+    private final String siteId;
 
     public Controller(String host, int port, String signalHost, String signalPort) {
         siteId = "ws://" + host + ":" + port;
-        document = new Document(this);
+        document = new Document();
         textEditor = new TextEditor(this);
         messenger = new Messenger(host, port, this, signalHost, signalPort);
     }
@@ -44,7 +38,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Override
     public void onInsert(char value, int position) {
         try {
-            document.insert(siteId, position, value);
+            document.insertChar(siteId, position, value);
             messenger.broadcastInsert(value, position);
         } catch (Exception e) {
             log.info("Ошибка при вставке символа " + value + " на поизицию " + position);
@@ -54,7 +48,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Override
     public void onDelete(int position) {
         try {
-            document.delete(position);
+            document.deleteChar(position);
             messenger.broadcastDelete(position);
         } catch (Exception e) {
             log.info("Ошибка при удалении символа на позиции " + position);
@@ -62,7 +56,19 @@ public class Controller implements TextEditorListener, MessengerListener {
         }
     }
 
-    public void insertToTextEditor(char value, int index) {
+    @Override
+    public void handleRemoteInsert(String from, char value, int position) {
+        document.insertChar(from, position, value);
+        insertCharToTextEditor(value, position);
+    }
+
+    @Override
+    public void handleRemoteDelete(int position) {
+        document.deleteChar(position);
+        deleteCharFromTextEditor(position);
+    }
+
+    public void insertCharToTextEditor(char value, int index) {
         textEditor.getTextArea().insert(String.valueOf(value), index);
         int curPos = textEditor.getCursorPos();
         if (index <= curPos) {
@@ -70,7 +76,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         }
     }
 
-    public void deleteToTextEditor(int index) {
+    public void deleteCharFromTextEditor(int index) {
         if (index == 0) {
             return;
         }
@@ -80,85 +86,25 @@ public class Controller implements TextEditorListener, MessengerListener {
             textEditor.getTextArea().setCaretPosition(curPos - 1);
         }
         textEditor.getTextArea().replaceRange("", index - 1, index);
-
     }
-
-    @Override
-    public void handleRemoteInsert(String from, char value, int position) {
-        document.insert(from, position, value);
-        insertToTextEditor(value, position);
-    }
-
-    @Override
-    public void handleRemoteDelete(int position) {
-        document.delete(position);
-        deleteToTextEditor(position);
-    }
-
-    public void incrementLocalClock() {
-        localClock++;
-    }
-
-//    public void importTextFromFile(String text) {
-//        int i = textEditor.getCursorPos();
-//        for (char c : text.toCharArray()) {
-//            document.insert(siteId, i, c);
-//            textEditor.getTextArea().insert(String.valueOf(c), i);
-//            i++;
-//        }
-//        messenger.broadcastText(text);
-//    }
 
     public void importTextFromFile(String text) {
-//        int totalBlocks = (int) Math.ceil((double) text.length() / BLOCK_SIZE);
-//        int currentBlock = 0;
-//        textEditor.showProgress(0);
-//        for (int j = 0; j < text.length(); j += BLOCK_SIZE) {
-//            String block = text.substring(j, Math.min(j + BLOCK_SIZE, text.length()));
-            document.insertBlock(siteId, textEditor.getCursorPos(), text);
-            textEditor.getTextArea().insert(text, textEditor.getCursorPos());
-            byte[] compressedBlock = compress(text);
-            messenger.broadcastTextBlock(compressedBlock);
-//            currentBlock++;
-//            textEditor.showProgress((int) Math.round(((double) currentBlock / totalBlocks) * 100));
-//        }
-//        textEditor.hideProgress();
+        document.updateContent(siteId, text);
+        textEditor.getTextArea().insert(text, 0);
+        messenger.broadcastTextBlock(compress(text));
     }
 
     public void insertText(String from, byte[] compressedText) {
         String text = decompress(compressedText);
-        textEditor.showProgress(0);
-        document.insertBlock(from, 0, text);
+        clear();
+        textEditor.pause();
+        document.updateContent(from, text);
         textEditor.getTextArea().insert(text, 0);
-        textEditor.hideProgress();
-
-//        int i = textEditor.getCursorPos();
-//        textEditor.showProgress(0);
-//        for (char c : text.toCharArray()) {
-//            handleRemoteInsert(from, c, i++);
-//        }
-//        int totalBlocks = (int) Math.ceil((double) text.length() / BLOCK_SIZE);
-//        int currentBlock = 0;
-//        for (int j = 0; j < text.length(); j += BLOCK_SIZE) {
-//            String block = text.substring(j, Math.min(j + BLOCK_SIZE, text.length()));
-//            handleRemoteInsert(from, i, block);
-//            i += block.length();
-//            currentBlock++;
-//            textEditor.showProgress((int) Math.round(((double) currentBlock / totalBlocks) * 100));
-//        }
+        textEditor.unpause();
     }
 
-    public String getText() {
-        return document.content();
-    }
-
-    public void insertText(String from, String text) {
-        textEditor.showProgress(0);
-        int i = textEditor.getCursorPos();
-        for (char c : text.toCharArray()) {
-            handleRemoteInsert(from, c, i++);
-        }
-        textEditor.hideProgress();
+    public byte[] getCompressedText() {
+        return compress(document.getContent());
     }
 
     private byte[] compress(String text) {
@@ -182,7 +128,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         } catch (IOException e) {
             log.error("Ошибка распаковки: " + e.getMessage());
         }
-        return new String(baos.toByteArray());
+        return baos.toString();
     }
 
 }
