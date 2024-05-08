@@ -112,7 +112,7 @@ public class Messenger {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
                 if (peerAddress.equals(peer.getRemotePeerAddress())) {
-                    peer.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + text);
+                    peer.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
                     isSucceeded = true;
                 }
             }
