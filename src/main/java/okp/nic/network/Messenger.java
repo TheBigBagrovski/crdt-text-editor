@@ -37,6 +37,7 @@ public class Messenger {
 
     public void startServerPeer() {
         peerServer = new PeerServer(new InetSocketAddress(host, port), this);
+        peerServer.setConnectionLostTimeout(0);
         peerServer.start();
     }
 
@@ -79,6 +80,7 @@ public class Messenger {
             PeerClient peerNode = new PeerClient(new URI(peerAddress), this);
             while (!connectedPeerList.contains(peerNode)) {
                 boolean isSucceeded = peerNode.connectBlocking();
+                peerNode.setConnectionLostTimeout(0);
                 if (isSucceeded) {
                     connectedPeerList.add(peerNode);
                 } else {
