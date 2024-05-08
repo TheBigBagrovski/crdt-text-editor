@@ -67,7 +67,7 @@ public class Messenger {
 //    }
 
     public void broadcastTextBlock(byte[] compressedBlock) {
-        String payload = "COMPRESSED_TEXT:" + Base64.getEncoder().encodeToString(compressedBlock);
+        String payload = "COMPRESSED_TEXT:" + compressedBlock;
         peerServer.broadcast(payload);
     }
 
@@ -112,7 +112,7 @@ public class Messenger {
             boolean isSucceeded = false;
             for (PeerClient peer : connectedPeerList) {
                 if (peerAddress.equals(peer.getRemotePeerAddress())) {
-                    peer.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
+                    peer.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + text);
                     isSucceeded = true;
                 }
             }
@@ -125,8 +125,8 @@ public class Messenger {
     }
 
     public void handleRemoteTextInsert(String from, String compressedText) {
-        byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
-        controller.insertText(from, decodedBlock);
+//        byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
+        controller.insertText(from, compressedText.getBytes());
     }
 
 }
