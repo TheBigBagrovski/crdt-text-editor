@@ -181,7 +181,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 controller.clear();
                 controller.getMessenger().broadcastClear();
                 while ((line = reader.readLine()) != null) {
-                    controller.importTextFromFile(line);
+                    controller.importTextFromFile(line + "\n");
 //                    fileContent.append(line).append("\n");
                 }
 //                controller.importTextFromFile(fileContent.toString());
