@@ -1,10 +1,19 @@
-//package okp.nic.network.peer;
-//
-//public class PeerMessageType {
-//    COMPRESSED_TEXT("COMPRESSED_TEXT:"),
-//    PEER_CONNECTED("SIGNAL:CONNECTED:"),
-//    PEER_DISCONNECTED("SIGNAL:DISCONNECTED:"),
-//    INITIAL_TEXT_REQUEST("SIGNAL:INITIAL_TEXT_REQ_TO:");
-//
-//
-//}
+package okp.nic.network.peer;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum PeerMessageType {
+    COMPRESSED_TEXT("COMPRESSED_TEXT:"),
+    OPERATION("OP:"),
+    CURRENT_STATE("CURRENT_STATE:");
+
+    private final String prefix;
+
+    public String formatMessage(String content) {
+        return prefix + content;
+    }
+
+}

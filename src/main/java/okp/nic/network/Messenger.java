@@ -3,7 +3,11 @@ package okp.nic.network;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.network.operation.DeleteOperation;
+import okp.nic.network.operation.InsertOperation;
+import okp.nic.network.operation.Operation;
 import okp.nic.network.peer.PeerClient;
+import okp.nic.network.peer.PeerMessageType;
 import okp.nic.network.peer.PeerServer;
 import okp.nic.network.signal.SignalClient;
 
@@ -53,19 +57,19 @@ public class Messenger {
     }
 
     public void broadcastInsert(char value, int position) {
-        Operation op = new Operation(value, "insert", position);
-        String payload = gson.toJson(op);
+        InsertOperation op = new InsertOperation(value, position);
+        String payload = PeerMessageType.OPERATION.formatMessage(gson.toJson(op));
         peerServer.broadcast(payload);
     }
 
     public void broadcastDelete(int position) {
-        Operation op = new Operation('!', "delete", position);
-        String payload = gson.toJson(op);
+        DeleteOperation op = new DeleteOperation(position);
+        String payload = PeerMessageType.OPERATION.formatMessage(gson.toJson(op));
         peerServer.broadcast(payload);
     }
 
     public void broadcastTextBlock(byte[] compressedBlock) {
-        String payload = "COMPRESSED_TEXT:" + Base64.getEncoder().encodeToString(compressedBlock);
+        String payload = PeerMessageType.COMPRESSED_TEXT.formatMessage(Base64.getEncoder().encodeToString(compressedBlock));
         peerServer.broadcast(payload);
     }
 
@@ -109,7 +113,8 @@ public class Messenger {
         byte[] text = controller.getCompressedText();
         try {
             if (connectedPeers.containsKey(peerAddress)) {
-                connectedPeers.get(peerAddress).send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
+                connectedPeers.get(peerAddress).send(PeerMessageType.CURRENT_STATE.formatMessage(
+                        "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text)));
             } else {
                 log.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
             }

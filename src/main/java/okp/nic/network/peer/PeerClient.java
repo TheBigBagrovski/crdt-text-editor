@@ -4,11 +4,16 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.network.Messenger;
-import okp.nic.network.Operation;
+import okp.nic.network.operation.DeleteOperation;
+import okp.nic.network.operation.InsertOperation;
+import okp.nic.network.operation.Operation;
+import okp.nic.network.signal.SignalMessageType;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+
+import static okp.nic.network.signal.SignalMessageType.WELCOME;
 
 @Slf4j
 @Getter
@@ -37,17 +42,23 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.info("От " + remotePeerAddress + " получено сообщение: " + message);
-        if (message.startsWith("COMPRESSED_TEXT:")) {
-            messenger.handleRemoteTextInsert(remotePeerAddress, message.substring("COMPRESSED_TEXT:".length()));
-        } else {
-            Operation op = gson.fromJson(message, Operation.class);
-            switch (op.getType()) {
-                case "insert":
-                    messenger.handleRemoteInsert(remotePeerAddress, op.getPosition(), op.getData());
-                    break;
-                case "delete":
-                    messenger.handleRemoteDelete(op.getPosition());
-                    break;
+        for (PeerMessageType type : PeerMessageType.values()) {
+            if (message.startsWith(type.getPrefix())) {
+                String content = message.substring(type.getPrefix().length());
+                switch (type) {
+                    case COMPRESSED_TEXT:
+                        messenger.handleRemoteTextInsert(remotePeerAddress, content);
+                        break;
+                    case OPERATION:
+                        Operation op = gson.fromJson(content, Operation.class);
+                        if (op instanceof InsertOperation) {
+                            InsertOperation insertOp = (InsertOperation) op;
+                            messenger.handleRemoteInsert(remotePeerAddress, insertOp.getPosition(), insertOp.getData());
+                        } else if (op instanceof DeleteOperation) {
+                            DeleteOperation deleteOp = (DeleteOperation) op;
+                            messenger.handleRemoteDelete(deleteOp.getPosition());
+                        }
+                }
             }
         }
     }
