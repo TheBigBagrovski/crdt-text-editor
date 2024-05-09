@@ -6,14 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import okp.nic.network.Messenger;
 import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.InsertOperation;
-import okp.nic.network.operation.Operation;
-import okp.nic.network.signal.SignalMessageType;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
-
-import static okp.nic.network.signal.SignalMessageType.WELCOME;
 
 @Slf4j
 @Getter

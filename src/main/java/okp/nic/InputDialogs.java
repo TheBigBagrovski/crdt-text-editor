@@ -11,10 +11,10 @@ public class InputDialogs {
     private static final Dimension textFieldSize = new Dimension(200, 25);
 
     public static String getSignalServerAddress() {
+        JPanel panel = new JPanel(new GridLayout(2, 2));
         JTextField hostField = new JTextField(18);
         hostField.setPreferredSize(textFieldSize);
         hostField.setFont(font);
-        JPanel panel = new JPanel(new GridLayout(1, 2));
         JLabel hostLabel = new JLabel(getUtfString("Адрес сигнального сервера:"));
         hostLabel.setFont(font);
         panel.add(hostLabel);
@@ -28,10 +28,10 @@ public class InputDialogs {
     }
 
     public static String getSignalServerPort() {
+        JPanel panel = new JPanel(new GridLayout(1, 2));
         JTextField portField = new JTextField(10);
         portField.setPreferredSize(textFieldSize);
         portField.setFont(font);
-        JPanel panel = new JPanel(new GridLayout(1, 2));
         JLabel portLabel = new JLabel(getUtfString("Порт сигнального сервера:"));
         portLabel.setFont(font);
         panel.add(portLabel);
@@ -45,6 +45,7 @@ public class InputDialogs {
     }
 
     public static String[] getPeerInfo() {
+        JPanel panel = new JPanel(new GridLayout(3, 2));
         JTextField peerAddressField = new JTextField(20);
         peerAddressField.setPreferredSize(textFieldSize);
         peerAddressField.setFont(font);
@@ -54,7 +55,6 @@ public class InputDialogs {
         JTextField signalPortField = new JTextField(5);
         signalPortField.setPreferredSize(textFieldSize);
         signalPortField.setFont(font);
-        JPanel panel = new JPanel(new GridLayout(3, 2));
         JLabel peerLabel = new JLabel(getUtfString("Адрес пира:"));
         peerLabel.setFont(font);
         JLabel signalHostLabel = new JLabel(getUtfString("Адрес сигнального сервера:"));

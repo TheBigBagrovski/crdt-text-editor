@@ -35,7 +35,7 @@ public class Utils {
         } catch (IOException e) {
             portFree = false;
         }
-        return portFree;
+        return port > 1024 && portFree;
     }
 
 }
