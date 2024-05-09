@@ -191,21 +191,24 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         }
     }
 
+    Thread thread = new Thread(() -> {
+        importDialog = new JDialog(this, getString("Импорт текста"), true);
+        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        JLabel messageLabel = new JLabel(getString("Идет импорт текста..."));
+        importDialog.add(messageLabel);
+        importDialog.pack();
+        importDialog.setLocationRelativeTo(this);
+        importDialog.setVisible(true);
+    });
+
     public void pause() {
-        new Thread(() -> {
-            importDialog = new JDialog(this, getString("Импорт текста"), true);
-            importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-            JLabel messageLabel = new JLabel(getString("Идет импорт текста..."));
-            importDialog.add(messageLabel);
-            importDialog.pack();
-            importDialog.setLocationRelativeTo(this);
-            importDialog.setVisible(true);
-        }).start();
+        thread.start();
         textArea.setEnabled(false);
     }
 
     public void unpause() {
         if (importDialog != null) {
+            thread.interrupt();
             importDialog.dispose();
             importDialog = null;
         }
