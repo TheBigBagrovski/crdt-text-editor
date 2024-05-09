@@ -184,7 +184,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                     fileContent.append(line).append("\n");
                 }
                 controller.importTextFromFile(fileContent.toString());
-                unpause();
             } catch (IOException ex) {
                 log.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
@@ -198,7 +197,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         importDialog.add(messageLabel);
         importDialog.pack();
         importDialog.setLocationRelativeTo(this);
-        new Thread(() -> importDialog.setVisible(true));
+        new Thread(() -> importDialog.setVisible(true)).start();
         textArea.setEnabled(false);
 }
 

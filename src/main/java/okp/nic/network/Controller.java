@@ -92,6 +92,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         new Thread(() -> {
             document.updateContent(siteId, text);
             textEditor.getTextArea().insert(text, 0);
+            textEditor.unpause();
         }).start();
         messenger.broadcastTextBlock(compress(text));
     }
