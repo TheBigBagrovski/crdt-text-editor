@@ -11,4 +11,9 @@ public class InsertOperation extends Operation {
         this.data = data;
     }
 
+    @Override
+    public String getType() {
+        return "INSERT:";
+    }
+
 }

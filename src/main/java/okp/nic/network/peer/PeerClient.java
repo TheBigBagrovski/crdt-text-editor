@@ -50,14 +50,14 @@ public class PeerClient extends WebSocketClient {
                         messenger.handleRemoteTextInsert(remotePeerAddress, content);
                         break;
                     case OPERATION:
-                        Operation op = gson.fromJson(content, Operation.class);
-                        if (op instanceof InsertOperation) {
-                            InsertOperation insertOp = (InsertOperation) op;
+                        if (content.startsWith("INSERT:")) {
+                            InsertOperation insertOp = gson.fromJson(content.substring("INSERT:".length()), InsertOperation.class);
                             messenger.handleRemoteInsert(remotePeerAddress, insertOp.getPosition(), insertOp.getData());
-                        } else if (op instanceof DeleteOperation) {
-                            DeleteOperation deleteOp = (DeleteOperation) op;
+                        } else if (content.startsWith("DELETE:")) {
+                            DeleteOperation deleteOp = gson.fromJson(content.substring("DELETE:".length()), DeleteOperation.class);
                             messenger.handleRemoteDelete(deleteOp.getPosition());
                         }
+                        break;
                 }
             }
         }

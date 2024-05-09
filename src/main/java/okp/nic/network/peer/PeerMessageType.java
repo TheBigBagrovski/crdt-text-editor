@@ -16,4 +16,8 @@ public enum PeerMessageType {
         return prefix + content;
     }
 
+    public String formatOperationMessage(String type, String content) {
+        return prefix + type + content;
+    }
+
 }

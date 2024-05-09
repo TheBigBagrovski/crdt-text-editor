@@ -10,4 +10,6 @@ public abstract class Operation {
         this.position = position;
     }
 
+    public abstract String getType();
+
 }

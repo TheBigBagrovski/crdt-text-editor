@@ -9,4 +9,9 @@ public class DeleteOperation extends Operation {
         super(position);
     }
 
+    @Override
+    public String getType() {
+        return "DELETE:";
+    }
+
 }

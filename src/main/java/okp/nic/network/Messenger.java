@@ -58,13 +58,13 @@ public class Messenger {
 
     public void broadcastInsert(char value, int position) {
         InsertOperation op = new InsertOperation(value, position);
-        String payload = PeerMessageType.OPERATION.formatMessage(gson.toJson(op));
+        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
         peerServer.broadcast(payload);
     }
 
     public void broadcastDelete(int position) {
         DeleteOperation op = new DeleteOperation(position);
-        String payload = PeerMessageType.OPERATION.formatMessage(gson.toJson(op));
+        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
         peerServer.broadcast(payload);
     }
 
