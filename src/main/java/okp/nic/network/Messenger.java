@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import okp.nic.network.peer.PeerClient;
 import okp.nic.network.peer.PeerServer;
 import okp.nic.network.signal.SignalClient;
-import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -109,16 +108,11 @@ public class Messenger {
     public void handleRemoteCurrentStateRequest(String peerAddress) {
         byte[] text = controller.getCompressedText();
         try {
-//            if (connectedPeers.containsKey(peerAddress)) {
-                for (WebSocket ws : peerServer.getConnections()) {
-                    if (("ws:/" + ws.getRemoteSocketAddress()).equals(peerAddress)) {
-                        ws.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
-                    }
-                }
-//                connectedPeers.get(peerAddress).send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
-//            } else {
-//                log.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
-//            }
+            if (connectedPeers.containsKey(peerAddress)) {
+                connectedPeers.get(peerAddress).send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
+            } else {
+                log.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
+            }
         } catch (Exception ex) {
             log.error("Ошибка при подключении к пиру");
         }
