@@ -1,8 +1,10 @@
-package okp.nic.network;
+package okp.nic.network.peer;
 
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.network.Messenger;
+import okp.nic.network.Operation;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -46,9 +48,6 @@ public class PeerClient extends WebSocketClient {
                 case "delete":
                     messenger.handleRemoteDelete(op.getPosition());
                     break;
-//                case "clear":
-//                    messenger.handleRemoteClear();
-//                    break;
             }
         }
     }

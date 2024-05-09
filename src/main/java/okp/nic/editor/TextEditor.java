@@ -20,7 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
 
-import static okp.nic.Utils.getString;
+import static okp.nic.Utils.getUtfString;
 
 @Slf4j
 public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener {
@@ -90,10 +90,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         rightPanel.add(logScrollPane, BorderLayout.CENTER);
         // настройки меню
         JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu(getString("Файл"));
+        JMenu fileMenu = new JMenu(getUtfString("Файл"));
         menuBar.add(fileMenu);
-        JMenuItem saveMenuItem = new JMenuItem(getString("Сохранить"));
-        JMenuItem loadMenuItem = new JMenuItem(getString("Загрузить"));
+        JMenuItem saveMenuItem = new JMenuItem(getUtfString("Сохранить"));
+        JMenuItem loadMenuItem = new JMenuItem(getUtfString("Загрузить"));
         fileMenu.add(saveMenuItem);
         fileMenu.add(loadMenuItem);
         saveMenuItem.addActionListener(e -> saveFile());
@@ -191,23 +191,35 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void pause() {
-        importDialog = new JDialog(this, getString("Импорт текста"), true);
-        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        JLabel messageLabel = new JLabel(getString("Идет импорт текста..."));
-        importDialog.add(messageLabel);
-        importDialog.pack();
-        importDialog.setLocationRelativeTo(this);
+        showPauseWindow();
         new Thread(() -> importDialog.setVisible(true)).start();
         textArea.setEnabled(false);
-}
-
-public void unpause() {
-    if (importDialog != null) {
-        importDialog.dispose();
-        importDialog = null;
     }
-    textArea.setEnabled(true);
-}
+
+    private void showPauseWindow() {
+        importDialog = new JDialog(this, getUtfString("Загрузка файла"), true);
+        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        JLabel messageLabel = new JLabel(getUtfString("Дождитесь загрузки файла..."));
+        messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+        panel.add(messageLabel);
+        importDialog.add(panel);
+        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+        importDialog.setIconImage(logo.getImage());
+        importDialog.setSize(new Dimension(100,50));
+        importDialog.pack();
+        importDialog.setLocationRelativeTo(this);
+    }
+
+    public void unpause() {
+        if (importDialog != null) {
+            importDialog.dispose();
+            importDialog = null;
+        }
+        textArea.setEnabled(true);
+    }
 
 }
 

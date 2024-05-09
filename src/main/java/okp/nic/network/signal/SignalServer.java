@@ -1,4 +1,4 @@
-package okp.nic.network;
+package okp.nic.network.signal;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +10,12 @@ import org.java_websocket.server.WebSocketServer;
 import javax.swing.*;
 import java.awt.*;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import static okp.nic.Utils.findAvailablePort;
+import static okp.nic.Utils.getUtfString;
 import static okp.nic.Utils.isPortAvailable;
 
 @Slf4j
@@ -32,21 +32,11 @@ public class SignalServer extends WebSocketServer {
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("=")[1];
         log.info("Новое подключение к сигнальному серверу: " + peerAddress);
-        conn.send("SIGNAL:WELCOME");
-        StringBuilder sb = new StringBuilder("SIGNAL:PEERS:");
-        if (!clients.isEmpty()) {
-            for (String socket : clients.values()) {
-                sb.append(socket).append(", ");
-            }
-            sb.delete(sb.length() - 2, sb.length());
-        } else {
-            sb.append("FIRST");
-        }
-        conn.send(sb.toString()); // отправка новому пиру текущих подключенных клиентов
-        broadcastMessage("SIGNAL:CONNECTED:" + peerAddress); // отправка подключенным клиентам данных о новом пире
+        conn.send(SignalMessageType.WELCOME.formatWelcomeMessage(clients.values())); // отправка новому пиру текущих подключенных клиентов
+        broadcastMessage(SignalMessageType.PEER_CONNECTED.formatMessage(peerAddress)); // отправка подключенным клиентам данных о новом пире
         if (!clients.isEmpty()) {
             Iterator<WebSocket> iterator = clients.keySet().iterator();
-            iterator.next().send("SIGNAL:INITIAL_TEXT_REQ_TO:" + peerAddress);
+            iterator.next().send(SignalMessageType.INITIAL_TEXT_REQUEST.formatMessage(peerAddress));
         }
         clients.put(conn, peerAddress);
     }
@@ -56,7 +46,7 @@ public class SignalServer extends WebSocketServer {
         log.info("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: " + reason);
         if (clients.containsKey(conn)) {
             clients.remove(conn);
-            broadcastMessage("SIGNAL:DISCONNECTED:" + "ws:/" + conn.getRemoteSocketAddress().toString());
+            broadcastMessage(SignalMessageType.PEER_DISCONNECTED.formatMessage("ws:/" + conn.getRemoteSocketAddress().toString()));
         } else {
             log.error(conn.getRemoteSocketAddress() + " не является клиентом сигнального сервера");
         }
@@ -76,13 +66,28 @@ public class SignalServer extends WebSocketServer {
     public void onStart() {
         String socketAddress = getAddress().toString();
         log.info("Сигнальный сервер запущен на сокете: " + socketAddress);
-        new SocketInfoWindow(socketAddress);
+        showInfoWindow(socketAddress);
     }
 
     private void broadcastMessage(String message) {
         for (WebSocket client : clients.keySet()) {
             client.send(message);
         }
+    }
+
+    private void showInfoWindow(String socketAddress) {
+        JFrame frame = new JFrame(getUtfString("Адрес сигнального сервера"));
+        JLabel socketLabel = new JLabel(getUtfString("Сигнальный сервер запущен на сокете: ") + socketAddress);
+        socketLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        socketLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel panel = new JPanel();
+        panel.add(socketLabel);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+        frame.add(panel);
+        frame.setSize(600, 100);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setVisible(true);
     }
 
     public static void main(String[] args) {
@@ -132,24 +137,6 @@ public class SignalServer extends WebSocketServer {
         InetSocketAddress isa = new InetSocketAddress(address, Integer.parseInt(port));
         SignalServer server = new SignalServer(isa);
         server.start();
-    }
-
-    static class SocketInfoWindow extends JFrame {
-
-        public SocketInfoWindow(String socketAddress) {
-            super(new String("Адрес сигнального сервера".getBytes(), StandardCharsets.UTF_8));
-            JLabel socketLabel = new JLabel(new String("Сигнальный сервер запущен на сокете: ".getBytes(), StandardCharsets.UTF_8) + socketAddress);
-            socketLabel.setFont(new Font("Arial", Font.BOLD, 18));
-            socketLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            JPanel panel = new JPanel();
-            panel.add(socketLabel);
-            panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
-            add(panel);
-            setSize(600, 100);
-            setLocationRelativeTo(null);
-            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            setVisible(true);
-        }
     }
 
 }

@@ -3,20 +3,23 @@ package okp.nic.network;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.network.peer.PeerClient;
+import okp.nic.network.peer.PeerServer;
+import okp.nic.network.signal.SignalClient;
+import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Slf4j
 public class Messenger {
 
 
-    private final List<PeerClient> connectedPeerList = new ArrayList<>();
+    private final Map<String, PeerClient> connectedPeers = new HashMap<>();
 
     private final String host;
     private final int port;
@@ -62,12 +65,6 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
-//    public void broadcastClear() {
-//        Operation op = new Operation('!', "clear", 0);
-//        String payload = gson.toJson(op);
-//        peerServer.broadcast(payload);
-//    }
-
     public void broadcastTextBlock(byte[] compressedBlock) {
         String payload = "COMPRESSED_TEXT:" + Base64.getEncoder().encodeToString(compressedBlock);
         peerServer.broadcast(payload);
@@ -78,11 +75,11 @@ public class Messenger {
         log.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
         try {
             PeerClient peerNode = new PeerClient(new URI(peerAddress), this);
-            while (!connectedPeerList.contains(peerNode)) {
+            while (!connectedPeers.containsKey(peerAddress)) {
                 boolean isSucceeded = peerNode.connectBlocking();
                 peerNode.setConnectionLostTimeout(0);
                 if (isSucceeded) {
-                    connectedPeerList.add(peerNode);
+                    connectedPeers.put(peerAddress, peerNode);
                 } else {
                     log.error("Не удалось подключиться к пиру " + peerAddress);
                     try {
@@ -98,7 +95,7 @@ public class Messenger {
     }
 
     public void handleRemotePeerDisconnected(String disconnectedPeer) {
-        connectedPeerList.removeIf(peer -> peer.getRemotePeerAddress().equals("ws://" + disconnectedPeer));
+        connectedPeers.remove("ws://" + disconnectedPeer);
     }
 
     public void handleRemoteInsert(String from, int position, char value) {
@@ -112,18 +109,16 @@ public class Messenger {
     public void handleRemoteCurrentStateRequest(String peerAddress) {
         byte[] text = controller.getCompressedText();
         try {
-            boolean isSucceeded = false;
-            for (PeerClient peer : connectedPeerList) {
-                if (peerAddress.equals(peer.getRemotePeerAddress())) {
-                    if (text.length != 0) {
-                        peer.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
+//            if (connectedPeers.containsKey(peerAddress)) {
+                for (WebSocket ws : peerServer.getConnections()) {
+                    if (("ws:/" + ws.getRemoteSocketAddress()).equals(peerAddress)) {
+                        ws.send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
                     }
-                    isSucceeded = true;
                 }
-            }
-            if (!isSucceeded) {
-                log.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
-            }
+//                connectedPeers.get(peerAddress).send("CURRENT_STATE:" + "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text));
+//            } else {
+//                log.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
+//            }
         } catch (Exception ex) {
             log.error("Ошибка при подключении к пиру");
         }

@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 public class Utils {
 
     // метод инкапсуляции текста в UTF-8 для Swing
-    public static String getString(String str) {
+    public static String getUtfString(String str) {
         return new String(str.getBytes(), StandardCharsets.UTF_8);
     }
 

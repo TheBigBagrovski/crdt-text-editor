@@ -1,6 +1,7 @@
-package okp.nic.network;
+package okp.nic.network.peer;
 
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.network.Messenger;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;

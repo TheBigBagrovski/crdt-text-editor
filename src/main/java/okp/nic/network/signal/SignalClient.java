@@ -1,6 +1,7 @@
-package okp.nic.network;
+package okp.nic.network.signal;
 
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.network.Messenger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -38,23 +39,30 @@ public class SignalClient extends WebSocketClient {
     }
 
     private void handleSignalServerMessage(String message) {
-        if (message.startsWith("SIGNAL:CONNECTED:")) {
-            String peerAddress = message.substring("SIGNAL:CONNECTED:".length());
-            messenger.handleRemotePeerConnected(peerAddress);
-        } else if (message.startsWith("SIGNAL:DISCONNECTED:")) {
-            String peerAddress = message.substring("SIGNAL:DISCONNECTED:".length());
-            messenger.handleRemotePeerDisconnected(peerAddress);
-        } else if (message.startsWith("SIGNAL:PEERS:")) {
-            String peersList = message.substring("SIGNAL:PEERS:".length());
-            if (!peersList.isEmpty() && !peersList.equals("FIRST")) {
-                String[] peers = peersList.split(", ");
-                for (String peer : peers) {
-                    messenger.handleRemotePeerConnected(peer);
+        for (SignalMessageType type : SignalMessageType.values()) {
+            if (message.startsWith(type.getPrefix())) {
+                String content = message.substring(type.getPrefix().length());
+                switch (type) {
+                    case WELCOME:
+                        if (!content.isEmpty() && !content.equals("NONE")) {
+                            String[] peers = content.split(", ");
+                            for (String peer : peers) {
+                                messenger.handleRemotePeerConnected(peer);
+                            }
+                        }
+                        break;
+                    case PEER_CONNECTED:
+                        messenger.handleRemotePeerConnected(content);
+                        break;
+                    case PEER_DISCONNECTED:
+                        messenger.handleRemotePeerDisconnected(content);
+                        break;
+                    case INITIAL_TEXT_REQUEST:
+                        messenger.handleRemoteCurrentStateRequest(content);
+                        break;
                 }
+                break; // найден тип сообщения, выход из цикла
             }
-        } else if (message.startsWith("SIGNAL:INITIAL_TEXT_REQ_TO:")) {
-            String peerAddress = message.substring("SIGNAL:INITIAL_TEXT_REQ_TO:".length());
-            messenger.handleRemoteCurrentStateRequest(peerAddress);
         }
     }
 
