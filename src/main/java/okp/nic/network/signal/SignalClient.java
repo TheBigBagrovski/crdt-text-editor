@@ -1,6 +1,8 @@
 package okp.nic.network.signal;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.logger.Logger;
 import okp.nic.network.Messenger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -11,6 +13,9 @@ import java.net.URI;
 public class SignalClient extends WebSocketClient {
 
     private final Messenger messenger;
+
+    @Setter
+    private Logger logger;
 
     public SignalClient(URI serverURI, Messenger messenger) {
         super(serverURI);

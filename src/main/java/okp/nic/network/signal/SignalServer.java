@@ -40,7 +40,6 @@ public class SignalServer extends WebSocketServer {
         log.info("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: " + reason);
         if (clients.containsKey(conn)) {
             clients.remove(conn);
-//            broadcastMessage(SignalMessageType.PEER_DISCONNECTED.formatMessage("ws:/" + conn.getRemoteSocketAddress().toString()));
             String peerAddress = conn.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
             broadcastMessage(SignalMessageType.PEER_DISCONNECTED.formatMessage(peerAddress));
         } else {

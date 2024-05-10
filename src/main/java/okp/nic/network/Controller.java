@@ -1,10 +1,10 @@
 package okp.nic.network;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Document;
 import okp.nic.gui.editor.TextEditor;
 import okp.nic.gui.editor.TextEditorListener;
+import okp.nic.logger.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,13 +12,15 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-@Slf4j
 public class Controller implements TextEditorListener, MessengerListener {
 
     @Getter
     private Messenger messenger;
     private Document document;
     private TextEditor textEditor;
+
+    @Getter
+    private Logger logger;
 
     @Getter
     private final String siteId;
@@ -30,7 +32,8 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void start(Messenger messenger, String name) {
         this.messenger = messenger;
         document = new Document();
-        textEditor = new TextEditor(this);
+        textEditor = new TextEditor(this, logger);
+        logger = new Logger(textEditor);
         handlePeerName(siteId, name);
     }
 
@@ -45,7 +48,7 @@ public class Controller implements TextEditorListener, MessengerListener {
             document.insertChar(siteId, position, value);
             messenger.broadcastInsert(value, position);
         } catch (Exception e) {
-            log.info("Ошибка при вставке символа " + value + " на поизицию " + position);
+            logger.error("Ошибка при вставке символа " + value + " на поизицию " + position);
         }
     }
 
@@ -55,7 +58,7 @@ public class Controller implements TextEditorListener, MessengerListener {
             document.deleteChar(position);
             messenger.broadcastDelete(position);
         } catch (Exception e) {
-            log.info("Ошибка при удалении символа на позиции " + position);
+            logger.error("Ошибка при удалении символа на позиции " + position);
 
         }
     }
@@ -119,7 +122,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
             gzipOut.write(text.getBytes());
         } catch (IOException e) {
-            log.error("Ошибка сжатия: " + e.getMessage());
+            logger.error("Ошибка сжатия: " + e.getMessage());
         }
         return baos.toByteArray();
     }
@@ -133,7 +136,7 @@ public class Controller implements TextEditorListener, MessengerListener {
                 baos.write(buffer, 0, len);
             }
         } catch (IOException e) {
-            log.error("Ошибка распаковки: " + e.getMessage());
+            logger.error("Ошибка распаковки: " + e.getMessage());
         }
         return baos.toString();
     }

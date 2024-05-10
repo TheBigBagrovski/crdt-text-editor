@@ -3,7 +3,7 @@ package okp.nic.network;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.gson.Gson;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import okp.nic.logger.Logger;
 import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.InsertOperation;
 import okp.nic.network.peer.PeerClient;
@@ -19,12 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static okp.nic.Utils.SALT;
-import static okp.nic.Utils.getUtfString;
 
 @Getter
-@Slf4j
 public class Messenger {
-
 
     private final Map<String, PeerClient> connectedPeers = new HashMap<>();
     private final Map<String, String> peerNames = new HashMap<>();
@@ -32,7 +29,7 @@ public class Messenger {
     private final String host;
     private final int port;
 
-    private final Controller controller;
+    private Controller controller;
     private PeerServer peerServer;
     private SignalClient signalClient;
     private final String name;
@@ -40,29 +37,33 @@ public class Messenger {
 
     private final Gson gson = new Gson();
 
-    public Messenger(String host, int port, Controller controller, String signalHost, String signalPort, String password, String name) {
+    private Logger logger;
+
+    public Messenger(String host, int port, String signalHost, String signalPort, String password, String name) {
         this.host = host;
         this.port = port;
-        this.controller = controller;
         this.name = name;
         inputPassword = password;
         connectToSignalServer("ws://" + signalHost + ":" + signalPort, name);
     }
 
     public void startServerPeer() {
+        controller = new Controller(host, port);
         controller.start(this, name);
-        peerServer = new PeerServer(new InetSocketAddress(host, port), this);
+        logger = controller.getLogger();
+        signalClient.setLogger(logger);
+        peerServer = new PeerServer(new InetSocketAddress(host, port), this, logger);
         peerServer.setConnectionLostTimeout(0);
         peerServer.start();
     }
 
     public void connectToSignalServer(String signalServerAddress, String name) {
         try {
-            signalClient = new SignalClient(new URI(
-                    getUtfString(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&name=" + URLEncoder.encode(name))), this);
+            String uri = signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&name=" + URLEncoder.encode(name);
+            signalClient = new SignalClient(new URI(uri), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
-            log.error("Ошибка при подключении к сигнальному серверу: " + ex);
+            logger.error("Ошибка при подключении к сигнальному серверу: " + ex);
         }
     }
 
@@ -90,9 +91,9 @@ public class Messenger {
 
     public void handleRemotePeerConnected(String peerAddress, String peerName) {
         String myFullAddress = "ws://" + host + ":" + port;
-        log.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
+        logger.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
         try {
-            PeerClient peerNode = new PeerClient(new URI(peerAddress), this);
+            PeerClient peerNode = new PeerClient(new URI(peerAddress), this, logger);
             while (!connectedPeers.containsKey(peerAddress)) {
                 boolean isSucceeded = peerNode.connectBlocking();
                 peerNode.setConnectionLostTimeout(0);
@@ -101,16 +102,16 @@ public class Messenger {
                     peerNames.put(peerAddress, peerName);
                     controller.handlePeerName(peerAddress, peerName);
                 } else {
-                    log.error("Не удалось подключиться к пиру " + peerAddress);
+                    logger.error("Не удалось подключиться к пиру " + peerAddress);
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {
-                        log.error("Ошибка прерывания потока в ожидании");
+                        logger.error("Ошибка прерывания потока в ожидании");
                     }
                 }
             }
         } catch (Exception ex) {
-            log.error("Ошибка при подключении к пиру");
+            logger.error("Ошибка при подключении к пиру");
         }
     }
 
@@ -134,10 +135,10 @@ public class Messenger {
                 connectedPeers.get(peerAddress).send(PeerMessageType.CURRENT_STATE.formatMessage(
                         "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text)));
             } else {
-                log.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
+                logger.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
             }
         } catch (Exception ex) {
-            log.error("Ошибка при подключении к пиру");
+            logger.error("Ошибка при подключении к пиру");
         }
     }
 

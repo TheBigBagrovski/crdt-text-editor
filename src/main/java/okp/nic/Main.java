@@ -1,12 +1,12 @@
 package okp.nic;
 
 import okp.nic.gui.InputDialogs;
+import okp.nic.logger.Logger;
 import okp.nic.network.Controller;
 import okp.nic.network.Messenger;
 
 import static okp.nic.Utils.findAvailablePort;
-//todo() никнеймы у пиров
-//todo() окно логов в интерфейсе + список подключенных участников
+//todo() окно логов в инт+ерфейсе
 //todo() ctrl+c, ctrl+x, ctrl+v
 //todo() чат
 //todo() паттерны и принципы
@@ -27,8 +27,7 @@ public class Main {
             String name = peerInfo[3];
             String password = peerInfo[4];
             int port = findAvailablePort();
-            Controller controller = new Controller(host, port);
-            Messenger messenger = new Messenger(host, port, controller, signalHost, signalPort, password, name);
+            Messenger messenger = new Messenger(host, port, signalHost, signalPort, password, name);
             System.out.println("Пир запущен на адресе: " + host + ", порт: " + port);
         } else {
             System.out.println("Пользователь отменил ввод");

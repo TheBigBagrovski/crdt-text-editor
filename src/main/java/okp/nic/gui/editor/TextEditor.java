@@ -3,6 +3,7 @@ package okp.nic.gui.editor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import okp.nic.logger.Logger;
 import okp.nic.network.Controller;
 
 import javax.swing.BorderFactory;
@@ -39,7 +40,6 @@ import java.util.Objects;
 
 import static okp.nic.Utils.getUtfString;
 
-@Slf4j
 public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener {
 
     private static final int FRAME_WIDTH = 1100;
@@ -59,18 +59,21 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Getter
     private final JTextArea textArea = new JTextArea();
-
     private final JPanel peersPanel = new JPanel();
     private final List<JLabel> peersList = new ArrayList<>();
-
+    private final JPanel logPanel = new JPanel();
+    private final JTextArea logArea = new JTextArea();
     private JDialog importDialog;
+
+    private final Logger logger;
 
     @Getter
     @Setter
     private int cursorPos;
 
-    public TextEditor(Controller controller) {
+    public TextEditor(Controller controller, Logger logger) {
         this.controller = controller;
+        this.logger = logger;
         // настройки фрейма
         JFrame frame = new JFrame("CRDT");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -92,11 +95,13 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         textArea.addKeyListener(this);
         textArea.getDocument().addDocumentListener(this);
         // настройки панели логов
-        JPanel logPanel = new JPanel();
         logPanel.setSize(LOG_SIZE);
         JScrollPane logScrollPane = new JScrollPane(logPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        logPanel.setLayout(new BorderLayout());
+        logArea.setEditable(false);
+        logPanel.add(logArea, BorderLayout.CENTER);
         // настройки панели пиров
         peersPanel.setPreferredSize(PEERS_SIZE);
         JScrollPane peersScrollPane = new JScrollPane(peersPanel,
@@ -184,7 +189,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             try (FileWriter writer = new FileWriter(selectedFile)) {
                 writer.write(textArea.getText());
             } catch (IOException ex) {
-                log.error("Ошибка при сохранении файла: " + ex.getMessage());
+                logger.error("Ошибка при сохранении файла: " + ex.getMessage());
             }
         }
     }
@@ -204,7 +209,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 }
                 controller.importTextFromFile(fileContent.toString());
             } catch (IOException ex) {
-                log.error("Ошибка при загрузке файла: " + ex.getMessage());
+                logger.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
         }
     }
@@ -256,6 +261,21 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         }
         peersPanel.revalidate();
         peersPanel.repaint();
+    }
+//
+//    public void writeLog(String message) {
+//        JLabel logLabel = new JLabel(getUtfString(message));
+//        logPanel.add(logLabel);
+//        logPanel.revalidate();
+//        logPanel.repaint();
+//    }
+
+    public void writeLog(String message) {
+        logArea.setLineWrap(true);  // Enable line wrapping
+        logArea.setWrapStyleWord(true); // Enable word wrap (break lines at word boundaries)
+        logArea.append(getUtfString(message) + "\n");
+        // Auto-scroll to the bottom
+        logArea.setCaretPosition(logArea.getDocument().getLength());
     }
 
 }
