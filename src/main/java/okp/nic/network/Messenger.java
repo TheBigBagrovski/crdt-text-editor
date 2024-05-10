@@ -51,7 +51,8 @@ public class Messenger {
         controller = new Controller(host, port);
         controller.start(this, name);
         logger = controller.getLogger();
-        signalClient.setLogger(logger);
+        logger.info("Указанный пароль верен");
+        logger.info("Получено WELCOME-сообщение от сигнального сервера");
         peerServer = new PeerServer(new InetSocketAddress(host, port), this, logger);
         peerServer.setConnectionLostTimeout(0);
         peerServer.start();
@@ -116,6 +117,7 @@ public class Messenger {
     }
 
     public void handleRemotePeerDisconnected(String disconnectedPeer) {
+        logger.info("Получено сообщение от сигнального сервера: " + disconnectedPeer + " отключается");
         connectedPeers.remove(disconnectedPeer);
         controller.removePeerName(disconnectedPeer, peerNames.get(disconnectedPeer));
     }
@@ -129,6 +131,7 @@ public class Messenger {
     }
 
     public void handleRemoteCurrentStateRequest(String peerAddress) {
+        logger.info("Получен запрос текста от сигнального сервера для " + peerAddress);
         byte[] text = controller.getCompressedText();
         try {
             if (connectedPeers.containsKey(peerAddress)) {

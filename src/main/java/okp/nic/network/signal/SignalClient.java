@@ -14,9 +14,6 @@ public class SignalClient extends WebSocketClient {
 
     private final Messenger messenger;
 
-    @Setter
-    private Logger logger;
-
     public SignalClient(URI serverURI, Messenger messenger) {
         super(serverURI);
         this.messenger = messenger;
@@ -34,7 +31,6 @@ public class SignalClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        log.info("Получено сообщение от сигнального сервера: " + message);
         handleSignalServerMessage(message);
     }
 
