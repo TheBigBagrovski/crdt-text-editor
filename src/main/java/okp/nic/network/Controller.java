@@ -1,6 +1,7 @@
 package okp.nic.network;
 
 import lombok.Getter;
+import okp.nic.crdt.Char;
 import okp.nic.crdt.Document;
 import okp.nic.gui.editor.TextEditor;
 import okp.nic.gui.editor.TextEditorListener;
@@ -40,6 +41,10 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Override
     public void onLocalInsert(char value, int position) {
         try {
+            System.out.println(document.getContent());
+            for (Char c : document.getChars()) {
+                System.out.println(c);
+            }
             document.insertChar(siteId, position, value);
             messenger.broadcastInsert(value, position);
         } catch (Exception e) {
