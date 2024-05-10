@@ -41,10 +41,6 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Override
     public void onLocalInsert(char value, int position) {
         try {
-            System.out.println(document.getContent());
-            for (Char c : document.getChars()) {
-                System.out.println(c);
-            }
             document.insertChar(siteId, position, value);
             messenger.broadcastInsert(value, position);
         } catch (Exception e) {
@@ -84,9 +80,8 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Override
     public void onLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
+        textEditor.getTextArea().replaceRange("", startPos, endPos - 1);
         textEditor.setCursorPos(startPos);
-        textEditor.getTextArea().replaceRange("", startPos + 1, endPos);
-        textEditor.getTextArea().setCaretPosition(startPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
