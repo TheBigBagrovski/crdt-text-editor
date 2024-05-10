@@ -251,7 +251,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void removePeerName(String name) {
         for (JLabel label : peersList) {
             if (label.getText().equals(name)) {
-                peersList.remove(label);
                 peersPanel.remove(label);
             }
         }
