@@ -93,7 +93,7 @@ public class Messenger {
     }
 
     public void broadcastTextBlock(byte[] compressedBlock, int pos) {
-        String payload = PeerMessageType.TEXT_BLOCK.formatTextBlockMessage(hostFullAddress, pos, Base64.getEncoder().encodeToString(compressedBlock));
+        String payload = PeerMessageType.TEXT_BLOCK.formatTextBlockMessage(pos, Base64.getEncoder().encodeToString(compressedBlock));
         peerServer.broadcast(payload);
     }
 
@@ -142,9 +142,8 @@ public class Messenger {
         try {
             if (connectedPeers.containsKey(peerAddress)) {
                 System.out.println(hostFullAddress);
-                System.out.println("ws:/" + peerServer.getAddress());
                 connectedPeers.get(peerAddress).send(PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(
-                        "ws:/" + peerServer.getAddress(), Base64.getEncoder().encodeToString(text)));
+                        hostFullAddress, Base64.getEncoder().encodeToString(text)));
                 logger.info("Текущий файл отправлен " + peerAddress);
             } else {
                 logger.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");

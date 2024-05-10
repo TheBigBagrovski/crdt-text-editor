@@ -47,7 +47,7 @@ public class PeerClient extends WebSocketClient {
                     case TEXT_BLOCK:
                         int pos = 0;
                         String text = "";
-                        Pattern pattern = Pattern.compile("^(\\d+)(.*)$");
+                        Pattern pattern = Pattern.compile("^(\\d+):(.*)$");
                         Matcher matcher = pattern.matcher(content);
                         if (matcher.find()) {
                             pos = Integer.parseInt(matcher.group(1));

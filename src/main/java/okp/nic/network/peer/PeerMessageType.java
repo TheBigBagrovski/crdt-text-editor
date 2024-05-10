@@ -25,8 +25,8 @@ public enum PeerMessageType {
         return prefix + ":<" + from + ">:" + text;
     }
 
-    public String formatTextBlockMessage(String from, int pos, String text) {
-        return prefix + pos /*":<" + from + ">:"*/ + text;
+    public String formatTextBlockMessage(int pos, String text) {
+        return prefix + pos + ":" + text;
     }
 
 }
