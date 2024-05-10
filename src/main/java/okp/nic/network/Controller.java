@@ -85,7 +85,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void onLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
         textEditor.setCursorPos(startPos);
-        textEditor.getTextArea().replaceRange("", startPos, endPos);
+        textEditor.getTextArea().replaceRange("", startPos + 1, endPos);
         textEditor.getTextArea().setCaretPosition(startPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
