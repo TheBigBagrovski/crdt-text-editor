@@ -4,20 +4,19 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.gui.InputDialogs;
+import okp.nic.network.peer.PeerMessageType;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import static okp.nic.Utils.SALT;
 import static okp.nic.Utils.findAvailablePort;
-import static okp.nic.Utils.getUtfString;
 import static okp.nic.Utils.isPortAvailable;
 
 @Slf4j
@@ -33,23 +32,7 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
-        String providedPasswordHash = handshake.getResourceDescriptor().split("\\?")[1].split("&")[1].split("=")[1];
-        String peerName = URLDecoder.decode(handshake.getResourceDescriptor().split("\\?")[1].split("&")[2].split("=")[1]);
-        BCrypt.Result result = BCrypt.verifyer().verify(passwordHash.toCharArray(), providedPasswordHash.getBytes());
-        if (!result.verified) {
-            log.error("Введен неверный пароль при попытке подключиться");
-            conn.close();
-            return;
-        }
-        log.info("Новое подключение к сигнальному серверу: " + peerAddress);
-        conn.send(SignalMessageType.WELCOME.formatWelcomeMessage(clients.values())); // отправка новому пиру текущих подключенных клиентов
-        broadcastMessage(SignalMessageType.PEER_CONNECTED.formatMessage(peerAddress + "-" + peerName)); // отправка подключенным клиентам данных о новом пире
-        if (!clients.isEmpty()) {
-            Iterator<WebSocket> iterator = clients.keySet().iterator();
-            iterator.next().send(SignalMessageType.INITIAL_TEXT_REQUEST.formatMessage(peerAddress));
-        }
-        clients.put(conn, new String[]{peerAddress, peerName});
+        conn.send(SignalMessageType.PASSWORD_REQUEST.getPrefix());
     }
 
     @Override
@@ -57,7 +40,9 @@ public class SignalServer extends WebSocketServer {
         log.info("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: " + reason);
         if (clients.containsKey(conn)) {
             clients.remove(conn);
-            broadcastMessage(SignalMessageType.PEER_DISCONNECTED.formatMessage("ws:/" + conn.getRemoteSocketAddress().toString()));
+//            broadcastMessage(SignalMessageType.PEER_DISCONNECTED.formatMessage("ws:/" + conn.getRemoteSocketAddress().toString()));
+            String peerAddress = conn.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
+            broadcastMessage(SignalMessageType.PEER_DISCONNECTED.formatMessage(peerAddress));
         } else {
             log.error(conn.getRemoteSocketAddress() + " не является клиентом сигнального сервера");
         }
@@ -66,6 +51,26 @@ public class SignalServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         log.info("Сигнальный сервер получает сообщение от " + conn.getRemoteSocketAddress() + ": " + message);
+        String passwordPrefix = PeerMessageType.PASSWORD.getPrefix();
+        if (message.startsWith(passwordPrefix)) {
+            String providedPasswordHash = message.substring(passwordPrefix.length());
+            BCrypt.Result result = BCrypt.verifyer().verify(passwordHash.toCharArray(), providedPasswordHash.getBytes());
+            if (!result.verified) {
+                log.error("Введен неверный пароль при попытке подключиться");
+                conn.close();
+                return;
+            }
+            String peerAddress = conn.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
+            String peerName = URLDecoder.decode(conn.getResourceDescriptor().split("\\?")[1].split("&")[1].split("=")[1]);
+            log.info("Новое подключение к сигнальному серверу: " + peerAddress);
+            conn.send(SignalMessageType.WELCOME.formatWelcomeMessage(clients.values())); // отправка новому пиру текущих подключенных клиентов
+            broadcastMessage(SignalMessageType.PEER_CONNECTED.formatMessage(peerAddress + "-" + peerName)); // отправка подключенным клиентам данных о новом пире
+            if (!clients.isEmpty()) {
+                Iterator<WebSocket> iterator = clients.keySet().iterator();
+                iterator.next().send(SignalMessageType.INITIAL_TEXT_REQUEST.formatMessage(peerAddress));
+            }
+            clients.put(conn, new String[]{peerAddress, peerName});
+        }
     }
 
     @Override

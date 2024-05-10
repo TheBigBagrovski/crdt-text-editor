@@ -4,7 +4,6 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import java.net.URLEncoder;
 import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.InsertOperation;
 import okp.nic.network.peer.PeerClient;
@@ -14,7 +13,7 @@ import okp.nic.network.signal.SignalClient;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
+import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +36,7 @@ public class Messenger {
     private PeerServer peerServer;
     private SignalClient signalClient;
     private final String name;
+    private final String inputPassword;
 
     private final Gson gson = new Gson();
 
@@ -45,7 +45,8 @@ public class Messenger {
         this.port = port;
         this.controller = controller;
         this.name = name;
-        connectToSignalServer("ws://" + signalHost + ":" + signalPort, password, name);
+        inputPassword = password;
+        connectToSignalServer("ws://" + signalHost + ":" + signalPort, name);
     }
 
     public void startServerPeer() {
@@ -55,15 +56,19 @@ public class Messenger {
         peerServer.start();
     }
 
-    public void connectToSignalServer(String signalServerAddress, String password, String name) {
+    public void connectToSignalServer(String signalServerAddress, String name) {
         try {
-            String hashedPassword = BCrypt.withDefaults().hashToString(6, (SALT + password).toCharArray());
             signalClient = new SignalClient(new URI(
-                    getUtfString(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&password=" + hashedPassword + "&name=" + URLEncoder.encode(name))), this);
+                    getUtfString(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&name=" + URLEncoder.encode(name))), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
             log.error("Ошибка при подключении к сигнальному серверу: " + ex);
         }
+    }
+
+    public void handlePasswordRequest() {
+        String hashedPassword = BCrypt.withDefaults().hashToString(6, (SALT + inputPassword).toCharArray());
+        signalClient.send(PeerMessageType.PASSWORD.formatMessage(hashedPassword));
     }
 
     public void broadcastInsert(char value, int position) {
@@ -110,7 +115,8 @@ public class Messenger {
     }
 
     public void handleRemotePeerDisconnected(String disconnectedPeer) {
-        connectedPeers.remove("ws://" + disconnectedPeer);
+        connectedPeers.remove(disconnectedPeer);
+        controller.removePeerName(disconnectedPeer, peerNames.get(disconnectedPeer));
     }
 
     public void handleRemoteInsert(String from, int position, char value) {

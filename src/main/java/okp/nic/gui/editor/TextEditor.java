@@ -5,12 +5,27 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.network.Controller;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.BufferedReader;
@@ -18,6 +33,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static okp.nic.Utils.getUtfString;
@@ -42,8 +59,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Getter
     private final JTextArea textArea = new JTextArea();
-    private final JPanel peersPanel = new JPanel();
 
+    private final JPanel peersPanel = new JPanel();
+    private final List<JLabel> peersList = new ArrayList<>();
 
     private JDialog importDialog;
 
@@ -224,7 +242,21 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     public void addPeerName(String name) {
         JLabel label = new JLabel(name);
+        peersList.add(label);
         peersPanel.add(label);
+        peersPanel.revalidate();
+        peersPanel.repaint();
+    }
+
+    public void removePeerName(String name) {
+        for (JLabel label : peersList) {
+            if (label.getText().equals(name)) {
+                peersList.remove(label);
+                peersPanel.remove(label);
+            }
+        }
+        peersPanel.revalidate();
+        peersPanel.repaint();
     }
 
 }

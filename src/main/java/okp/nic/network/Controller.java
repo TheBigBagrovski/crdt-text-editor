@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static okp.nic.Utils.getUtfString;
-
 @Slf4j
 public class Controller implements TextEditorListener, MessengerListener {
 
@@ -142,6 +140,11 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     public void handlePeerName(String peerAddress, String name) {
         textEditor.addPeerName(name + " [" + peerAddress + "]");
+    }
+
+    public void removePeerName(String peerAddress, String name) {
+        textEditor.removePeerName(name + " [" + peerAddress + "]");
+
     }
 
 }

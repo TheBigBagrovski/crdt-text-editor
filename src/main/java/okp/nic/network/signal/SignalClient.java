@@ -63,6 +63,9 @@ public class SignalClient extends WebSocketClient {
                     case INITIAL_TEXT_REQUEST:
                         messenger.handleRemoteCurrentStateRequest(content);
                         break;
+                    case PASSWORD_REQUEST:
+                        messenger.handlePasswordRequest();
+                        break;
                 }
                 break; // найден тип сообщения, выход из цикла
             }

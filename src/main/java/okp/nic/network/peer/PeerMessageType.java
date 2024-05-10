@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum PeerMessageType {
     COMPRESSED_TEXT("COMPRESSED_TEXT:"),
     OPERATION("OP:"),
-    CURRENT_STATE("CURRENT_STATE:");
+    CURRENT_STATE("CURRENT_STATE:"),
+    PASSWORD("PASSWORD:");
 
     private final String prefix;
 
