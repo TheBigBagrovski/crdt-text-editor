@@ -5,8 +5,8 @@ import lombok.Getter;
 @Getter
 public class DeleteOperation extends Operation {
 
-    public DeleteOperation(int position) {
-        super(position);
+    public DeleteOperation(int startPos) {
+        super(startPos);
     }
 
     @Override

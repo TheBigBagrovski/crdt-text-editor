@@ -6,8 +6,8 @@ import lombok.Getter;
 public class InsertOperation extends Operation {
     private final char data;
 
-    public InsertOperation(char data, int position) {
-        super(position);
+    public InsertOperation(int startPos, char data) {
+        super(startPos);
         this.data = data;
     }
 

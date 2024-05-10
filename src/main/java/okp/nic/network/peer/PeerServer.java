@@ -23,12 +23,10 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake clientHandshake) {
-//        logger.info("К пир-серверу подключается " + "ws:/" + conn.getRemoteSocketAddress());
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-//        logger.info("Закрыто подключение " + conn.getRemoteSocketAddress() + " к пир-серверу с кодом " + code + ", причина: " + getUtfString(reason));
     }
 
     @Override
@@ -44,13 +42,12 @@ public class PeerServer extends WebSocketServer {
                 from = matcher.group(1);
                 text = matcher.group(2);
             }
-            messenger.handleUpdateText(from, text);
+            messenger.handleRemoteTextUpdate(from, text);
         }
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-//        logger.error("Ошибка при подключении " + conn.getRemoteSocketAddress() + " к пир-серверу:" + ex);
     }
 
     @Override

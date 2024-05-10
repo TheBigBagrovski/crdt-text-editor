@@ -146,14 +146,14 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         InputMap inputMap = textArea.getInputMap();
         ActionMap actionMap = textArea.getActionMap();
 
-//        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
-//        inputMap.put(copyKeyStroke, "copy");
-//        actionMap.put("copy", new AbstractAction() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                copiedText = selectedText;
-//            }
-//        });
+        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
+        inputMap.put(copyKeyStroke, "copy");
+        actionMap.put("copy", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                copiedText = selectedText;
+            }
+        });
 
         KeyStroke cutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK);
         inputMap.put(cutKeyStroke, "cut");
@@ -161,7 +161,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 copiedText = selectedText;
-                controller.deleteRange(selectStartPos, selectEndPos);
+                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
             }
         });
 
@@ -170,7 +170,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         actionMap.put("paste", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                controller.handlePasteTextBlock(cursorPos, copiedText);
+                if (copiedText != null && !copiedText.isEmpty()) {
+                    controller.onLocalInsertBlock(cursorPos, copiedText);
+                }
             }
         });
 
@@ -209,26 +211,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void keyPressed(KeyEvent e) {
-//        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-//            controller.onDelete(this.getCursorPos());
-//        } else if (e.getKeyCode() != KeyEvent.VK_UP &&
-//                e.getKeyCode() != KeyEvent.VK_DOWN &&
-//                e.getKeyCode() != KeyEvent.VK_LEFT &&
-//                e.getKeyCode() != KeyEvent.VK_RIGHT &&
-//                e.getKeyCode() != KeyEvent.VK_TAB &&
-//                e.getKeyCode() != KeyEvent.VK_ALT &&
-//                e.getKeyCode() != KeyEvent.VK_SHIFT &&
-//                e.getKeyCode() != KeyEvent.VK_CANCEL &&
-//                e.getKeyCode() != KeyEvent.VK_CONTROL &&
-//                e.getKeyCode() != KeyEvent.VK_CAPS_LOCK &&
-//                e.getKeyCode() != KeyEvent.VK_ESCAPE &&
-//                e.getKeyCode() != KeyEvent.VK_END &&
-//                e.getKeyCode() != KeyEvent.VK_HOME
-//        ) {
-//            char value;
-//            value = e.getKeyChar();
-//            controller.onInsert(value, this.getCursorPos());
-//        }
+        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            controller.onLocalDelete(this.getCursorPos());
+        }
     }
 
     public void keyReleased(KeyEvent e) {
@@ -236,7 +221,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     public void keyTyped(KeyEvent e) {
         char value = e.getKeyChar();
-        if (value != '\u0003' && value != '\u0018' && value != '\u0016' ) controller.onInsert(value, this.getCursorPos());
+        if (value != '\u0003' && value != '\u0018' && value != '\u0016' ) {
+            controller.onLocalInsert(value, this.getCursorPos());
+        }
     }
 
     public void clearTextArea() {
@@ -269,7 +256,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 while ((line = reader.readLine()) != null) {
                     fileContent.append(line).append("\n");
                 }
-                controller.importTextFromFile(fileContent.toString());
+                controller.onLocalFileImport(fileContent.toString());
             } catch (IOException ex) {
                 logger.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
@@ -344,10 +331,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void writeLog(String message) {
-        logArea.setLineWrap(true);  // Enable line wrapping
-        logArea.setWrapStyleWord(true); // Enable word wrap (break lines at word boundaries)
+        logArea.setLineWrap(true);
+        logArea.setWrapStyleWord(true);
         logArea.append(getUtfString(message) + "\n");
-        // Auto-scroll to the bottom
         logArea.setCaretPosition(logArea.getDocument().getLength());
     }
 

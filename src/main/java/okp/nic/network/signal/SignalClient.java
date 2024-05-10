@@ -1,8 +1,6 @@
 package okp.nic.network.signal;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import okp.nic.logger.Logger;
 import okp.nic.network.Messenger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;

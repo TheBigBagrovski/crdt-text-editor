@@ -5,18 +5,25 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import okp.nic.logger.Logger;
 import okp.nic.network.operation.DeleteOperation;
+import okp.nic.network.operation.DeleteRangeOperation;
+import okp.nic.network.operation.InsertBlockOperation;
 import okp.nic.network.operation.InsertOperation;
 import okp.nic.network.peer.PeerClient;
 import okp.nic.network.peer.PeerMessageType;
 import okp.nic.network.peer.PeerServer;
 import okp.nic.network.signal.SignalClient;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import static okp.nic.Utils.SALT;
 
@@ -75,28 +82,6 @@ public class Messenger {
         signalClient.send(PeerMessageType.PASSWORD.formatMessage(hashedPassword));
     }
 
-    public void broadcastInsert(char value, int position) {
-        InsertOperation op = new InsertOperation(value, position);
-        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
-        peerServer.broadcast(payload);
-    }
-
-    public void broadcastDelete(int position) {
-        DeleteOperation op = new DeleteOperation(position);
-        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
-        peerServer.broadcast(payload);
-    }
-
-    public void broadcastTextUpdate(byte[] compressedBlock) {
-        String payload = PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(hostFullAddress, Base64.getEncoder().encodeToString(compressedBlock));
-        peerServer.broadcast(payload);
-    }
-
-    public void broadcastTextBlock(byte[] compressedBlock, int pos) {
-        String payload = PeerMessageType.TEXT_BLOCK.formatTextBlockMessage(pos, Base64.getEncoder().encodeToString(compressedBlock));
-        peerServer.broadcast(payload);
-    }
-
     public void handleRemotePeerConnected(String peerAddress, String peerName) {
         logger.info("Попытка соединения с пиром " + peerAddress);
         try {
@@ -128,6 +113,37 @@ public class Messenger {
         controller.removePeerName(disconnectedPeer, peerNames.get(disconnectedPeer));
     }
 
+    public void broadcastInsert(char value, int position) {
+        InsertOperation op = new InsertOperation(position, value);
+        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
+        peerServer.broadcast(payload);
+    }
+
+    public void broadcastDelete(int position) {
+        DeleteOperation op = new DeleteOperation(position);
+        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
+        peerServer.broadcast(payload);
+    }
+
+    public void broadcastDeleteRange(int startPos, int endPos) {
+        DeleteRangeOperation op = new DeleteRangeOperation(startPos, endPos);
+        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
+        peerServer.broadcast(payload);
+    }
+
+    public void broadcastTextUpdate(String text) {
+        byte[] compressedText = compress(text);
+        String payload = PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(hostFullAddress, Base64.getEncoder().encodeToString(compressedText));
+        peerServer.broadcast(payload);
+    }
+
+    public void broadcastInsertBlock(int pos, String text) {
+        byte[] compressedBlock = compress(text);
+        InsertBlockOperation op = new InsertBlockOperation(pos, Base64.getEncoder().encodeToString(compressedBlock));
+        String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
+        peerServer.broadcast(payload);
+    }
+
     public void handleRemoteInsert(String from, int position, char value) {
         controller.handleRemoteInsert(from, value, position);
     }
@@ -138,7 +154,7 @@ public class Messenger {
 
     public void handleRemoteCurrentStateRequest(String peerAddress) {
         logger.info("Получен запрос текста от сигнального сервера для " + peerAddress);
-        byte[] text = controller.getCompressedText();
+        byte[] text = compress(controller.getCurrentDocument());
         try {
             if (connectedPeers.containsKey(peerAddress)) {
                 connectedPeers.get(peerAddress).send(PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(
@@ -152,15 +168,46 @@ public class Messenger {
         }
     }
 
-    public void handleUpdateText(String from, String compressedText) {
+    public void handleRemoteTextUpdate(String from, String compressedText) {
         logger.info("Получено обновление файла от " + from);
         byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
-        controller.updateText(from, decodedBlock);
+        String text = decompress(decodedBlock);
+        controller.handleRemoteTextUpdate(from, text);
     }
 
-    public void handleRemoteBlockInsert(String from, int pos, String compressedText) {
+    public void handleRemoteInsertBlock(String from, int pos, String compressedText) {
         byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
-        controller.insertTextBlock(from, pos, decodedBlock);
+        String text = decompress(decodedBlock);
+        controller.handleRemoteInsertBlock(from, pos, text);
     }
+
+    public void handleRemoteDeleteRange(int startPos, int endPos) {
+        controller.handleRemoteDeleteRange(startPos, endPos);
+    }
+
+    private byte[] compress(String text) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
+            gzipOut.write(text.getBytes());
+        } catch (IOException e) {
+            logger.error("Ошибка при сжатии файла: " + e.getMessage());
+        }
+        return baos.toByteArray();
+    }
+
+    private String decompress(byte[] compressedText) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (GZIPInputStream gzipIn = new GZIPInputStream(new ByteArrayInputStream(compressedText))) {
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = gzipIn.read(buffer)) > 0) {
+                baos.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            logger.error("Ошибка при распаковке файла: " + e.getMessage());
+        }
+        return baos.toString();
+    }
+
 
 }

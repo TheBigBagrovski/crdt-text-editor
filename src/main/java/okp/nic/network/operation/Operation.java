@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public abstract class Operation {
-    protected final int position;
+    protected final int startPos;
 
-    public Operation(int position) {
-        this.position = position;
+    public Operation(int startPos) {
+        this.startPos = startPos;
     }
 
     public abstract String getType();
