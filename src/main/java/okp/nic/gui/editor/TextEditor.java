@@ -161,7 +161,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 copiedText = selectedText;
-                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
+                controller.onLocalDeleteRange(selectStartPos, selectEndPos - 1);
             }
         });
 
@@ -213,7 +213,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !(e.isControlDown())) {
             if (selectStartPos != selectEndPos) {
-                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
+                controller.onLocalDeleteRange(selectStartPos, selectEndPos - 1);
             } else {
                 controller.onLocalDelete(this.getCursorPos());
             }
