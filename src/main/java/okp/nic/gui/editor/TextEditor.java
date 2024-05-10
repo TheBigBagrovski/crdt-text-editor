@@ -134,7 +134,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         loadMenuItem.addActionListener(e -> loadFile());
         frame.setJMenuBar(menuBar);
         // настройки сочетаний клавиш (копировать, вырезать, вставить)
-//        setupKeyStrokeActions();
+        setupKeyStrokeActions();
         // финальные настройки
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
@@ -229,7 +229,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         ) {
             char value;
             value = e.getKeyChar();
-            controller.onLocalInsert(value, this.getCursorPos());
+            if (value != '\u0003' && value != '\u0018' && value != '\u0016') {
+                controller.onLocalInsert(value, this.getCursorPos());
+            }
         }
     }
 
