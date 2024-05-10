@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class Utils {
 
+    public static final String SALT = "somesaltsomesalt";
+
     // метод инкапсуляции текста в UTF-8 для Swing
     public static String getUtfString(String str) {
         return new String(str.getBytes(), StandardCharsets.UTF_8);

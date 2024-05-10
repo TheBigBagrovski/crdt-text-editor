@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.InsertOperation;
-import okp.nic.network.operation.Operation;
 import okp.nic.network.peer.PeerClient;
 import okp.nic.network.peer.PeerMessageType;
 import okp.nic.network.peer.PeerServer;
@@ -14,7 +13,6 @@ import okp.nic.network.signal.SignalClient;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;

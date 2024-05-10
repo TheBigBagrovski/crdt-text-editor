@@ -4,6 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.InputDialogs;
+import okp.nic.Utils;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -23,7 +24,6 @@ import static okp.nic.Utils.isPortAvailable;
 @Getter
 public class SignalServer extends WebSocketServer {
 
-    private static final String SALT = "somesaltsomesalt";
     private final Map<WebSocket, String> clients = new HashMap<>();
     private static String passwordHash;
 
@@ -123,7 +123,7 @@ public class SignalServer extends WebSocketServer {
             }
         } while (!validAddress);
         String password = info[1];
-        passwordHash = BCrypt.withDefaults().hashToString(6, (SALT + password).toCharArray());
+        passwordHash = BCrypt.withDefaults().hashToString(6, (Utils.SALT + password).toCharArray());
 //        passwordHash = SALT + password;
         String port;
         boolean validPort = false;
