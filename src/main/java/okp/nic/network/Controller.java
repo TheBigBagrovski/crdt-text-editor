@@ -98,7 +98,6 @@ public class Controller implements TextEditorListener, MessengerListener {
         document.insertTextBlock(siteId, pos, text);
         textEditor.getTextArea().insert(text, pos);
         messenger.broadcastTextBlock(compress(text), pos);
-
     }
 
     public void insertTextBlock(String from, int pos, byte[] compressedText) {
