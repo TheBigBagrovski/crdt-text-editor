@@ -211,16 +211,16 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-            controller.onLocalDelete(this.getCursorPos());
-        }
+//        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+//            controller.onLocalDelete(this.getCursorPos());
+//        }
     }
 
     public void keyReleased(KeyEvent e) {
     }
 
     public void keyTyped(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+        if (e.getKeyChar() == KeyEvent.VK_BACK_SPACE) {
             controller.onLocalDelete(this.getCursorPos());
         } else {
             char value = e.getKeyChar();
