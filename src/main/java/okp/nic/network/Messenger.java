@@ -28,6 +28,7 @@ public class Messenger {
 
     private final String host;
     private final int port;
+    private final String hostFullAddress;
 
     private Controller controller;
     private PeerServer peerServer;
@@ -43,8 +44,19 @@ public class Messenger {
         this.host = host;
         this.port = port;
         this.name = name;
+        hostFullAddress = "ws://" + host + ":" + port;
         inputPassword = password;
         connectToSignalServer("ws://" + signalHost + ":" + signalPort, name);
+    }
+
+    public void connectToSignalServer(String signalServerAddress, String name) {
+        try {
+            String uri = signalServerAddress + "?address=" + hostFullAddress + "&name=" + URLEncoder.encode(name);
+            signalClient = new SignalClient(new URI(uri), this);
+            signalClient.connectBlocking();
+        } catch (Exception ex) {
+            logger.error("Ошибка при подключении к сигнальному серверу: " + ex);
+        }
     }
 
     public void startServerPeer() {
@@ -56,16 +68,6 @@ public class Messenger {
         peerServer = new PeerServer(new InetSocketAddress(host, port), this, logger);
         peerServer.setConnectionLostTimeout(0);
         peerServer.start();
-    }
-
-    public void connectToSignalServer(String signalServerAddress, String name) {
-        try {
-            String uri = signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&name=" + URLEncoder.encode(name);
-            signalClient = new SignalClient(new URI(uri), this);
-            signalClient.connectBlocking();
-        } catch (Exception ex) {
-            logger.error("Ошибка при подключении к сигнальному серверу: " + ex);
-        }
     }
 
     public void handlePasswordRequest() {
@@ -85,14 +87,18 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
-    public void broadcastTextBlock(byte[] compressedBlock) {
-        String payload = PeerMessageType.COMPRESSED_TEXT.formatMessage(Base64.getEncoder().encodeToString(compressedBlock));
+    public void broadcastTextUpdate(byte[] compressedBlock) {
+        String payload = PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(hostFullAddress, Base64.getEncoder().encodeToString(compressedBlock));
+        peerServer.broadcast(payload);
+    }
+
+    public void broadcastTextBlock(byte[] compressedBlock, int pos) {
+        String payload = PeerMessageType.TEXT_BLOCK.formatTextBlockMessage(hostFullAddress, pos, Base64.getEncoder().encodeToString(compressedBlock));
         peerServer.broadcast(payload);
     }
 
     public void handleRemotePeerConnected(String peerAddress, String peerName) {
-        String myFullAddress = "ws://" + host + ":" + port;
-        logger.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
+        logger.info("Попытка соединения с пиром " + peerAddress);
         try {
             PeerClient peerNode = new PeerClient(new URI(peerAddress), this, logger);
             while (!connectedPeers.containsKey(peerAddress)) {
@@ -101,7 +107,7 @@ public class Messenger {
                 if (isSucceeded) {
                     connectedPeers.put(peerAddress, peerNode);
                     peerNames.put(peerAddress, peerName);
-                    controller.handlePeerName(peerAddress, peerName);
+                    controller.addPeerName(peerAddress, peerName);
                 } else {
                     logger.error("Не удалось подключиться к пиру " + peerAddress);
                     try {
@@ -135,8 +141,10 @@ public class Messenger {
         byte[] text = controller.getCompressedText();
         try {
             if (connectedPeers.containsKey(peerAddress)) {
-                connectedPeers.get(peerAddress).send(PeerMessageType.CURRENT_STATE.formatMessage(
-                        "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text)));
+                System.out.println(hostFullAddress);
+                System.out.println("ws:/" + peerServer.getAddress());
+                connectedPeers.get(peerAddress).send(PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(
+                        "ws:/" + peerServer.getAddress(), Base64.getEncoder().encodeToString(text)));
                 logger.info("Текущий файл отправлен " + peerAddress);
             } else {
                 logger.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
@@ -146,10 +154,15 @@ public class Messenger {
         }
     }
 
-    public void handleRemoteTextInsert(String from, String compressedText) {
-        logger.info("Получен текст файла от " + from);
+    public void handleUpdateText(String from, String compressedText) {
+        logger.info("Получено обновление файла от " + from);
         byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
-        controller.insertText(from, decodedBlock);
+        controller.updateText(from, decodedBlock);
+    }
+
+    public void handleRemoteBlockInsert(String from, int pos, String compressedText) {
+        byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
+        controller.insertTextBlock(from, pos, decodedBlock);
     }
 
 }

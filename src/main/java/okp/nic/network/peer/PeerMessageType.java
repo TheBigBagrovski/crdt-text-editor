@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum PeerMessageType {
-    COMPRESSED_TEXT("COMPRESSED_TEXT:"),
+    TEXT_BLOCK("TEXT_BLOCK:"),
+    UPDATE_TEXT("UPDATE_TEXT:"),
     OPERATION("OP:"),
-    CURRENT_STATE("CURRENT_STATE:"),
     PASSWORD("PASSWORD:");
 
     private final String prefix;
@@ -19,6 +19,14 @@ public enum PeerMessageType {
 
     public String formatOperationMessage(String type, String content) {
         return prefix + type + content;
+    }
+
+    public String formatTextUpdateMessage(String from, String text) {
+        return prefix + ":<" + from + ">:" + text;
+    }
+
+    public String formatTextBlockMessage(String from, int pos, String text) {
+        return prefix + pos /*":<" + from + ">:"*/ + text;
     }
 
 }

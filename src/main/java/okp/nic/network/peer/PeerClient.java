@@ -2,7 +2,6 @@ package okp.nic.network.peer;
 
 import com.google.gson.Gson;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import okp.nic.logger.Logger;
 import okp.nic.network.Messenger;
 import okp.nic.network.operation.DeleteOperation;
@@ -11,6 +10,8 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Getter
 public class PeerClient extends WebSocketClient {
@@ -43,8 +44,16 @@ public class PeerClient extends WebSocketClient {
             if (message.startsWith(type.getPrefix())) {
                 String content = message.substring(type.getPrefix().length());
                 switch (type) {
-                    case COMPRESSED_TEXT:
-                        messenger.handleRemoteTextInsert(remotePeerAddress, content);
+                    case TEXT_BLOCK:
+                        int pos = 0;
+                        String text = "";
+                        Pattern pattern = Pattern.compile("^(\\d+)(.*)$");
+                        Matcher matcher = pattern.matcher(content);
+                        if (matcher.find()) {
+                            pos = Integer.parseInt(matcher.group(1));
+                            text = matcher.group(2);
+                        }
+                        messenger.handleRemoteBlockInsert(remotePeerAddress, pos, text);
                         break;
                     case OPERATION:
                         if (content.startsWith("INSERT:")) {

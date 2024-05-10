@@ -171,9 +171,15 @@ public class Document {
         generateDelete(position);
     }
 
-    public void updateContent(String from, String text) {
-        for (int i = 0; i < text.length(); i++) {
+    public void insertTextBlock(String from, int pos, String text) {
+        for (int i = pos; i < text.length(); i++) {
             generateInsert(from, i, text.charAt(i));
+        }
+    }
+
+    public void deleteRange(int startPos, int endPos) {
+        for (;startPos < endPos; startPos++) {
+            generateDelete(startPos);
         }
     }
 

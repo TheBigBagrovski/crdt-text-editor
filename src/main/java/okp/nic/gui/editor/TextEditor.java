@@ -2,12 +2,14 @@ package okp.nic.gui.editor;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import okp.nic.logger.Logger;
 import okp.nic.network.Controller;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -18,6 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.CaretEvent;
@@ -27,6 +30,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.BufferedReader;
@@ -61,9 +66,13 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private final JTextArea textArea = new JTextArea();
     private final JPanel peersPanel = new JPanel();
     private final List<JLabel> peersList = new ArrayList<>();
-    private final JPanel logPanel = new JPanel();
     private final JTextArea logArea = new JTextArea();
     private JDialog importDialog;
+
+    private String selectedText;
+    private String copiedText;
+    private int selectStartPos;
+    private int selectEndPos;
 
     private final Logger logger;
 
@@ -95,6 +104,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         textArea.addKeyListener(this);
         textArea.getDocument().addDocumentListener(this);
         // настройки панели логов
+        JPanel logPanel = new JPanel();
         logPanel.setSize(LOG_SIZE);
         JScrollPane logScrollPane = new JScrollPane(logPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -123,6 +133,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         saveMenuItem.addActionListener(e -> saveFile());
         loadMenuItem.addActionListener(e -> loadFile());
         frame.setJMenuBar(menuBar);
+        // настройки сочетаний клавиш (копировать, вырезать, вставить)
+        setupKeyStrokeActions();
         // финальные настройки
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
@@ -130,9 +142,58 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.setVisible(true);
     }
 
+    private void setupKeyStrokeActions() {
+        InputMap inputMap = textArea.getInputMap();
+        ActionMap actionMap = textArea.getActionMap();
+
+        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
+        inputMap.put(copyKeyStroke, "copy");
+        actionMap.put("copy", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                copiedText = selectedText;
+            }
+        });
+
+        KeyStroke cutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK);
+        inputMap.put(cutKeyStroke, "cut");
+        actionMap.put("cut", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                copiedText = selectedText;
+                controller.deleteRange(selectStartPos, selectEndPos);
+            }
+        });
+
+        KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK);
+        inputMap.put(pasteKeyStroke, "paste");
+        actionMap.put("paste", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.handlePasteTextBlock(cursorPos, copiedText);
+            }
+        });
+
+        // TODO() ЕСЛИ ДРУГОЙ ПОЛЬЗОВАТЕЛЬ ИЗМЕНЯЕТ ВЫДЕЛЕННЫЙ ТЕКСТ - СБРОС ВЫДЕЛЕНИЯ
+
+        KeyStroke deleteWordKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.CTRL_DOWN_MASK);
+        inputMap.put(deleteWordKeyStroke, "deleteWord");
+        actionMap.put("deleteWord", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+    }
+
     @Override
     public void caretUpdate(CaretEvent e) {
         cursorPos = e.getDot();
+        selectStartPos = textArea.getSelectionStart();
+        selectEndPos = textArea.getSelectionEnd();
+        if (selectStartPos != selectEndPos) {
+            selectedText = textArea.getSelectedText();
+        }
     }
 
     @Override
@@ -203,7 +264,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
                 StringBuilder fileContent = new StringBuilder();
                 String line;
-                controller.clear();
                 while ((line = reader.readLine()) != null) {
                     fileContent.append(line).append("\n");
                 }
@@ -212,6 +272,24 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 logger.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
         }
+    }
+
+    public void insertCharToTextEditor(char value, int index) {
+        textArea.insert(String.valueOf(value), index);
+        if (index <= cursorPos) {
+            textArea.setCaretPosition(cursorPos + 1);
+        }
+    }
+
+    public void deleteCharFromTextEditor(int index) {
+        if (index == 0) {
+            return;
+        }
+        if (index <= cursorPos) {
+            cursorPos--;
+            textArea.setCaretPosition(cursorPos);
+        }
+        textArea.replaceRange("", index - 1, index);
     }
 
     public void pause() {
@@ -262,13 +340,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         peersPanel.revalidate();
         peersPanel.repaint();
     }
-//
-//    public void writeLog(String message) {
-//        JLabel logLabel = new JLabel(getUtfString(message));
-//        logPanel.add(logLabel);
-//        logPanel.revalidate();
-//        logPanel.repaint();
-//    }
 
     public void writeLog(String message) {
         logArea.setLineWrap(true);  // Enable line wrapping

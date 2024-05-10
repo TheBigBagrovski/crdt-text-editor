@@ -6,7 +6,6 @@ import okp.nic.network.Controller;
 import okp.nic.network.Messenger;
 
 import static okp.nic.Utils.findAvailablePort;
-//todo() окно логов в инт+ерфейсе
 //todo() ctrl+c, ctrl+x, ctrl+v
 //todo() чат
 //todo() паттерны и принципы

@@ -34,7 +34,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         document = new Document();
         textEditor = new TextEditor(this, logger);
         logger = new Logger(textEditor);
-        handlePeerName(siteId, name);
+        addPeerName(siteId, name);
     }
 
     public void clear() {
@@ -66,55 +66,66 @@ public class Controller implements TextEditorListener, MessengerListener {
     @Override
     public void handleRemoteInsert(String from, char value, int position) {
         document.insertChar(from, position, value);
-        insertCharToTextEditor(value, position);
+        textEditor.insertCharToTextEditor(value, position);
     }
 
     @Override
     public void handleRemoteDelete(int position) {
         document.deleteChar(position);
-        deleteCharFromTextEditor(position);
-    }
-
-    public void insertCharToTextEditor(char value, int index) {
-        textEditor.getTextArea().insert(String.valueOf(value), index);
-        int curPos = textEditor.getCursorPos();
-        if (index <= curPos) {
-            textEditor.getTextArea().setCaretPosition(curPos + 1);
-        }
-    }
-
-    public void deleteCharFromTextEditor(int index) {
-        if (index == 0) {
-            return;
-        }
-        int curPos = textEditor.getCursorPos();
-        if (index <= curPos) {
-            textEditor.setCursorPos(curPos - 1);
-            textEditor.getTextArea().setCaretPosition(curPos - 1);
-        }
-        textEditor.getTextArea().replaceRange("", index - 1, index);
+        textEditor.deleteCharFromTextEditor(position);
     }
 
     public void importTextFromFile(String text) {
         new Thread(() -> {
-            document.updateContent(siteId, text);
+            clear();
+            document.insertTextBlock(siteId, 0, text);
             textEditor.getTextArea().insert(text, 0);
             textEditor.unpause();
         }).start();
-        messenger.broadcastTextBlock(compress(text));
+        messenger.broadcastTextUpdate(compress(text));
     }
 
-    public void insertText(String from, byte[] compressedText) {
+    public void updateText(String from, byte[] compressedText) {
         String text = decompress(compressedText);
         clear();
         textEditor.pause();
-        document.updateContent(from, text);
+        document.insertTextBlock(from, 0, text);
         textEditor.getTextArea().insert(text, 0);
         textEditor.unpause();
     }
 
+    public void handlePasteTextBlock(int pos, String text) {
+        document.insertTextBlock(siteId, pos, text);
+        textEditor.getTextArea().insert(text, pos);
+        messenger.broadcastTextBlock(compress(text), pos);
+
+    }
+
+    public void insertTextBlock(String from, int pos, byte[] compressedText) {
+        String text = decompress(compressedText);
+        document.insertTextBlock(from, pos, text);
+        textEditor.getTextArea().insert(text, pos);
+    }
+
+    public void deleteRange(int startPos, int endPos) {
+        document.deleteRange(startPos, endPos);
+        textEditor.setCursorPos(startPos);
+        textEditor.getTextArea().setCaretPosition(startPos);
+        textEditor.getTextArea().replaceRange("", startPos, endPos);
+    }
+
     public byte[] getCompressedText() {
-        return compress(document.getContent());
+        String text = document.getContent();
+        return compress(text);
+    }
+
+    public void addPeerName(String peerAddress, String name) {
+        textEditor.addPeerName(name + " [" + peerAddress + "]");
+    }
+
+    public void removePeerName(String peerAddress, String name) {
+        textEditor.removePeerName(name + " [" + peerAddress + "]");
+
     }
 
     private byte[] compress(String text) {
@@ -122,7 +133,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
             gzipOut.write(text.getBytes());
         } catch (IOException e) {
-            logger.error("Ошибка сжатия: " + e.getMessage());
+            logger.error("Ошибка при сжатии файла: " + e.getMessage());
         }
         return baos.toByteArray();
     }
@@ -136,18 +147,9 @@ public class Controller implements TextEditorListener, MessengerListener {
                 baos.write(buffer, 0, len);
             }
         } catch (IOException e) {
-            logger.error("Ошибка распаковки: " + e.getMessage());
+            logger.error("Ошибка при распаковке файла: " + e.getMessage());
         }
         return baos.toString();
-    }
-
-    public void handlePeerName(String peerAddress, String name) {
-        textEditor.addPeerName(name + " [" + peerAddress + "]");
-    }
-
-    public void removePeerName(String peerAddress, String name) {
-        textEditor.removePeerName(name + " [" + peerAddress + "]");
-
     }
 
 }

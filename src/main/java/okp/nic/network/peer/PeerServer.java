@@ -1,7 +1,5 @@
 package okp.nic.network.peer;
 
-import lombok.extern.slf4j.Slf4j;
-import okp.nic.Utils;
 import okp.nic.logger.Logger;
 import okp.nic.network.Messenger;
 import org.java_websocket.WebSocket;
@@ -9,8 +7,8 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
-
-import static okp.nic.Utils.getUtfString;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PeerServer extends WebSocketServer {
 
@@ -35,11 +33,18 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        String prefix = PeerMessageType.CURRENT_STATE.getPrefix();
+        String prefix = PeerMessageType.UPDATE_TEXT.getPrefix();
         if (message.startsWith(prefix)) {
-            String from = message.substring(prefix.length(), message.indexOf(":FROM:"));
-            String payload = message.substring((prefix + from + ":FROM:").length());
-            messenger.handleRemoteTextInsert(from, payload);
+            String content = message.substring(prefix.length());
+            String from = "";
+            String text = "";
+            Pattern pattern = Pattern.compile("^:<(.*?)>:(.*)$");
+            Matcher matcher = pattern.matcher(content);
+            if (matcher.find()) {
+                from = matcher.group(1);
+                text = matcher.group(2);
+            }
+            messenger.handleUpdateText(from, text);
         }
     }
 
