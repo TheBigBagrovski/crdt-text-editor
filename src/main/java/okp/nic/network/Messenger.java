@@ -137,6 +137,7 @@ public class Messenger {
             if (connectedPeers.containsKey(peerAddress)) {
                 connectedPeers.get(peerAddress).send(PeerMessageType.CURRENT_STATE.formatMessage(
                         "ws:/" + peerServer.getAddress() + ":FROM:" + Base64.getEncoder().encodeToString(text)));
+                logger.info("Текущий файл отправлен " + peerAddress);
             } else {
                 logger.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
             }
@@ -146,6 +147,7 @@ public class Messenger {
     }
 
     public void handleRemoteTextInsert(String from, String compressedText) {
+        logger.info("Получен текст файла от " + from);
         byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
         controller.insertText(from, decodedBlock);
     }
