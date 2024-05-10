@@ -4,6 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import java.net.URLEncoder;
 import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.InsertOperation;
 import okp.nic.network.peer.PeerClient;
@@ -13,11 +14,13 @@ import okp.nic.network.signal.SignalClient;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 import static okp.nic.Utils.SALT;
+import static okp.nic.Utils.getUtfString;
 
 @Getter
 @Slf4j
@@ -55,7 +58,8 @@ public class Messenger {
     public void connectToSignalServer(String signalServerAddress, String password, String name) {
         try {
             String hashedPassword = BCrypt.withDefaults().hashToString(6, (SALT + password).toCharArray());
-            signalClient = new SignalClient(new URI(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&password=" + hashedPassword + "&name=" + name), this);
+            signalClient = new SignalClient(new URI(
+                    getUtfString(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&password=" + hashedPassword + "&name=" + URLEncoder.encode(name))), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
             log.error("Ошибка при подключении к сигнальному серверу: " + ex);

@@ -1,4 +1,4 @@
-package okp.nic.editor;
+package okp.nic.gui.editor;
 
 public interface TextEditorListener {
     void onInsert(char value, int index);

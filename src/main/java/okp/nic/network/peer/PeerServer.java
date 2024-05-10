@@ -32,9 +32,10 @@ public class PeerServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         log.info("Пир-сервер получает сообщение от " + " ws:/" + conn.getRemoteSocketAddress() + ": " + message);
-        if (message.startsWith("CURRENT_STATE:")) {
-            String from = message.substring("CURRENT_STATE:".length(), message.indexOf(":FROM:"));
-            String payload = message.substring(("CURRENT_STATE:" + from + ":FROM:").length());
+        String prefix = PeerMessageType.CURRENT_STATE.getPrefix();
+        if (message.startsWith(prefix)) {
+            String from = message.substring(prefix.length(), message.indexOf(":FROM:"));
+            String payload = message.substring((prefix + from + ":FROM:").length());
             messenger.handleRemoteTextInsert(from, payload);
         }
     }

@@ -1,4 +1,4 @@
-package okp.nic.editor;
+package okp.nic.gui.editor;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,16 +25,16 @@ import static okp.nic.Utils.getUtfString;
 @Slf4j
 public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener {
 
-    private static final int FRAME_WIDTH = 1000;
+    private static final int FRAME_WIDTH = 1100;
     private static final int FRAME_HEIGHT = 700;
     private static final Dimension FRAME_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
-    private static final int PEERS_WIDTH = 200;
+    private static final int PEERS_WIDTH = 250;
     private static final int PEERS_HEIGHT = 300;
     private static final Dimension PEERS_SIZE = new Dimension(PEERS_WIDTH, PEERS_HEIGHT);
-    private static final int LOG_WIDTH = 200;
+    private static final int LOG_WIDTH = 250;
     private static final int LOG_HEIGHT = 400;
     private static final Dimension LOG_SIZE = new Dimension(LOG_WIDTH, LOG_HEIGHT);
-    private static final int RIGHT_PANEL_WIDTH = 200;
+    private static final int RIGHT_PANEL_WIDTH = 250;
     private static final int RIGHT_PANEL_HEIGHT = 700;
     private static final Dimension RIGHT_PANEL_SIZE = new Dimension(RIGHT_PANEL_WIDTH, RIGHT_PANEL_HEIGHT);
 
@@ -223,7 +223,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void addPeerName(String name) {
-        JLabel label = new JLabel(getUtfString(name));
+        JLabel label = new JLabel(name);
         peersPanel.add(label);
     }
 

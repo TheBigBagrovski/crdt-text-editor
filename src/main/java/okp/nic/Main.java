@@ -1,5 +1,6 @@
 package okp.nic;
 
+import okp.nic.gui.InputDialogs;
 import okp.nic.network.Controller;
 import okp.nic.network.Messenger;
 

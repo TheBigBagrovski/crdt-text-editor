@@ -3,14 +3,16 @@ package okp.nic.network;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Document;
-import okp.nic.editor.TextEditor;
-import okp.nic.editor.TextEditorListener;
+import okp.nic.gui.editor.TextEditor;
+import okp.nic.gui.editor.TextEditorListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import static okp.nic.Utils.getUtfString;
 
 @Slf4j
 public class Controller implements TextEditorListener, MessengerListener {
@@ -139,7 +141,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     }
 
     public void handlePeerName(String peerAddress, String name) {
-        textEditor.addPeerName(name + "[" + peerAddress + "]");
+        textEditor.addPeerName(name + " [" + peerAddress + "]");
     }
 
 }

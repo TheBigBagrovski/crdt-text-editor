@@ -3,18 +3,17 @@ package okp.nic.network.signal;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import okp.nic.InputDialogs;
+import okp.nic.gui.InputDialogs;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
-import javax.swing.*;
-import java.awt.*;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 
 import static okp.nic.Utils.SALT;
 import static okp.nic.Utils.findAvailablePort;
@@ -36,8 +35,8 @@ public class SignalServer extends WebSocketServer {
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
         String providedPasswordHash = handshake.getResourceDescriptor().split("\\?")[1].split("&")[1].split("=")[1];
-        String peerName = handshake.getResourceDescriptor().split("\\?")[1].split("&")[2].split("=")[1];
-        BCrypt.Result result = BCrypt.verifyer().verify(passwordHash.getBytes(), providedPasswordHash.getBytes());
+        String peerName = URLDecoder.decode(handshake.getResourceDescriptor().split("\\?")[1].split("&")[2].split("=")[1]);
+        BCrypt.Result result = BCrypt.verifyer().verify(passwordHash.toCharArray(), providedPasswordHash.getBytes());
         if (!result.verified) {
             log.error("Введен неверный пароль при попытке подключиться");
             conn.close();
@@ -71,37 +70,20 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        log.error("Ошибка при попытке подключиться к сигнальному серверу по адресу " + conn.getRemoteSocketAddress());
+        log.error("Ошибка при попытке подключиться к сигнальному серверу");
     }
 
     @Override
     public void onStart() {
         String socketAddress = getAddress().toString();
         log.info("Сигнальный сервер запущен на сокете: " + socketAddress);
-        showInfoWindow(socketAddress);
+        InputDialogs.showInfoWindow(socketAddress);
     }
 
     private void broadcastMessage(String message) {
         for (WebSocket client : clients.keySet()) {
             client.send(message);
         }
-    }
-
-    private void showInfoWindow(String socketAddress) {
-        JFrame frame = new JFrame(getUtfString("Адрес сигнального сервера"));
-        JLabel socketLabel = new JLabel(getUtfString("Сигнальный сервер запущен на сокете: ") + socketAddress);
-        socketLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        socketLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        JPanel panel = new JPanel();
-        panel.add(socketLabel);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
-        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
-        frame.setIconImage(logo.getImage());
-        frame.add(panel);
-        frame.setSize(600, 100);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setVisible(true);
     }
 
     public static void main(String[] args) {

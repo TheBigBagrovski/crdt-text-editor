@@ -34,7 +34,7 @@ public class Utils {
         boolean portFree;
         try (ServerSocket ignored = new ServerSocket(port)) {
             portFree = true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             portFree = false;
         }
         return port > 1024 && portFree;
