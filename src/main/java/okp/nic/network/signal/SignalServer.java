@@ -1,5 +1,6 @@
 package okp.nic.network.signal;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.InputDialogs;
@@ -22,7 +23,9 @@ import static okp.nic.Utils.isPortAvailable;
 @Getter
 public class SignalServer extends WebSocketServer {
 
+    private static final String SALT = "somesaltsomesalt";
     private final Map<WebSocket, String> clients = new HashMap<>();
+    private static String passwordHash;
 
     public SignalServer(InetSocketAddress address) {
         super(address);
@@ -30,7 +33,14 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("=")[1];
+        String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
+        String providedPasswordHash = handshake.getResourceDescriptor().split("\\?")[1].split("&")[1].split("=")[1];
+        BCrypt.Result result = BCrypt.verifyer().verify(passwordHash.getBytes(), providedPasswordHash.getBytes());
+        if (!result.verified) {
+            log.error("Введен неверный пароль при попытке подключиться");
+            conn.close();
+            return;
+        }
         log.info("Новое подключение к сигнальному серверу: " + peerAddress);
         conn.send(SignalMessageType.WELCOME.formatWelcomeMessage(clients.values())); // отправка новому пиру текущих подключенных клиентов
         broadcastMessage(SignalMessageType.PEER_CONNECTED.formatMessage(peerAddress)); // отправка подключенным клиентам данных о новом пире
@@ -91,14 +101,16 @@ public class SignalServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
+        String[] info;
         String address;
         boolean validAddress = false;
         do {
-            address = InputDialogs.getSignalServerAddress();
-            if (address == null) {
+            info = InputDialogs.getSignalServerAddress();
+            if (info == null) {
                 log.info("Пользователь отменил ввод");
                 return;
             }
+            address = info[0];
             try {
                 InetSocketAddress testAddress = new InetSocketAddress(address, 0);
                 if (!testAddress.isUnresolved()) {
@@ -110,7 +122,9 @@ public class SignalServer extends WebSocketServer {
                 log.error("Некорретный формат адреса");
             }
         } while (!validAddress);
-
+        String password = info[1];
+        passwordHash = BCrypt.withDefaults().hashToString(6, (SALT + password).toCharArray());
+//        passwordHash = SALT + password;
         String port;
         boolean validPort = false;
         do {

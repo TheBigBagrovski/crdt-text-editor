@@ -1,5 +1,6 @@
 package okp.nic.network;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,9 +14,12 @@ import okp.nic.network.signal.SignalClient;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import static okp.nic.Utils.SALT;
 
 @Getter
 @Slf4j
@@ -33,23 +37,24 @@ public class Messenger {
 
     private final Gson gson = new Gson();
 
-    public Messenger(String host, int port, Controller controller, String signalHost, String signalPort) {
+    public Messenger(String host, int port, Controller controller, String signalHost, String signalPort, String password) {
         this.host = host;
         this.port = port;
         this.controller = controller;
-        startServerPeer();
-        connectToSignalServer("ws://" + signalHost + ":" + signalPort);
+        connectToSignalServer("ws://" + signalHost + ":" + signalPort, password);
     }
 
     public void startServerPeer() {
+        controller.start(this);
         peerServer = new PeerServer(new InetSocketAddress(host, port), this);
         peerServer.setConnectionLostTimeout(0);
         peerServer.start();
     }
 
-    public void connectToSignalServer(String signalServerAddress) {
+    public void connectToSignalServer(String signalServerAddress, String password) {
         try {
-            signalClient = new SignalClient(new URI(signalServerAddress + "?address=" + "ws://" + host + ":" + port), this);
+            String hashedPassword = BCrypt.withDefaults().hashToString(6, (SALT + password).toCharArray());
+            signalClient = new SignalClient(new URI(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&password=" + hashedPassword), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
             log.error("Ошибка при подключении к сигнальному серверу: " + ex);

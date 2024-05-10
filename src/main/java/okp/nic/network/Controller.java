@@ -1,6 +1,7 @@
 package okp.nic.network;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Document;
 import okp.nic.editor.TextEditor;
@@ -16,18 +17,21 @@ import java.util.zip.GZIPOutputStream;
 public class Controller implements TextEditorListener, MessengerListener {
 
     @Getter
-    private final Messenger messenger;
-    private final Document document;
-    private final TextEditor textEditor;
+    private Messenger messenger;
+    private Document document;
+    private TextEditor textEditor;
 
     @Getter
     private final String siteId;
 
-    public Controller(String host, int port, String signalHost, String signalPort) {
+    public Controller(String host, int port) {
         siteId = "ws://" + host + ":" + port;
+    }
+
+    public void start(Messenger messenger) {
+        this.messenger = messenger;
         document = new Document();
         textEditor = new TextEditor(this);
-        messenger = new Messenger(host, port, this, signalHost, signalPort);
     }
 
     public void clear() {

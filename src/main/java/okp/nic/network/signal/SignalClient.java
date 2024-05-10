@@ -44,6 +44,7 @@ public class SignalClient extends WebSocketClient {
                 String content = message.substring(type.getPrefix().length());
                 switch (type) {
                     case WELCOME:
+                        messenger.startServerPeer();
                         if (!content.isEmpty() && !content.equals("NONE")) {
                             String[] peers = content.split(", ");
                             for (String peer : peers) {

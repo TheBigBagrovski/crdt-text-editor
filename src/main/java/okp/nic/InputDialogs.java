@@ -10,18 +10,18 @@ public class InputDialogs {
     private static final Font font = new Font("Arial", Font.BOLD, 16);
     private static final Dimension textFieldSize = new Dimension(200, 25);
 
-    public static String getSignalServerAddress() {
+    public static String[] getSignalServerAddress() {
         JPanel panel = new JPanel(new GridLayout(2, 2));
-        JTextField hostField = new JTextField(18);
-        hostField.setPreferredSize(textFieldSize);
-        hostField.setFont(font);
-        JLabel hostLabel = new JLabel(getUtfString("Адрес сигнального сервера:"));
-        hostLabel.setFont(font);
-        panel.add(hostLabel);
-        panel.add(hostField);
+        JPasswordField passwordField = new JPasswordField(18);
+        passwordField.setPreferredSize(textFieldSize);
+        passwordField.setFont(font);
+        addLabel(panel, "Адрес сигнального сервера:");
+        JTextField hostField = addTextField(panel);
+        addLabel(panel, "Пароль:");
+        panel.add(passwordField);
         int result = JOptionPane.showConfirmDialog(null, panel, getUtfString("Сигнальный сервер"), JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            return hostField.getText();
+            return new String[]{hostField.getText(), new String(passwordField.getPassword())};
         } else {
             return null;
         }
@@ -29,13 +29,8 @@ public class InputDialogs {
 
     public static String getSignalServerPort() {
         JPanel panel = new JPanel(new GridLayout(1, 2));
-        JTextField portField = new JTextField(10);
-        portField.setPreferredSize(textFieldSize);
-        portField.setFont(font);
-        JLabel portLabel = new JLabel(getUtfString("Порт сигнального сервера:"));
-        portLabel.setFont(font);
-        panel.add(portLabel);
-        panel.add(portField);
+        addLabel(panel, "Порт сигнального сервера:");
+        JTextField portField = addTextField(panel);
         int result = JOptionPane.showConfirmDialog(null, panel, getUtfString("Сигнальный сервер"), JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             return portField.getText();
@@ -45,33 +40,38 @@ public class InputDialogs {
     }
 
     public static String[] getPeerInfo() {
-        JPanel panel = new JPanel(new GridLayout(3, 2));
-        JTextField peerAddressField = new JTextField(20);
-        peerAddressField.setPreferredSize(textFieldSize);
-        peerAddressField.setFont(font);
-        JTextField signalHostField = new JTextField(20);
-        signalHostField.setPreferredSize(textFieldSize);
-        signalHostField.setFont(font);
-        JTextField signalPortField = new JTextField(5);
-        signalPortField.setPreferredSize(textFieldSize);
-        signalPortField.setFont(font);
-        JLabel peerLabel = new JLabel(getUtfString("Адрес пира:"));
-        peerLabel.setFont(font);
-        JLabel signalHostLabel = new JLabel(getUtfString("Адрес сигнального сервера:"));
-        signalHostLabel.setFont(font);
-        JLabel signalPortLabel = new JLabel(getUtfString("Порт сигнального сервера:"));
-        signalPortLabel.setFont(font);
-        panel.add(peerLabel);
-        panel.add(peerAddressField);
-        panel.add(signalHostLabel);
-        panel.add(signalHostField);
-        panel.add(signalPortLabel);
-        panel.add(signalPortField);
+        JPanel panel = new JPanel(new GridLayout(4, 2));
+        JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setPreferredSize(textFieldSize);
+        passwordField.setFont(font);
+        addLabel(panel, "Адрес пира:");
+        JTextField peerAddressField = addTextField(panel);
+        addLabel(panel, "Адрес сигнального сервера:");
+        JTextField signalHostField = addTextField(panel);
+        addLabel(panel, "Порт сигнального сервера:");
+        JTextField signalPortField = addTextField(panel);
+        addLabel(panel, "Пароль:");
+        panel.add(passwordField);
         int result = JOptionPane.showConfirmDialog(null, panel, getUtfString("Подключение"), JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            return new String[]{peerAddressField.getText(), signalHostField.getText(), signalPortField.getText()};
+            return new String[]{peerAddressField.getText(), signalHostField.getText(), signalPortField.getText(), new String(passwordField.getPassword())};
         } else {
             return null;
         }
     }
+
+    private static JTextField addTextField(JPanel panel) {
+        JTextField field = new JTextField(20);
+        field.setPreferredSize(textFieldSize);
+        field.setFont(font);
+        panel.add(field);
+        return field;
+    }
+
+    private static void addLabel(JPanel panel, String labelText) {
+        JLabel label = new JLabel(getUtfString(labelText));
+        label.setFont(font);
+        panel.add(label);
+    }
+
 }
