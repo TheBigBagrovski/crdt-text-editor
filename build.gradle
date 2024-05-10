@@ -32,10 +32,6 @@ dependencies {
     implementation 'de.javawi.jstun:jstun:0.7.4'
 
     implementation 'at.favre.lib:bcrypt:0.10.2'
-    implementation 'org.mindrot.bcrypt:bcrypt:0.2'
-    implementation 'org.springframework.security:spring-security-crypto:6.2.0'
-
-
 
 }
 

@@ -12,8 +12,7 @@ import static okp.nic.Utils.findAvailablePort;
 //todo() паттерны и принципы
 //todo() окно логов в интерфейсе + список подключенных участников
 //todo() ctrl+c, ctrl+x, ctrl+v
-//todo() безпоасный протокол
-
+//todo() безопасность пароля? вынести соль?
 
 //todo() тесты
 //todo() рефакторинг
