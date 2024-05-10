@@ -211,18 +211,22 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void keyPressed(KeyEvent e) {
-//        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-//            controller.onLocalDelete(this.getCursorPos());
-//        }
+        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            controller.onLocalDelete(this.getCursorPos());
+        }
     }
 
     public void keyReleased(KeyEvent e) {
     }
 
     public void keyTyped(KeyEvent e) {
-        char value = e.getKeyChar();
-        if (value != '\u0003' && value != '\u0018' && value != '\u0016' ) {
-            controller.onLocalInsert(value, this.getCursorPos());
+        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            controller.onLocalDelete(this.getCursorPos());
+        } else {
+            char value = e.getKeyChar();
+            if (value != '\u0003' && value != '\u0018' && value != '\u0016') {
+                controller.onLocalInsert(value, this.getCursorPos());
+            }
         }
     }
 
