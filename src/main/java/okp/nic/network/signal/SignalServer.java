@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static okp.nic.Utils.SALT;
 import static okp.nic.Utils.findAvailablePort;
 import static okp.nic.Utils.getUtfString;
 import static okp.nic.Utils.isPortAvailable;
@@ -123,8 +124,7 @@ public class SignalServer extends WebSocketServer {
             }
         } while (!validAddress);
         String password = info[1];
-        passwordHash = BCrypt.withDefaults().hashToString(6, (Utils.SALT + password).toCharArray());
-//        passwordHash = SALT + password;
+        passwordHash = SALT + password;
         String port;
         boolean validPort = false;
         do {
