@@ -146,14 +146,14 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         InputMap inputMap = textArea.getInputMap();
         ActionMap actionMap = textArea.getActionMap();
 
-        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
-        inputMap.put(copyKeyStroke, "copy");
-        actionMap.put("copy", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                copiedText = selectedText;
-            }
-        });
+//        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
+//        inputMap.put(copyKeyStroke, "copy");
+//        actionMap.put("copy", new AbstractAction() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                copiedText = selectedText;
+//            }
+//        });
 
         KeyStroke cutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK);
         inputMap.put(cutKeyStroke, "cut");
@@ -236,7 +236,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     public void keyTyped(KeyEvent e) {
         char value = e.getKeyChar();
-        controller.onInsert(value, this.getCursorPos());
+        if (value != '\u0003' || value != '\u0018' || value != '\u0016' ) controller.onInsert(value, this.getCursorPos());
     }
 
     public void clearTextArea() {

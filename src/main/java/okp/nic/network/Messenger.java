@@ -141,7 +141,6 @@ public class Messenger {
         byte[] text = controller.getCompressedText();
         try {
             if (connectedPeers.containsKey(peerAddress)) {
-                System.out.println(hostFullAddress);
                 connectedPeers.get(peerAddress).send(PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(
                         hostFullAddress, Base64.getEncoder().encodeToString(text)));
                 logger.info("Текущий файл отправлен " + peerAddress);
