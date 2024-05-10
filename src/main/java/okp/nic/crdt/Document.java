@@ -172,8 +172,8 @@ public class Document {
     }
 
     public void insertTextBlock(String from, int pos, String text) {
-        for (int i = pos; i < text.length(); i++) {
-            generateInsert(from, i, text.charAt(i));
+        for (int i = 0; i < text.length(); i++) {
+            generateInsert(from, i + pos, text.charAt(i));
         }
     }
 
