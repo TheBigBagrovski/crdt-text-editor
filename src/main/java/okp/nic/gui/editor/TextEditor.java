@@ -212,7 +212,11 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !(e.isControlDown())) {
-            controller.onLocalDelete(this.getCursorPos());
+            if (selectStartPos != selectEndPos) {
+                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
+            } else {
+                controller.onLocalDelete(this.getCursorPos());
+            }
         } else if (!e.isControlDown() &&
                 e.getKeyCode() != KeyEvent.VK_UP &&
                 e.getKeyCode() != KeyEvent.VK_DOWN &&
