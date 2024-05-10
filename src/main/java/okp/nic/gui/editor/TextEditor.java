@@ -236,7 +236,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     public void keyTyped(KeyEvent e) {
         char value = e.getKeyChar();
-        if (value != '\u0003' || value != '\u0018' || value != '\u0016' ) controller.onInsert(value, this.getCursorPos());
+        if (value != '\u0003' && value != '\u0018' && value != '\u0016' ) controller.onInsert(value, this.getCursorPos());
     }
 
     public void clearTextArea() {
