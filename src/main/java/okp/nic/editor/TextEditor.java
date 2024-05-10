@@ -42,6 +42,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Getter
     private final JTextArea textArea = new JTextArea();
+    private final JPanel peersPanel = new JPanel();
+
 
     private JDialog importDialog;
 
@@ -78,7 +80,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         // настройки панели пиров
-        JPanel peersPanel = new JPanel();
         peersPanel.setPreferredSize(PEERS_SIZE);
         JScrollPane peersScrollPane = new JScrollPane(peersPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -219,6 +220,11 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             importDialog = null;
         }
         textArea.setEnabled(true);
+    }
+
+    public void addPeerName(String name) {
+        JLabel label = new JLabel(getUtfString(name));
+        peersPanel.add(label);
     }
 
 }

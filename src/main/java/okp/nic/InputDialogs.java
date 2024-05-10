@@ -40,7 +40,7 @@ public class InputDialogs {
     }
 
     public static String[] getPeerInfo() {
-        JPanel panel = new JPanel(new GridLayout(4, 2));
+        JPanel panel = new JPanel(new GridLayout(5, 2));
         JPasswordField passwordField = new JPasswordField(20);
         passwordField.setPreferredSize(textFieldSize);
         passwordField.setFont(font);
@@ -50,11 +50,13 @@ public class InputDialogs {
         JTextField signalHostField = addTextField(panel);
         addLabel(panel, "Порт сигнального сервера:");
         JTextField signalPortField = addTextField(panel);
+        addLabel(panel, "Ваше имя:");
+        JTextField nameField = addTextField(panel);
         addLabel(panel, "Пароль:");
         panel.add(passwordField);
         int result = JOptionPane.showConfirmDialog(null, panel, getUtfString("Подключение"), JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            return new String[]{peerAddressField.getText(), signalHostField.getText(), signalPortField.getText(), new String(passwordField.getPassword())};
+            return new String[]{peerAddressField.getText(), signalHostField.getText(), signalPortField.getText(), nameField.getText(), new String(passwordField.getPassword())};
         } else {
             return null;
         }

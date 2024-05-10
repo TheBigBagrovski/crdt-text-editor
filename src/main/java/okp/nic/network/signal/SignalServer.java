@@ -4,7 +4,6 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.InputDialogs;
-import okp.nic.Utils;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -15,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import static okp.nic.Utils.SALT;
 import static okp.nic.Utils.findAvailablePort;
@@ -25,7 +25,7 @@ import static okp.nic.Utils.isPortAvailable;
 @Getter
 public class SignalServer extends WebSocketServer {
 
-    private final Map<WebSocket, String> clients = new HashMap<>();
+    private final Map<WebSocket, String[]> clients = new HashMap<>();
     private static String passwordHash;
 
     public SignalServer(InetSocketAddress address) {
@@ -36,6 +36,7 @@ public class SignalServer extends WebSocketServer {
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         String peerAddress = handshake.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
         String providedPasswordHash = handshake.getResourceDescriptor().split("\\?")[1].split("&")[1].split("=")[1];
+        String peerName = handshake.getResourceDescriptor().split("\\?")[1].split("&")[2].split("=")[1];
         BCrypt.Result result = BCrypt.verifyer().verify(passwordHash.getBytes(), providedPasswordHash.getBytes());
         if (!result.verified) {
             log.error("Введен неверный пароль при попытке подключиться");
@@ -44,12 +45,12 @@ public class SignalServer extends WebSocketServer {
         }
         log.info("Новое подключение к сигнальному серверу: " + peerAddress);
         conn.send(SignalMessageType.WELCOME.formatWelcomeMessage(clients.values())); // отправка новому пиру текущих подключенных клиентов
-        broadcastMessage(SignalMessageType.PEER_CONNECTED.formatMessage(peerAddress)); // отправка подключенным клиентам данных о новом пире
+        broadcastMessage(SignalMessageType.PEER_CONNECTED.formatMessage(peerAddress + "-" + peerName)); // отправка подключенным клиентам данных о новом пире
         if (!clients.isEmpty()) {
             Iterator<WebSocket> iterator = clients.keySet().iterator();
             iterator.next().send(SignalMessageType.INITIAL_TEXT_REQUEST.formatMessage(peerAddress));
         }
-        clients.put(conn, peerAddress);
+        clients.put(conn, new String[]{peerAddress, peerName});
     }
 
     @Override
@@ -94,6 +95,8 @@ public class SignalServer extends WebSocketServer {
         JPanel panel = new JPanel();
         panel.add(socketLabel);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+        frame.setIconImage(logo.getImage());
         frame.add(panel);
         frame.setSize(600, 100);
         frame.setLocationRelativeTo(null);

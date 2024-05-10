@@ -48,12 +48,14 @@ public class SignalClient extends WebSocketClient {
                         if (!content.isEmpty() && !content.equals("NONE")) {
                             String[] peers = content.split(", ");
                             for (String peer : peers) {
-                                messenger.handleRemotePeerConnected(peer);
+                                String[] info = peer.split("-");
+                                messenger.handleRemotePeerConnected(info[0], info[1]);
                             }
                         }
                         break;
                     case PEER_CONNECTED:
-                        messenger.handleRemotePeerConnected(content);
+                        String[] info = content.split("-");
+                        messenger.handleRemotePeerConnected(info[0], info[1]);
                         break;
                     case PEER_DISCONNECTED:
                         messenger.handleRemotePeerDisconnected(content);

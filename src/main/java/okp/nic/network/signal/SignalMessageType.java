@@ -19,8 +19,14 @@ public enum SignalMessageType {
         return prefix + content;
     }
 
-    public String formatWelcomeMessage(Collection<String> clients) {
-        String peersList = clients.isEmpty() ? "NONE" : String.join(", ", clients);
+    public String formatWelcomeMessage(Collection<String[]> clients) {
+        if (clients.isEmpty()) {
+            return getPrefix() + "NONE";
+        }
+        StringBuilder peersList = new StringBuilder();
+        for (String[] client : clients) {
+            peersList.append(client[0]).append("-").append(client[1]).append(", ");
+        }
         return getPrefix() + peersList;
     }
 

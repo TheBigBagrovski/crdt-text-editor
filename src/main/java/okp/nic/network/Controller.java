@@ -1,7 +1,6 @@
 package okp.nic.network;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.crdt.Document;
 import okp.nic.editor.TextEditor;
@@ -28,10 +27,11 @@ public class Controller implements TextEditorListener, MessengerListener {
         siteId = "ws://" + host + ":" + port;
     }
 
-    public void start(Messenger messenger) {
+    public void start(Messenger messenger, String name) {
         this.messenger = messenger;
         document = new Document();
         textEditor = new TextEditor(this);
+        handlePeerName(siteId, name);
     }
 
     public void clear() {
@@ -136,6 +136,10 @@ public class Controller implements TextEditorListener, MessengerListener {
             log.error("Ошибка распаковки: " + e.getMessage());
         }
         return baos.toString();
+    }
+
+    public void handlePeerName(String peerAddress, String name) {
+        textEditor.addPeerName(name + "[" + peerAddress + "]");
     }
 
 }

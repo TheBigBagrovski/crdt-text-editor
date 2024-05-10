@@ -25,6 +25,7 @@ public class Messenger {
 
 
     private final Map<String, PeerClient> connectedPeers = new HashMap<>();
+    private final Map<String, String> peerNames = new HashMap<>();
 
     private final String host;
     private final int port;
@@ -32,27 +33,29 @@ public class Messenger {
     private final Controller controller;
     private PeerServer peerServer;
     private SignalClient signalClient;
+    private final String name;
 
     private final Gson gson = new Gson();
 
-    public Messenger(String host, int port, Controller controller, String signalHost, String signalPort, String password) {
+    public Messenger(String host, int port, Controller controller, String signalHost, String signalPort, String password, String name) {
         this.host = host;
         this.port = port;
         this.controller = controller;
-        connectToSignalServer("ws://" + signalHost + ":" + signalPort, password);
+        this.name = name;
+        connectToSignalServer("ws://" + signalHost + ":" + signalPort, password, name);
     }
 
     public void startServerPeer() {
-        controller.start(this);
+        controller.start(this, name);
         peerServer = new PeerServer(new InetSocketAddress(host, port), this);
         peerServer.setConnectionLostTimeout(0);
         peerServer.start();
     }
 
-    public void connectToSignalServer(String signalServerAddress, String password) {
+    public void connectToSignalServer(String signalServerAddress, String password, String name) {
         try {
             String hashedPassword = BCrypt.withDefaults().hashToString(6, (SALT + password).toCharArray());
-            signalClient = new SignalClient(new URI(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&password=" + hashedPassword), this);
+            signalClient = new SignalClient(new URI(signalServerAddress + "?address=" + "ws://" + host + ":" + port + "&password=" + hashedPassword + "&name=" + name), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
             log.error("Ошибка при подключении к сигнальному серверу: " + ex);
@@ -76,7 +79,7 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
-    public void handleRemotePeerConnected(String peerAddress) {
+    public void handleRemotePeerConnected(String peerAddress, String peerName) {
         String myFullAddress = "ws://" + host + ":" + port;
         log.info(myFullAddress + " начинает соединение с пиром " + peerAddress);
         try {
@@ -86,6 +89,8 @@ public class Messenger {
                 peerNode.setConnectionLostTimeout(0);
                 if (isSucceeded) {
                     connectedPeers.put(peerAddress, peerNode);
+                    peerNames.put(peerAddress, peerName);
+                    controller.handlePeerName(peerAddress, peerName);
                 } else {
                     log.error("Не удалось подключиться к пиру " + peerAddress);
                     try {
