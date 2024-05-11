@@ -161,7 +161,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 copiedText = selectedText;
-                controller.cut(selectStartPos, selectEndPos);
+                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
             }
         });
 
@@ -298,7 +298,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void insertCharToTextEditor(char value, int index) {
         textArea.insert(String.valueOf(value), index);
         if (index <= cursorPos) {
-            textArea.setCaretPosition(cursorPos + 1);
+            textArea.setCaretPosition(cursorPos);
         }
     }
 
