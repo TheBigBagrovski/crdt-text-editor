@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
@@ -432,7 +433,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            pause();
+            new Thread(() -> {
+                // Отображаем importDialog в EDT
+                SwingUtilities.invokeLater(this::pause);
+//            pause();
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
                 StringBuilder fileContent = new StringBuilder();
                 String line;
@@ -440,9 +444,11 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                     fileContent.append(line).append("\n");
                 }
                 controller.onLocalFileImport(fileContent.toString());
+
             } catch (IOException ex) {
                 logger.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
+            });
         }
     }
 
