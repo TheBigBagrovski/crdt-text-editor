@@ -327,21 +327,21 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         });
     }
 
-    private void updateLineNumbers(JPanel lineNumberPanel) {
-        lineNumberPanel.removeAll();
-        lineNumberPanel.setLayout(new BoxLayout(lineNumberPanel, BoxLayout.Y_AXIS));
-
-        Element root = textArea.getDocument().getDefaultRootElement();
-        int lineCount = root.getElementCount();
-        for (int i = 1; i <= lineCount; i++) {
-            JLabel lineNumber = new JLabel(String.valueOf(i));
-            lineNumber.setFont(new Font("Courier New", Font.PLAIN, 14));
-            lineNumber.setBorder(new EmptyBorder(2, 5, 2, 5));
-            lineNumberPanel.add(lineNumber);
-        }
-        lineNumberPanel.revalidate();
-        lineNumberPanel.repaint();
-    }
+//    private void updateLineNumbers(JPanel lineNumberPanel) {
+//        lineNumberPanel.removeAll();
+//        lineNumberPanel.setLayout(new BoxLayout(lineNumberPanel, BoxLayout.Y_AXIS));
+//
+//        Element root = textArea.getDocument().getDefaultRootElement();
+//        int lineCount = root.getElementCount();
+//        for (int i = 1; i <= lineCount; i++) {
+//            JLabel lineNumber = new JLabel(String.valueOf(i));
+//            lineNumber.setFont(new Font("Courier New", Font.PLAIN, 14));
+//            lineNumber.setBorder(new EmptyBorder(2, 5, 2, 5));
+//            lineNumberPanel.add(lineNumber);
+//        }
+//        lineNumberPanel.revalidate();
+//        lineNumberPanel.repaint();
+//    }
 
     @Override
     public void caretUpdate(CaretEvent e) {
@@ -354,12 +354,12 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Override
     public void insertUpdate(DocumentEvent e) {
-        updateLineNumbers(lineNumberPanel);
+//        updateLineNumbers(lineNumberPanel);
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
-        updateLineNumbers(lineNumberPanel);
+//        updateLineNumbers(lineNumberPanel);
     }
 
     @Override
