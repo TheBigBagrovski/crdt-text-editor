@@ -10,6 +10,7 @@ import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -27,10 +28,15 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.Element;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -100,6 +106,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         textArea.addCaretListener(this);
         textArea.addKeyListener(this);
         textArea.getDocument().addDocumentListener(this);
+        // нумерация строк
+        mainPanel.add(new LineNumberComponent(textArea), BorderLayout.WEST);
+
         // настройки панели логов
         JPanel logPanel = new JPanel();
         logPanel.setSize(LOG_SIZE);
@@ -139,6 +148,55 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.add(rightPanel, BorderLayout.EAST);
         addKeyListener(this);
         frame.setVisible(true);
+    }
+
+    // Класс для нумерации строк
+    class LineNumberComponent extends JComponent {
+        private final JTextArea textArea;
+
+        public LineNumberComponent(JTextArea textArea) {
+            this.textArea = textArea;
+            setPreferredSize(new Dimension(30, 100));
+            textArea.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    repaint();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    repaint();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    repaint();
+                }
+            });
+            textArea.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    repaint();
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            FontMetrics metrics = textArea.getFontMetrics(textArea.getFont());
+            int lineHeight = metrics.getHeight();
+            int currentLine = 1;
+
+            Element root = textArea.getDocument().getDefaultRootElement();
+            int lineCount = root.getElementCount();
+
+            for (int i = 0; i < lineCount; i++) {
+                g.drawString(String.valueOf(currentLine), 5, lineHeight * currentLine);
+                currentLine++;
+            }
+        }
     }
 
     private void setupKeyStrokeActions() {
