@@ -299,6 +299,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void insertCharToTextEditor(char value, int index) {
         textArea.insert(String.valueOf(value), index);
         if (index <= cursorPos) {
+            cursorPos++;
             textArea.setCaretPosition(cursorPos);
         }
     }

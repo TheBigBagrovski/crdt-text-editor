@@ -129,16 +129,15 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void handleRemoteInsertBlock(String from, int pos, String text) {
         document.insertTextBlock(from, pos, text);
         textEditor.getTextArea().insert(text, pos);
+
     }
 
     @Override
     public void handleRemoteDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
         textEditor.getTextArea().replaceRange("", startPos, endPos);
-        if (textEditor.getCursorPos() < endPos && textEditor.getCursorPos() >= startPos) {
-            textEditor.getTextArea().setCaretPosition(startPos + 1);
-            textEditor.setCursorPos(startPos + 1);
-        }
+        textEditor.getTextArea().setCaretPosition(startPos + 1);
+        textEditor.setCursorPos(startPos + 1);
     }
 
     @Override
