@@ -37,6 +37,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
@@ -54,7 +56,7 @@ import java.util.Objects;
 
 import static okp.nic.Utils.getUtfString;
 
-public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener {
+public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener, ComponentListener {
 
     //    private static final int FRAME_WIDTH = 1600;
 //    private static final int FRAME_HEIGHT = 700;
@@ -73,8 +75,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 //    private static final Dimension CHAT_SIZE = new Dimension(CHAT_WIDTH, CHAT_HEIGHT);
     private static final double RIGHT_PANEL_WIDTH_RATIO = 0.2; // 20% от ширины экрана
     private static final double CHAT_PANEL_WIDTH_RATIO = 0.2; // 20% от ширины экрана
+//    private static final double MAX_FRAME_SIZE_RATIO = 0.9; // 90% от размеров экрана
     private static final int MAX_CHAT_MESSAGE_LENGTH = 250;
-    private int screenWidth;
+    private final int screenWidth;
 
     private final Controller controller;
     private final Logger logger;
@@ -83,12 +86,13 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private final JTextArea textArea = new JTextArea();
     private JPanel lineNumberPanel;
 
+    private final JPanel rightPanel = new JPanel(new BorderLayout());
     private final JPanel peersListPanel = new JPanel();
     private final JPanel peersPanel = new JPanel();
     private final List<JLabel> peersList = new ArrayList<>();
-
     private final JTextArea logArea = new JTextArea();
 
+    private final JPanel chatPanel = new JPanel(new BorderLayout());
     private final JTextArea chatArea = new JTextArea();
     private final JTextArea chatInput = new JTextArea();
 
@@ -118,7 +122,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         // настройки сочетаний клавиш (копировать, вырезать, вставить)
         setupKeyStrokeActions();
         // настройки чата
-        JPanel chatPanel = new JPanel(new BorderLayout());
+
 //        chatPanel.setPreferredSize(CHAT_SIZE);
         chatPanel.setPreferredSize(new Dimension((int) (screenWidth * CHAT_PANEL_WIDTH_RATIO), 0));
 
@@ -181,7 +185,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         mainPanel.add(chatPanel, BorderLayout.EAST);
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
-//        frame.addComponentListener(this);
+        frame.addComponentListener(this);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Фрейм на весь экран
         frame.pack();
         addKeyListener(this);
@@ -193,6 +197,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
         frame.setIconImage(logo.getImage());
+//        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//        int maxWidth = (int) (screenSize.width * MAX_FRAME_SIZE_RATIO);
+//        int maxHeight = (int) (screenSize.height * MAX_FRAME_SIZE_RATIO);
+//        frame.setMaximumSize(new Dimension(maxWidth, maxHeight));
 //        frame.setMinimumSize(FRAME_SIZE);
         return frame;
     }
@@ -233,7 +241,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     private JPanel setupRightPanel() {
-        JPanel rightPanel = new JPanel(new BorderLayout());
 //        rightPanel.setPreferredSize(RIGHT_PANEL_SIZE);
         rightPanel.setPreferredSize(new Dimension((int) (screenWidth * RIGHT_PANEL_WIDTH_RATIO), 0));
 
@@ -418,6 +425,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void keyTyped(KeyEvent e) {
     }
 
+
+
     public void clearTextArea() {
         textArea.setCaretPosition(0);
         textArea.setText("");
@@ -552,5 +561,36 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         writeChat(getUtfString("Вы"), message);
     }
 
+    @Override
+    public void componentResized(ComponentEvent e) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = screenSize.width;
+
+        // Изменяем размеры панелей
+        int rightPanelWidth = (int) (screenWidth * RIGHT_PANEL_WIDTH_RATIO);
+        int chatPanelWidth = (int) (screenWidth * CHAT_PANEL_WIDTH_RATIO);
+
+        rightPanel.setPreferredSize(new Dimension(rightPanelWidth, rightPanel.getHeight()));
+        chatPanel.setPreferredSize(new Dimension(chatPanelWidth, chatPanel.getHeight()));
+
+        // Перерисовываем интерфейс
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void componentMoved(ComponentEvent e) {
+
+    }
+
+    @Override
+    public void componentShown(ComponentEvent e) {
+
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent e) {
+
+    }
 }
 
