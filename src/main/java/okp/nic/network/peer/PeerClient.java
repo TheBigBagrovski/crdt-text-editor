@@ -12,6 +12,8 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Getter
 public class PeerClient extends WebSocketClient {
@@ -40,9 +42,19 @@ public class PeerClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        String opPrefix = PeerMessageType.OPERATION.getPrefix();
-        if (message.startsWith(opPrefix)) {
-            String content = message.substring(opPrefix.length());
+        if (message.startsWith(PeerMessageType.UPDATE_TEXT.getPrefix())) {
+            String content = message.substring(PeerMessageType.UPDATE_TEXT.getPrefix().length());
+            String from = "";
+            String text = "";
+            Pattern pattern = Pattern.compile("^:<(.*?)>:(.*)$");
+            Matcher matcher = pattern.matcher(content);
+            if (matcher.find()) {
+                from = matcher.group(1);
+                text = matcher.group(2);
+            }
+            messenger.handleRemoteTextUpdate(from, text);
+        } else if (message.startsWith(PeerMessageType.OPERATION.getPrefix())) {
+            String content = message.substring(PeerMessageType.OPERATION.getPrefix().length());
             System.out.println(content);
             if (content.startsWith("INSERT:")) {
                 InsertOperation insertOp = gson.fromJson(content.substring("INSERT:".length()), InsertOperation.class);
