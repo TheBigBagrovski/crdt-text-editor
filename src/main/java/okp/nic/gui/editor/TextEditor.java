@@ -23,7 +23,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
@@ -34,6 +33,7 @@ import javax.swing.text.Element;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -46,6 +46,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -81,7 +83,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private final JTextArea chatArea = new JTextArea();
     private final JTextArea chatInput = new JTextArea();
 
-    private JDialog importDialog = new JDialog();
+    //    private JDialog importDialog = new JDialog();
+    JDialog importDialog = new JDialog(this);
 
     private String selectedText;
     private String copiedText;
@@ -107,7 +110,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         // настройки чата
         setupChatPanel();
         // окно паузы
-        setupPauseWindow();
+//        setupPauseWindow();
         // финальные настройки
         mainPanel.add(chatPanel, BorderLayout.EAST);
         frame.add(mainPanel, BorderLayout.CENTER);
@@ -251,6 +254,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                     chatInput.setText("");
                 }
             }
+
             @Override
             public void focusLost(FocusEvent e) {
                 if (chatInput.getText().isEmpty()) {
@@ -316,22 +320,22 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         });
     }
 
-    private void setupPauseWindow() {
-        importDialog = new JDialog(this, getUtfString("Загрузка файла"), true);
-        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        JLabel messageLabel = new JLabel(getUtfString("Дождитесь загрузки файла..."));
-        messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
-        panel.add(messageLabel);
-        importDialog.add(panel);
-        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
-        importDialog.setIconImage(logo.getImage());
-        importDialog.setSize(new Dimension(100, 50));
-        importDialog.pack();
-        importDialog.setLocationRelativeTo(this);
-    }
+//    private void setupPauseWindow() {
+//        importDialog = new JDialog(this, getUtfString("Загрузка файла"), true);
+//        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+//        JLabel messageLabel = new JLabel(getUtfString("Дождитесь загрузки файла..."));
+//        messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
+//        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//        JPanel panel = new JPanel();
+//        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+//        panel.add(messageLabel);
+//        importDialog.add(panel);
+//        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+//        importDialog.setIconImage(logo.getImage());
+//        importDialog.setSize(new Dimension(100, 50));
+//        importDialog.pack();
+//        importDialog.setLocationRelativeTo(this);
+//    }
 
     private void updateLineNumbers(JPanel lineNumberPanel) {
         lineNumberPanel.removeAll();
@@ -433,10 +437,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-//            new Thread(() -> {
-                // Отображаем importDialog в EDT
-                SwingUtilities.invokeLater(this::pause);
-//            pause();
+            pause();
             try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile))) {
                 StringBuilder fileContent = new StringBuilder();
                 String line;
@@ -444,11 +445,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                     fileContent.append(line).append("\n");
                 }
                 controller.onLocalFileImport(fileContent.toString());
-
             } catch (IOException ex) {
                 logger.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
-//            });
         }
     }
 
@@ -487,21 +486,113 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 //        textArea.setEnabled(false);
 //    }
 
+//    public void pause() {
+//        if (importDialog == null) {
+//            setupPauseWindow();
+//        }
+//        importDialog.setVisible(true);
+//        textArea.setEnabled(false);
+//    }
+
+//    class PauseDialog extends JDialog {
+//
+//        private final Object lock = new Object();
+//        private boolean paused = false;
+//
+//        public PauseDialog(JFrame parent) {
+//            super(parent, "Загрузка файла", true);
+//            setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+//            JLabel messageLabel = new JLabel(getUtfString("Дождитесь загрузки файла..."));
+//            messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
+//            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//            JPanel panel = new JPanel();
+//            panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+//            panel.add(messageLabel);
+//            add(panel);
+//            ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+//            setIconImage(logo.getImage());
+//            setSize(new Dimension(100, 50));
+//            pack();
+//            setLocationRelativeTo(this);
+//        }
+//
+//        public void pause() {
+//            textArea.setEnabled(false);
+//            synchronized (lock) {
+//                paused = true;
+//                setVisible(true); // Показываем диалоговое окно паузы
+//                while (paused) {
+//                    try {
+//                        lock.wait(); // Ожидаем разблокировки
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }
+//
+//        public void unpause() {
+//            synchronized (lock) {
+//                paused = false;
+//                setVisible(false); // Скрываем диалоговое окно паузы
+//                lock.notify(); // Уведомляем ожидающий поток
+//            }
+//            textArea.setEnabled(true);
+//        }
+//    }
+//
+//    public void pause() {
+//        pauseDialog.pause(); // Вызываем метод паузы из PauseDialog
+//    }
+//
+//    public void unpause() {
+//        pauseDialog.unpause(); // Вызываем метод анпаузы из PauseDialog
+//    }
+
     public void pause() {
-        if (importDialog == null) {
-            setupPauseWindow();
-        }
-        importDialog.setVisible(true);
-        textArea.setEnabled(false);
+        importDialog = new JDialog(this, getUtfString("Загрузка файла"), true);
+        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        JLabel messageLabel = new JLabel(getUtfString("Дождитесь загрузки файла..."));
+        messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+        panel.add(messageLabel);
+        importDialog.add(panel);
+        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+        importDialog.setIconImage(logo.getImage());
+        importDialog.setSize(new Dimension(100, 50));
+        importDialog.pack();
+        importDialog.setLocationRelativeTo(this);
+        // Устанавливаем обработчик закрытия окна - разблокируем поле при закрытии окна
+        importDialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                unpause();
+            }
+        });
+
+        // Показываем диалоговое окно паузы
+        new Thread(() -> importDialog.setVisible(true)).start();
     }
 
     public void unpause() {
+        // Разблокируем текстовое поле
+        textArea.setEditable(true);
+
+        // Закрываем диалоговое окно паузы
         if (importDialog != null) {
             importDialog.dispose();
-            importDialog = null;
         }
-        textArea.setEnabled(true);
     }
+
+//    public void unpause() {
+//        if (importDialog != null) {
+//            importDialog.dispose();
+//            importDialog = null;
+//        }
+//        textArea.setEnabled(true);
+//    }
 
     public void addPeerName(String name) {
         JLabel label = new JLabel(name);
