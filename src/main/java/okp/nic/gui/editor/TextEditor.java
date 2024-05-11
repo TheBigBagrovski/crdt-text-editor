@@ -607,11 +607,11 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void removePeerName(String name) {
         for (JLabel label : peersList) {
             if (label.getText().equals(name)) {
-                peersPanel.remove(label);
+                peersListPanel.remove(label);
             }
         }
-        peersPanel.revalidate();
-        peersPanel.repaint();
+        peersListPanel.revalidate();
+        peersListPanel.repaint();
     }
 
     public void writeLog(String message) {
