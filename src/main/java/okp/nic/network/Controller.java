@@ -81,14 +81,14 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void onLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
         textEditor.getTextArea().replaceRange("", startPos, endPos);
-        textEditor.getTextArea().setCaretPosition(startPos);
+//        textEditor.getTextArea().setCaretPosition(startPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
     public void onlyInDocLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
-        textEditor.getTextArea().replaceRange("", startPos, endPos);
-        textEditor.getTextArea().setCaretPosition(startPos);
+        textEditor.getTextArea().replaceRange("", startPos +1 , endPos);
+//        textEditor.getTextArea().setCaretPosition(startPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
@@ -122,6 +122,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         textEditor.pause();
         document.insertTextBlock(from, 0, text);
         textEditor.getTextArea().insert(text, 0);
+        textEditor.getTextArea().setCaretPosition(0);
         textEditor.unpause();
     }
 
@@ -129,7 +130,7 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void handleRemoteInsertBlock(String from, int pos, String text) {
         document.insertTextBlock(from, pos, text);
         textEditor.getTextArea().insert(text, pos);
-
+        textEditor.getTextArea().setCaretPosition(textEditor.getTextArea().getCaretPosition() + text.length());
     }
 
     @Override
