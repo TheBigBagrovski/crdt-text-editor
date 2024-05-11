@@ -80,7 +80,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private final JTextArea chatArea = new JTextArea();
     private final JTextArea chatInput = new JTextArea();
 
-    private JDialog importDialog;
+    private JDialog importDialog = new JDialog();
 
     private String selectedText;
     private String copiedText;
