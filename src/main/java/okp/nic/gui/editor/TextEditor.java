@@ -67,6 +67,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private final JPanel peersPanel = new JPanel();
     private final List<JLabel> peersList = new ArrayList<>();
     private final JTextArea logArea = new JTextArea();
+    private final JTextArea chatArea = new JTextArea();
     private JDialog importDialog;
 
     private String selectedText;
@@ -75,10 +76,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private int selectEndPos;
 
     private final Logger logger;
-
-//    @Getter
-//    @Setter
-//    private int cursorPos;
 
     public TextEditor(Controller controller, Logger logger) {
         this.controller = controller;
@@ -135,6 +132,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.setJMenuBar(menuBar);
         // настройки сочетаний клавиш (копировать, вырезать, вставить)
         setupKeyStrokeActions();
+        // настройки чата
+
         // финальные настройки
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
@@ -298,6 +297,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     public void insertCharToTextEditor(char value, int index) {
         textArea.insert(String.valueOf(value), index);
+        if (index <= selectEndPos && index >= selectStartPos) {
+            textArea.setSelectionEnd(textArea.getSelectionStart());
+        }
         int i = textArea.getCaretPosition();
         if (index <= i) {
             i++;
@@ -308,6 +310,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void deleteCharFromTextEditor(int index) {
         if (index == 0) {
             return;
+        }
+        if (index <= selectEndPos && index >= selectStartPos) {
+            textArea.setSelectionEnd(textArea.getSelectionStart());
         }
         int i = textArea.getCaretPosition();
         if (index <= i) {

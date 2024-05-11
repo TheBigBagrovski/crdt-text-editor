@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum PeerMessageType {
     UPDATE_TEXT("UPDATE_TEXT:"),
     OPERATION("OP:"),
-    PASSWORD("PASSWORD:");
+    PASSWORD("PASSWORD:"),
+    CHAT("CHAT:");
 
     private final String prefix;
 
