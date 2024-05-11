@@ -119,8 +119,10 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     @Override
     public void handleRemoteDeleteRange(int startPos, int endPos) {
+        System.out.println(document.getContent());
         document.deleteRange(startPos, endPos);
-        textEditor.getTextArea().replaceRange("", startPos, endPos - 1);
+        textEditor.getTextArea().replaceRange("", startPos + 1, endPos + 1);
+        System.out.println(document.getContent());
     }
 
     @Override
