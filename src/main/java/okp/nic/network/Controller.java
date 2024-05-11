@@ -6,6 +6,8 @@ import okp.nic.gui.editor.TextEditor;
 import okp.nic.gui.editor.TextEditorListener;
 import okp.nic.logger.Logger;
 
+import javax.swing.SwingUtilities;
+
 public class Controller implements TextEditorListener, MessengerListener {
 
     @Getter
@@ -110,14 +112,26 @@ public class Controller implements TextEditorListener, MessengerListener {
         textEditor.deleteCharFromTextEditor(position);
     }
 
+//    @Override
+//    public void handleRemoteTextUpdate(String from, String text) {
+//        clear();
+//        textEditor.pause();
+//        document.insertTextBlock(from, 0, text);
+//        textEditor.getTextArea().insert(text, 0);
+//        textEditor.getTextArea().setCaretPosition(0);
+//        textEditor.unpause();
+//    }
+
     @Override
     public void handleRemoteTextUpdate(String from, String text) {
         clear();
         textEditor.pause();
-        document.insertTextBlock(from, 0, text);
-        textEditor.getTextArea().insert(text, 0);
-        textEditor.getTextArea().setCaretPosition(0);
-        textEditor.unpause();
+        new Thread(() -> { // Загрузка файла в отдельном потоке
+            document.insertTextBlock(from, 0, text);
+            textEditor.getTextArea().insert(text, 0);
+            textEditor.getTextArea().setCaretPosition(0);
+            SwingUtilities.invokeLater(() -> textEditor.unpause()); // Обновляем интерфейс в EDT
+        }).start();
     }
 
     @Override
