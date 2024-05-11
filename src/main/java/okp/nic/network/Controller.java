@@ -66,7 +66,7 @@ public class Controller implements TextEditorListener, MessengerListener {
             clear();
             document.insertTextBlock(siteId, 0, text);
             textEditor.getTextArea().insert(text, 0);
-            textEditor.unpause();
+            SwingUtilities.invokeLater(textEditor::unpause);
         }).start();
         messenger.broadcastTextUpdate(text);
     }
