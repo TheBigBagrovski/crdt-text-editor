@@ -191,7 +191,7 @@ public class Messenger {
     }
 
     public void handleRemoteChatMessage(String from, String message) {
-        controller.handleRemoteChatMessage(from, message);
+        controller.handleRemoteChatMessage(peerNames.get(from), message);
     }
 
     private byte[] compress(String text) {
