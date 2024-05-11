@@ -136,6 +136,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         System.out.println(document.getContent());
         document.deleteRange(startPos, endPos);
         textEditor.getTextArea().replaceRange("", startPos, endPos);
+        textEditor.getTextArea().setCaretPosition(startPos);
         System.out.println(document.getContent());
     }
 
