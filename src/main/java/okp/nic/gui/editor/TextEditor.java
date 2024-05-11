@@ -76,9 +76,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     private final Logger logger;
 
-    @Getter
-    @Setter
-    private int cursorPos;
+//    @Getter
+//    @Setter
+//    private int cursorPos;
 
     public TextEditor(Controller controller, Logger logger) {
         this.controller = controller;
@@ -172,7 +172,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             public void actionPerformed(ActionEvent e) {
 //                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
                 if (copiedText != null && !copiedText.isEmpty() && selectStartPos == selectEndPos) {
-                    controller.onLocalInsertBlock(cursorPos, copiedText);
+                    controller.onLocalInsertBlock(textArea.getCaretPosition(), copiedText);
                 }
             }
         });
@@ -192,7 +192,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     @Override
     public void caretUpdate(CaretEvent e) {
         System.out.println("[caret] = " + e.getDot());
-        cursorPos = e.getDot();
+//        cursorPos = e.getDot();
         selectStartPos = textArea.getSelectionStart();
         selectEndPos = textArea.getSelectionEnd();
         if (selectStartPos != selectEndPos) {
@@ -217,7 +217,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             if (selectStartPos != selectEndPos) {
                 controller.onlyInDocLocalDeleteRange(selectStartPos, selectEndPos);
             } else {
-                controller.onLocalDelete(this.getCursorPos());
+                controller.onLocalDelete(textArea.getCaretPosition());
             }
         } else if (!e.isControlDown() &&
                 e.getKeyCode() != KeyEvent.VK_UP &&
@@ -240,7 +240,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 controller.onLocalDeleteRange(selectStartPos, selectEndPos);
             }
             if (value != '\u0003' && value != '\u0018' && value != '\u0016') {
-                controller.onLocalInsert(value, this.getCursorPos());
+                controller.onLocalInsert(value, textArea.getCaretPosition());
             }
         }
     }
@@ -298,9 +298,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     public void insertCharToTextEditor(char value, int index) {
         textArea.insert(String.valueOf(value), index);
-        if (index <= cursorPos) {
-            cursorPos++;
-            textArea.setCaretPosition(cursorPos);
+        int i = textArea.getCaretPosition();
+        if (index <= i) {
+            i++;
+            textArea.setCaretPosition(i);
         }
     }
 
@@ -308,9 +309,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         if (index == 0) {
             return;
         }
-        if (index <= cursorPos) {
-            cursorPos--;
-            textArea.setCaretPosition(cursorPos);
+        int i = textArea.getCaretPosition();
+        if (index <= i) {
+            i--;
+            textArea.setCaretPosition(i);
         }
         textArea.replaceRange("", index - 1, index);
     }

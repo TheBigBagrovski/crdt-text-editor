@@ -81,14 +81,14 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void onLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
         textEditor.getTextArea().replaceRange("", startPos, endPos);
-        textEditor.setCursorPos(startPos);
+        textEditor.getTextArea().setCaretPosition(startPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
     public void onlyInDocLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
 //        textEditor.getTextArea().replaceRange("", startPos, endPos);
-        textEditor.setCursorPos(startPos);
+        textEditor.getTextArea().setCaretPosition(startPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
@@ -137,7 +137,7 @@ public class Controller implements TextEditorListener, MessengerListener {
         document.deleteRange(startPos, endPos);
         textEditor.getTextArea().replaceRange("", startPos, endPos);
         textEditor.getTextArea().setCaretPosition(startPos + 1);
-        textEditor.setCursorPos(startPos + 1);
+//        textEditor.getT(startPos + 1);
     }
 
     @Override
