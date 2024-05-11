@@ -8,6 +8,7 @@ import okp.nic.network.Controller;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -19,22 +20,27 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.Element;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import java.awt.event.AdjustmentEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
@@ -75,6 +81,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private final JTextArea logArea = new JTextArea();
     private final JTextArea chatArea = new JTextArea();
     private JDialog importDialog;
+    private final JPanel lineNumberPanel;
 
     private String selectedText;
     private String copiedText;
@@ -96,19 +103,55 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         // настройки основной панели
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setVisible(true);
-        JScrollPane scrollPane = new JScrollPane(textArea,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
-        mainPanel.add(scrollPane);
+
         // настройки текстового поля
+        // панель с текстовым полем и нумерацией строк
+        JPanel textPanel = new JPanel(new BorderLayout());
         textArea.setFont(new Font("Courier New", Font.PLAIN, 18));
         textArea.addCaretListener(this);
         textArea.addKeyListener(this);
         textArea.getDocument().addDocumentListener(this);
-        // нумерация строк
-        mainPanel.add(new LineNumberComponent(textArea), BorderLayout.WEST);
+        // нумерация строк todo()
+        lineNumberPanel = new JPanel() {
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(70, textArea.getPreferredSize().height);
+            }
+        };
+        lineNumberPanel.setBackground(Color.LIGHT_GRAY);
+        lineNumberPanel.setBorder(new EmptyBorder(0, 5, 0, 5));
+//        textArea.getDocument().addDocumentListener(new DocumentListener() {
+//            @Override
+//            public void insertUpdate(DocumentEvent e) {
+//                updateLineNumbers(lineNumberPanel);
+//            }
+//
+//            @Override
+//            public void removeUpdate(DocumentEvent e) {
+//                updateLineNumbers(lineNumberPanel);
+//            }
+//
+//            @Override
+//            public void changedUpdate(DocumentEvent e) {
+//                updateLineNumbers(lineNumberPanel);
+//            }
+//        });
+        // Добавляем textArea и lineNumberArea в textPanel
+        textPanel.add(lineNumberPanel, BorderLayout.WEST);
+        textPanel.add(textArea, BorderLayout.CENTER);
 
+        // Создаём scrollPane и добавляем textPanel
+        JScrollPane scrollPane = new JScrollPane(textPanel,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
+        verticalScrollBar.setUnitIncrement(20); // Установите желаемый шаг
+        JScrollBar horizontalScrollBar = scrollPane.getHorizontalScrollBar();
+        horizontalScrollBar.setUnitIncrement(20); // Установите желаемый шаг
+//        scrollPane.setRowHeaderView(lineNumberPanel);
+
+        // Добавляем scrollPane в mainPanel
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
         // настройки панели логов
         JPanel logPanel = new JPanel();
         logPanel.setSize(LOG_SIZE);
@@ -150,55 +193,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.setVisible(true);
     }
 
-    // Класс для нумерации строк
-    class LineNumberComponent extends JComponent {
-        private final JTextArea textArea;
-
-        public LineNumberComponent(JTextArea textArea) {
-            this.textArea = textArea;
-            setPreferredSize(new Dimension(30, 100));
-            textArea.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    repaint();
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    repaint();
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    repaint();
-                }
-            });
-            textArea.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    repaint();
-                }
-            });
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-
-            FontMetrics metrics = textArea.getFontMetrics(textArea.getFont());
-            int lineHeight = metrics.getHeight();
-            int currentLine = 1;
-
-            Element root = textArea.getDocument().getDefaultRootElement();
-            int lineCount = root.getElementCount();
-
-            for (int i = 0; i < lineCount; i++) {
-                g.drawString(String.valueOf(currentLine), 5, lineHeight * currentLine);
-                currentLine++;
-            }
-        }
-    }
-
     private void setupKeyStrokeActions() {
         InputMap inputMap = textArea.getInputMap();
         ActionMap actionMap = textArea.getActionMap();
@@ -234,8 +228,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             }
         });
 
-        // TODO() ЕСЛИ ДРУГОЙ ПОЛЬЗОВАТЕЛЬ ИЗМЕНЯЕТ ВЫДЕЛЕННЫЙ ТЕКСТ - СБРОС ВЫДЕЛЕНИЯ
-
         KeyStroke deleteWordKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.CTRL_DOWN_MASK);
         inputMap.put(deleteWordKeyStroke, "deleteWord");
         actionMap.put("deleteWord", new AbstractAction() {
@@ -244,6 +236,22 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
             }
         });
+    }
+
+    private void updateLineNumbers(JPanel lineNumberPanel) {
+        lineNumberPanel.removeAll();
+        lineNumberPanel.setLayout(new BoxLayout(lineNumberPanel, BoxLayout.Y_AXIS));
+
+        Element root = textArea.getDocument().getDefaultRootElement();
+        int lineCount = root.getElementCount();
+        for (int i = 1; i <= lineCount; i++) {
+            JLabel lineNumber = new JLabel(String.valueOf(i));
+            lineNumber.setFont(new Font("Courier New", Font.PLAIN, 14));
+            lineNumber.setBorder(new EmptyBorder(2, 5, 2, 5));
+            lineNumberPanel.add(lineNumber);
+        }
+        lineNumberPanel.revalidate();
+        lineNumberPanel.repaint();
     }
 
     @Override
@@ -259,10 +267,12 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Override
     public void insertUpdate(DocumentEvent e) {
+        updateLineNumbers(lineNumberPanel);
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
+        updateLineNumbers(lineNumberPanel);
     }
 
     @Override
