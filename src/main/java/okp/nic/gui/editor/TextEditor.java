@@ -565,12 +565,12 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         importDialog.pack();
         importDialog.setLocationRelativeTo(this);
         // Устанавливаем обработчик закрытия окна - разблокируем поле при закрытии окна
-        importDialog.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                unpause();
-            }
-        });
+//        importDialog.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                unpause();
+//            }
+//        });
 
         // Показываем диалоговое окно паузы
         new Thread(() -> importDialog.setVisible(true)).start();
