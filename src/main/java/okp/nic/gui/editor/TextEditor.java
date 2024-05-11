@@ -191,6 +191,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     @Override
     public void caretUpdate(CaretEvent e) {
+        System.out.println("[caret] = " + e.getDot());
         cursorPos = e.getDot();
         selectStartPos = textArea.getSelectionStart();
         selectEndPos = textArea.getSelectionEnd();
