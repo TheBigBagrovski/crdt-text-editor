@@ -8,7 +8,6 @@ import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.DeleteRangeOperation;
 import okp.nic.network.operation.InsertBlockOperation;
 import okp.nic.network.operation.InsertOperation;
-import okp.nic.network.signal.SignalMessageType;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 

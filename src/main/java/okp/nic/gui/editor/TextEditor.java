@@ -35,6 +35,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -55,22 +56,25 @@ import static okp.nic.Utils.getUtfString;
 
 public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener {
 
-    private static final int FRAME_WIDTH = 1600;
-    private static final int FRAME_HEIGHT = 700;
-    private static final Dimension FRAME_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
-    private static final int PEERS_WIDTH = 250;
-    private static final int PEERS_HEIGHT = 300;
-    private static final Dimension PEERS_SIZE = new Dimension(PEERS_WIDTH, PEERS_HEIGHT);
-    private static final int LOG_WIDTH = 250;
-    private static final int LOG_HEIGHT = 400;
-    private static final Dimension LOG_SIZE = new Dimension(LOG_WIDTH, LOG_HEIGHT);
-    private static final int RIGHT_PANEL_WIDTH = 250;
-    private static final int RIGHT_PANEL_HEIGHT = 700;
-    private static final Dimension RIGHT_PANEL_SIZE = new Dimension(RIGHT_PANEL_WIDTH, RIGHT_PANEL_HEIGHT);
-    private static final int CHAT_WIDTH = 250;
-    private static final int CHAT_HEIGHT = 700;
-    private static final Dimension CHAT_SIZE = new Dimension(CHAT_WIDTH, CHAT_HEIGHT);
+    //    private static final int FRAME_WIDTH = 1600;
+//    private static final int FRAME_HEIGHT = 700;
+//    private static final Dimension FRAME_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
+//    private static final int PEERS_WIDTH = 250;
+//    private static final int PEERS_HEIGHT = 300;
+//    private static final Dimension PEERS_SIZE = new Dimension(PEERS_WIDTH, PEERS_HEIGHT);
+//    private static final int LOG_WIDTH = 250;
+//    private static final int LOG_HEIGHT = 400;
+//    private static final Dimension LOG_SIZE = new Dimension(LOG_WIDTH, LOG_HEIGHT);
+//    private static final int RIGHT_PANEL_WIDTH = 250;
+//    private static final int RIGHT_PANEL_HEIGHT = 700;
+//    private static final Dimension RIGHT_PANEL_SIZE = new Dimension(RIGHT_PANEL_WIDTH, RIGHT_PANEL_HEIGHT);
+//    private static final int CHAT_WIDTH = 250;
+//    private static final int CHAT_HEIGHT = 700;
+//    private static final Dimension CHAT_SIZE = new Dimension(CHAT_WIDTH, CHAT_HEIGHT);
+    private static final double RIGHT_PANEL_WIDTH_RATIO = 0.2; // 20% от ширины экрана
+    private static final double CHAT_PANEL_WIDTH_RATIO = 0.2; // 20% от ширины экрана
     private static final int MAX_CHAT_MESSAGE_LENGTH = 250;
+    private int screenWidth;
 
     private final Controller controller;
     private final Logger logger;
@@ -86,7 +90,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private final JTextArea logArea = new JTextArea();
 
     private final JTextArea chatArea = new JTextArea();
-    private final JTextArea  chatInput = new JTextArea();
+    private final JTextArea chatInput = new JTextArea();
 
     private JDialog importDialog;
 
@@ -101,6 +105,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         this.controller = controller;
         this.logger = logger;
         // настройки фрейма
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        screenWidth = screenSize.width;
         JFrame frame = setupFrame();
         // настройки основной панели
         JPanel mainPanel = setupMainPanel();
@@ -113,13 +119,17 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         setupKeyStrokeActions();
         // настройки чата
         JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.setPreferredSize(CHAT_SIZE);
+//        chatPanel.setPreferredSize(CHAT_SIZE);
+        chatPanel.setPreferredSize(new Dimension((int) (screenWidth * CHAT_PANEL_WIDTH_RATIO), 0));
+
         JScrollPane chatScrollPane = new JScrollPane(chatArea,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         chatArea.setEditable(false);
         chatArea.setFont(chatArea.getFont().deriveFont(16f));
-        chatInput.setPreferredSize(new Dimension(CHAT_WIDTH, 100));
+//        chatInput.setPreferredSize(new Dimension(CHAT_WIDTH, 100));
+        chatInput.setPreferredSize(new Dimension((int) (screenWidth * CHAT_PANEL_WIDTH_RATIO), 100));
+
         chatInput.setLineWrap(true); // Включаем перенос по словам
         chatInput.setWrapStyleWord(true);
         chatInput.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // Толстая рамка
@@ -171,8 +181,11 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         mainPanel.add(chatPanel, BorderLayout.EAST);
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
+//        frame.addComponentListener(this);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Фрейм на весь экран
         frame.pack();
         addKeyListener(this);
+        frame.setVisible(true);
     }
 
     private JFrame setupFrame() {
@@ -180,8 +193,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
         frame.setIconImage(logo.getImage());
-        frame.setMinimumSize(FRAME_SIZE);
-        frame.setVisible(true);
+//        frame.setMinimumSize(FRAME_SIZE);
         return frame;
     }
 
@@ -222,10 +234,13 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     private JPanel setupRightPanel() {
         JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setPreferredSize(RIGHT_PANEL_SIZE);
+//        rightPanel.setPreferredSize(RIGHT_PANEL_SIZE);
+        rightPanel.setPreferredSize(new Dimension((int) (screenWidth * RIGHT_PANEL_WIDTH_RATIO), 0));
 
         // настройки панели пиров
-        peersPanel.setPreferredSize(PEERS_SIZE);
+//        peersPanel.setPreferredSize(PEERS_SIZE);
+        peersPanel.setPreferredSize(new Dimension((int) (screenWidth * RIGHT_PANEL_WIDTH_RATIO), 300));
+
         peersPanel.setLayout(new BorderLayout());
         // Заголовок "PEERS"
         JLabel peersLabel = new JLabel(getUtfString("PEERS"));
@@ -236,8 +251,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         peersLabel.setHorizontalAlignment(JLabel.CENTER);
 
         // Панель для списка пиров
-        peersListPanel.setLayout(new BoxLayout(peersListPanel, BoxLayout.Y_AXIS)); // Вертикальное расположение
-        peersPanel.add(peersListPanel, BorderLayout.CENTER); // Добавляем панель под заголовок
+        peersListPanel.setLayout(new BoxLayout(peersListPanel, BoxLayout.Y_AXIS));
+        peersPanel.add(peersListPanel, BorderLayout.CENTER);
 
         JScrollPane peersScrollPane = new JScrollPane(peersPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -245,11 +260,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         peersPanel.add(peersLabel, BorderLayout.NORTH);
 
 
-
-
         // панель логов
         JPanel logPanel = new JPanel();
-        logPanel.setSize(LOG_SIZE);
+//        logPanel.setSize(LOG_SIZE);
         logPanel.setLayout(new BorderLayout());
         logArea.setEditable(false);
         // Заголовок "ЛОГ"
