@@ -1,7 +1,6 @@
 package okp.nic.network;
 
 import lombok.Getter;
-import okp.nic.crdt.Char;
 import okp.nic.crdt.Document;
 import okp.nic.gui.editor.TextEditor;
 import okp.nic.gui.editor.TextEditorListener;
@@ -81,23 +80,18 @@ public class Controller implements TextEditorListener, MessengerListener {
     public void onLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
         textEditor.getTextArea().replaceRange("", startPos, endPos);
-//        textEditor.getTextArea().setCaretPosition(startPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
     public void onlyInDocLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
-        textEditor.getTextArea().replaceRange("", startPos +1 , endPos);
-//        textEditor.getTextArea().setCaretPosition(startPos);
+        textEditor.getTextArea().replaceRange("", startPos + 1 , endPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
-//    public void cut(int startPos, int endPos) {
-//        document.deleteRange(startPos, endPos);
-//        textEditor.getTextArea().replaceRange("", startPos, endPos);
-//        textEditor.setCursorPos(startPos);
-//        messenger.broadcastDeleteRange(startPos, endPos);
-//    }
+    public void sendChatMessage(String message) {
+        messenger.broadcastChatMessage(message);
+    }
 
     @Override
     public String getCurrentDocument() {
@@ -138,18 +132,20 @@ public class Controller implements TextEditorListener, MessengerListener {
         document.deleteRange(startPos, endPos);
         textEditor.getTextArea().replaceRange("", startPos, endPos);
         textEditor.getTextArea().setCaretPosition(startPos);
-//        textEditor.getT(startPos + 1);
     }
 
     @Override
     public void addPeerName(String peerAddress, String name) {
-        textEditor.addPeerName(name + " [" + peerAddress + "]");
+        textEditor.addPeerName(name + " [" + peerAddress.substring(5) + "]");
     }
 
     @Override
     public void removePeerName(String peerAddress, String name) {
         textEditor.removePeerName(name + " [" + peerAddress + "]");
+    }
 
+    public void handleRemoteChatMessage(String from, String message) {
+        textEditor.writeChat(from, message);
     }
 
 }

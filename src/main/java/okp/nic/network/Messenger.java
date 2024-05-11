@@ -144,6 +144,11 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
+    public void broadcastChatMessage(String message) {
+        String payload = PeerMessageType.CHAT_MESSAGE.formatMessage(message);
+        peerServer.broadcast(payload);
+    }
+
     public void handleRemoteInsert(String from, int position, char value) {
         controller.handleRemoteInsert(from, value, position);
     }
@@ -183,6 +188,10 @@ public class Messenger {
 
     public void handleRemoteDeleteRange(int startPos, int endPos) {
         controller.handleRemoteDeleteRange(startPos, endPos);
+    }
+
+    public void handleRemoteChatMessage(String from, String message) {
+        controller.handleRemoteChatMessage(from, message);
     }
 
     private byte[] compress(String text) {

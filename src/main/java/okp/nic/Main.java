@@ -4,7 +4,6 @@ import okp.nic.gui.InputDialogs;
 import okp.nic.network.Messenger;
 
 import static okp.nic.Utils.findAvailablePort;
-//todo() ctrl+c, ctrl+x, ctrl+v
 //todo() чат
 //todo() паттерны и принципы
 //todo() тест на 3 пирах

@@ -9,7 +9,7 @@ public enum PeerMessageType {
     UPDATE_TEXT("UPDATE_TEXT:"),
     OPERATION("OP:"),
     PASSWORD("PASSWORD:"),
-    CHAT("CHAT:");
+    CHAT_MESSAGE("CHAT:");
 
     private final String prefix;
 
