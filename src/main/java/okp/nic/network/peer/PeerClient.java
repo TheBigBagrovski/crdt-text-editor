@@ -47,17 +47,17 @@ public class PeerClient extends WebSocketClient {
             if (message.startsWith(type.getPrefix())) {
                 String content = message.substring(type.getPrefix().length());
                 switch (type) {
-//                    case UPDATE_TEXT:
-//                        String from = "";
-//                        String text = "";
-//                        Pattern pattern = Pattern.compile("^:<(.*?)>:(.*)$");
-//                        Matcher matcher = pattern.matcher(content);
-//                        if (matcher.find()) {
-//                            from = matcher.group(1);
-//                            text = matcher.group(2);
-//                        }
-//                        messenger.handleRemoteTextUpdate(from, text);
-//                        break;
+                    case UPDATE_TEXT:
+                        String from = "";
+                        String text = "";
+                        Pattern pattern = Pattern.compile("^:<(.*?)>:(.*)$");
+                        Matcher matcher = pattern.matcher(content);
+                        if (matcher.find()) {
+                            from = matcher.group(1);
+                            text = matcher.group(2);
+                        }
+                        messenger.handleRemoteTextUpdate(from, text);
+                        break;
                     case OPERATION:
                         if (content.startsWith("INSERT:")) {
                             InsertOperation insertOp = gson.fromJson(content.substring("INSERT:".length()), InsertOperation.class);
