@@ -474,10 +474,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void pause() {
-        if (importDialog == null) {
+        new Thread(() -> {
             setupPauseWindow();
-        }
-        new Thread(() -> importDialog.setVisible(true)).start();
+            importDialog.setVisible(true);
+        }).start();
         textArea.setEnabled(false);
     }
 
