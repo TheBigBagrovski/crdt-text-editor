@@ -433,7 +433,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            new Thread(() -> {
+//            new Thread(() -> {
                 // Отображаем importDialog в EDT
                 SwingUtilities.invokeLater(this::pause);
 //            pause();
@@ -448,7 +448,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             } catch (IOException ex) {
                 logger.error("Ошибка при загрузке файла: " + ex.getMessage());
             }
-            });
+//            });
         }
     }
 
