@@ -58,24 +58,8 @@ import static okp.nic.Utils.getUtfString;
 
 public class TextEditor extends JFrame implements CaretListener, DocumentListener, KeyListener, ComponentListener {
 
-    //    private static final int FRAME_WIDTH = 1600;
-//    private static final int FRAME_HEIGHT = 700;
-//    private static final Dimension FRAME_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
-//    private static final int PEERS_WIDTH = 250;
-//    private static final int PEERS_HEIGHT = 300;
-//    private static final Dimension PEERS_SIZE = new Dimension(PEERS_WIDTH, PEERS_HEIGHT);
-//    private static final int LOG_WIDTH = 250;
-//    private static final int LOG_HEIGHT = 400;
-//    private static final Dimension LOG_SIZE = new Dimension(LOG_WIDTH, LOG_HEIGHT);
-//    private static final int RIGHT_PANEL_WIDTH = 250;
-//    private static final int RIGHT_PANEL_HEIGHT = 700;
-//    private static final Dimension RIGHT_PANEL_SIZE = new Dimension(RIGHT_PANEL_WIDTH, RIGHT_PANEL_HEIGHT);
-//    private static final int CHAT_WIDTH = 250;
-//    private static final int CHAT_HEIGHT = 700;
-//    private static final Dimension CHAT_SIZE = new Dimension(CHAT_WIDTH, CHAT_HEIGHT);
     private static final double RIGHT_PANEL_WIDTH_RATIO = 0.2; // 20% от ширины экрана
     private static final double CHAT_PANEL_WIDTH_RATIO = 0.2; // 20% от ширины экрана
-//    private static final double MAX_FRAME_SIZE_RATIO = 0.9; // 90% от размеров экрана
     private static final int MAX_CHAT_MESSAGE_LENGTH = 250;
     private final int screenWidth;
 
@@ -98,12 +82,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
 
     private JDialog importDialog;
 
-    // cut-copy-paste
     private String selectedText;
     private String copiedText;
     private int selectStartPos;
     private int selectEndPos;
-
 
     public TextEditor(Controller controller, Logger logger) {
         this.controller = controller;
@@ -122,73 +104,17 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         // настройки сочетаний клавиш (копировать, вырезать, вставить)
         setupKeyStrokeActions();
         // настройки чата
-
-//        chatPanel.setPreferredSize(CHAT_SIZE);
-        chatPanel.setPreferredSize(new Dimension((int) (screenWidth * CHAT_PANEL_WIDTH_RATIO), 0));
-
-        JScrollPane chatScrollPane = new JScrollPane(chatArea,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        chatArea.setEditable(false);
-        chatArea.setFont(chatArea.getFont().deriveFont(16f));
-//        chatInput.setPreferredSize(new Dimension(CHAT_WIDTH, 100));
-        chatInput.setPreferredSize(new Dimension((int) (screenWidth * CHAT_PANEL_WIDTH_RATIO), 100));
-
-        chatInput.setLineWrap(true); // Включаем перенос по словам
-        chatInput.setWrapStyleWord(true);
-        chatInput.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // Толстая рамка
-        chatInput.setFont(chatInput.getFont().deriveFont(14f));
-        chatPanel.add(chatScrollPane, BorderLayout.CENTER);
-        chatPanel.add(chatInput, BorderLayout.SOUTH);
-        // отправка сообщения по нажатию Enter
-        chatInput.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    e.consume();
-                    String message = chatInput.getText().trim();
-                    if (message.length() > MAX_CHAT_MESSAGE_LENGTH) {
-                        chatInput.setBackground(Color.PINK);
-                    } else if (!message.isEmpty()) {
-                        sendChatMessage(message);
-                        chatInput.setText("");
-                        chatInput.setBackground(Color.WHITE);
-                    }
-                }
-            }
-        });
-        // Заголовок "ЧАТ"
-        JLabel chatLabel = new JLabel(getUtfString("ЧАТ"));
-        chatLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        chatLabel.setFont(chatLabel.getFont().deriveFont(Font.BOLD, 16));
-        chatLabel.setOpaque(true);
-        chatLabel.setBackground(Color.LIGHT_GRAY);
-        chatLabel.setHorizontalAlignment(JLabel.CENTER);
-        chatPanel.add(chatLabel, BorderLayout.NORTH);
-        // Placeholder и обработка фокуса
-        chatInput.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (chatInput.getText().equals(getUtfString("Введите сообщение..."))) {
-                    chatInput.setText("");
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (chatInput.getText().isEmpty()) {
-                    chatInput.setText(getUtfString("Введите сообщение..."));
-                }
-            }
-        });
+        setupChatPanel();
+        // окно паузы
+        setupPauseWindow();
         // финальные настройки
         mainPanel.add(chatPanel, BorderLayout.EAST);
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.add(rightPanel, BorderLayout.EAST);
         frame.addComponentListener(this);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Фрейм на весь экран
-        frame.pack();
         addKeyListener(this);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.pack();
         frame.setVisible(true);
     }
 
@@ -197,11 +123,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
         frame.setIconImage(logo.getImage());
-//        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-//        int maxWidth = (int) (screenSize.width * MAX_FRAME_SIZE_RATIO);
-//        int maxHeight = (int) (screenSize.height * MAX_FRAME_SIZE_RATIO);
-//        frame.setMaximumSize(new Dimension(maxWidth, maxHeight));
-//        frame.setMinimumSize(FRAME_SIZE);
         return frame;
     }
 
@@ -234,45 +155,35 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         verticalScrollBar.setUnitIncrement(20);
         JScrollBar horizontalScrollBar = scrollPane.getHorizontalScrollBar();
         horizontalScrollBar.setUnitIncrement(20);
-//        scrollPane.setRowHeaderView(lineNumberPanel);
         // добавляем все поля (через scrollPane) в главную панель
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         return mainPanel;
     }
 
     private JPanel setupRightPanel() {
-//        rightPanel.setPreferredSize(RIGHT_PANEL_SIZE);
         rightPanel.setPreferredSize(new Dimension((int) (screenWidth * RIGHT_PANEL_WIDTH_RATIO), 0));
-
         // настройки панели пиров
-//        peersPanel.setPreferredSize(PEERS_SIZE);
         peersPanel.setPreferredSize(new Dimension((int) (screenWidth * RIGHT_PANEL_WIDTH_RATIO), 300));
-
         peersPanel.setLayout(new BorderLayout());
-        // Заголовок "PEERS"
+        // заголовок пиры
         JLabel peersLabel = new JLabel(getUtfString("PEERS"));
         peersLabel.setFont(peersLabel.getFont().deriveFont(Font.BOLD, 16));
         peersLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         peersLabel.setOpaque(true);
         peersLabel.setBackground(Color.LIGHT_GRAY);
         peersLabel.setHorizontalAlignment(JLabel.CENTER);
-
-        // Панель для списка пиров
+        // панель для списка пиров
         peersListPanel.setLayout(new BoxLayout(peersListPanel, BoxLayout.Y_AXIS));
         peersPanel.add(peersListPanel, BorderLayout.CENTER);
-
         JScrollPane peersScrollPane = new JScrollPane(peersPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         peersPanel.add(peersLabel, BorderLayout.NORTH);
-
-
         // панель логов
         JPanel logPanel = new JPanel();
-//        logPanel.setSize(LOG_SIZE);
         logPanel.setLayout(new BorderLayout());
         logArea.setEditable(false);
-        // Заголовок "ЛОГ"
+        // заголовок логи
         JLabel logLabel = new JLabel(getUtfString("ЖУРНАЛ ЛОГОВ"));
         logLabel.setFont(logLabel.getFont().deriveFont(Font.BOLD, 16));
         logLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
@@ -284,10 +195,68 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         JScrollPane logScrollPane = new JScrollPane(logPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
+        // добавление элементов на панель
         rightPanel.add(peersScrollPane, BorderLayout.NORTH);
         rightPanel.add(logScrollPane, BorderLayout.CENTER);
         return rightPanel;
+    }
+
+    private void setupChatPanel() {
+        chatPanel.setPreferredSize(new Dimension((int) (screenWidth * CHAT_PANEL_WIDTH_RATIO), 0));
+        // настройка поля сообщений
+        JScrollPane chatScrollPane = new JScrollPane(chatArea,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        chatArea.setEditable(false);
+        chatArea.setFont(chatArea.getFont().deriveFont(16f));
+        // настройка поля ввода
+        chatInput.setPreferredSize(new Dimension((int) (screenWidth * CHAT_PANEL_WIDTH_RATIO), 100));
+        chatInput.setLineWrap(true);
+        chatInput.setWrapStyleWord(true);
+        chatInput.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        chatInput.setFont(chatInput.getFont().deriveFont(14f));
+        chatPanel.add(chatScrollPane, BorderLayout.CENTER);
+        chatPanel.add(chatInput, BorderLayout.SOUTH);
+        // отправка сообщения по нажатию Enter
+        chatInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    e.consume();
+                    String message = chatInput.getText().trim();
+                    if (message.length() > MAX_CHAT_MESSAGE_LENGTH) {
+                        chatInput.setBackground(Color.PINK);
+                    } else if (!message.isEmpty()) {
+                        sendChatMessage(message);
+                        chatInput.setText("");
+                        chatInput.setBackground(Color.WHITE);
+                    }
+                }
+            }
+        });
+        // Заголовок "ЧАТ"
+        JLabel chatLabel = new JLabel(getUtfString("ЧАТ"));
+        chatLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        chatLabel.setFont(chatLabel.getFont().deriveFont(Font.BOLD, 16));
+        chatLabel.setOpaque(true);
+        chatLabel.setBackground(Color.LIGHT_GRAY);
+        chatLabel.setHorizontalAlignment(JLabel.CENTER);
+        chatPanel.add(chatLabel, BorderLayout.NORTH);
+        // плейсхолдер и обработка фокуса
+        chatInput.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (chatInput.getText().equals(getUtfString("Введите сообщение..."))) {
+                    chatInput.setText("");
+                }
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (chatInput.getText().isEmpty()) {
+                    chatInput.setText(getUtfString("Введите сообщение..."));
+                }
+            }
+        });
     }
 
     private JMenuBar setupMenuBar() {
@@ -306,7 +275,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     private void setupKeyStrokeActions() {
         InputMap inputMap = textArea.getInputMap();
         ActionMap actionMap = textArea.getActionMap();
-
+        // копирование
         KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
         inputMap.put(copyKeyStroke, "copy");
         actionMap.put("copy", new AbstractAction() {
@@ -315,7 +284,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 copiedText = selectedText;
             }
         });
-
+        // вырезание
         KeyStroke cutKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK);
         inputMap.put(cutKeyStroke, "cut");
         actionMap.put("cut", new AbstractAction() {
@@ -325,7 +294,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 controller.onLocalDeleteRange(selectStartPos, selectEndPos);
             }
         });
-
+        // вставка
         KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK);
         inputMap.put(pasteKeyStroke, "paste");
         actionMap.put("paste", new AbstractAction() {
@@ -336,21 +305,36 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
                 }
             }
         });
-
+        // лочим ctrl+backspace
         KeyStroke deleteWordKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.CTRL_DOWN_MASK);
         inputMap.put(deleteWordKeyStroke, "deleteWord");
         actionMap.put("deleteWord", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
             }
         });
+    }
+
+    private void setupPauseWindow() {
+        importDialog = new JDialog(this, getUtfString("Загрузка файла"), true);
+        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        JLabel messageLabel = new JLabel(getUtfString("Дождитесь загрузки файла..."));
+        messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+        panel.add(messageLabel);
+        importDialog.add(panel);
+        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
+        importDialog.setIconImage(logo.getImage());
+        importDialog.setSize(new Dimension(100, 50));
+        importDialog.pack();
+        importDialog.setLocationRelativeTo(this);
     }
 
     private void updateLineNumbers(JPanel lineNumberPanel) {
         lineNumberPanel.removeAll();
         lineNumberPanel.setLayout(new BoxLayout(lineNumberPanel, BoxLayout.Y_AXIS));
-
         Element root = textArea.getDocument().getDefaultRootElement();
         int lineCount = root.getElementCount();
         for (int i = 1; i <= lineCount; i++) {
@@ -425,8 +409,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void keyTyped(KeyEvent e) {
     }
 
-
-
     public void clearTextArea() {
         textArea.setCaretPosition(0);
         textArea.setText("");
@@ -492,26 +474,8 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void pause() {
-        showPauseWindow();
         new Thread(() -> importDialog.setVisible(true)).start();
         textArea.setEnabled(false);
-    }
-
-    private void showPauseWindow() {
-        importDialog = new JDialog(this, getUtfString("Загрузка файла"), true);
-        importDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        JLabel messageLabel = new JLabel(getUtfString("Дождитесь загрузки файла..."));
-        messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
-        panel.add(messageLabel);
-        importDialog.add(panel);
-        ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
-        importDialog.setIconImage(logo.getImage());
-        importDialog.setSize(new Dimension(100, 50));
-        importDialog.pack();
-        importDialog.setLocationRelativeTo(this);
     }
 
     public void unpause() {
@@ -525,9 +489,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void addPeerName(String name) {
         JLabel label = new JLabel(name);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 14));
-        label.setAlignmentX(Component.CENTER_ALIGNMENT); // Центрируем лейбл по горизонтали
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
         peersList.add(label);
-        peersListPanel.add(label); // Добавляем лейбл в peersListPanel
+        peersListPanel.add(label);
         peersListPanel.revalidate();
         peersListPanel.repaint();
     }
@@ -566,31 +530,26 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = screenSize.width;
 
-        // Изменяем размеры панелей
         int rightPanelWidth = (int) (screenWidth * RIGHT_PANEL_WIDTH_RATIO);
         int chatPanelWidth = (int) (screenWidth * CHAT_PANEL_WIDTH_RATIO);
 
         rightPanel.setPreferredSize(new Dimension(rightPanelWidth, rightPanel.getHeight()));
         chatPanel.setPreferredSize(new Dimension(chatPanelWidth, chatPanel.getHeight()));
 
-        // Перерисовываем интерфейс
         revalidate();
         repaint();
     }
 
     @Override
     public void componentMoved(ComponentEvent e) {
-
     }
 
     @Override
     public void componentShown(ComponentEvent e) {
-
     }
 
     @Override
     public void componentHidden(ComponentEvent e) {
-
     }
 }
 
