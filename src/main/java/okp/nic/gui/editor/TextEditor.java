@@ -161,7 +161,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 copiedText = selectedText;
-                controller.onLocalDeleteRange(selectStartPos, selectEndPos + 1);
+                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
             }
         });
 
