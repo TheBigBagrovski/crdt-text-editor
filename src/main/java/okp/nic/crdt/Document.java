@@ -178,8 +178,8 @@ public class Document {
     }
 
     public void deleteRange(int startPos, int endPos) {
-        for (;startPos + 2 <= endPos + 1; startPos++) {
-            generateDelete(startPos);
+        for (int i = startPos + 1; i <= endPos; i++) {
+            generateDelete(i);
         }
     }
 

@@ -210,8 +210,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void changedUpdate(DocumentEvent e) {
     }
 
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !(e.isControlDown())) {
+    public void keyPressed(KeyEvent e) {        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !(e.isControlDown())) {
             if (selectStartPos != selectEndPos) {
                 controller.onLocalDeleteRange(selectStartPos, selectEndPos);
             } else {
@@ -234,6 +233,9 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         ) {
             char value;
             value = e.getKeyChar();
+            if (selectStartPos != selectEndPos) {
+                controller.onLocalDeleteRange(selectStartPos, selectEndPos);
+            }
             if (value != '\u0003' && value != '\u0018' && value != '\u0016') {
                 controller.onLocalInsert(value, this.getCursorPos());
             }
@@ -327,7 +329,7 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
         importDialog.add(panel);
         ImageIcon logo = new ImageIcon(Objects.requireNonNull(getClass().getResource("/img/logo.png")));
         importDialog.setIconImage(logo.getImage());
-        importDialog.setSize(new Dimension(100,50));
+        importDialog.setSize(new Dimension(100, 50));
         importDialog.pack();
         importDialog.setLocationRelativeTo(this);
     }
