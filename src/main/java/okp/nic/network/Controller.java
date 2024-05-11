@@ -122,15 +122,32 @@ public class Controller implements TextEditorListener, MessengerListener {
 //        textEditor.unpause();
 //    }
 
+//    @Override
+//    public void handleRemoteTextUpdate(String from, String text) {
+//        clear();
+//        textEditor.pause();
+//        new Thread(() -> { // Загрузка файла в отдельном потоке
+//            document.insertTextBlock(from, 0, text);
+//            textEditor.getTextArea().insert(text, 0);
+//            textEditor.getTextArea().setCaretPosition(0);
+//            SwingUtilities.invokeLater(() -> textEditor.unpause()); // Обновляем интерфейс в EDT
+//        }).start();
+//    }
+
     @Override
     public void handleRemoteTextUpdate(String from, String text) {
         clear();
-        textEditor.pause();
-        new Thread(() -> { // Загрузка файла в отдельном потоке
+        new Thread(() -> {
+            SwingUtilities.invokeLater(() -> { // Отображаем importDialog в EDT
+                textEditor.pause();
+            });
+
+            // Загрузка файла
             document.insertTextBlock(from, 0, text);
             textEditor.getTextArea().insert(text, 0);
             textEditor.getTextArea().setCaretPosition(0);
-            SwingUtilities.invokeLater(() -> textEditor.unpause()); // Обновляем интерфейс в EDT
+
+            SwingUtilities.invokeLater(() -> textEditor.unpause()); // Закрываем importDialog в EDT
         }).start();
     }
 
