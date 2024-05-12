@@ -6,8 +6,6 @@ import okp.nic.gui.editor.TextEditor;
 import okp.nic.gui.editor.TextEditorListener;
 import okp.nic.logger.Logger;
 
-import javax.swing.SwingUtilities;
-
 public class Controller implements TextEditorListener, MessengerListener {
 
     @Getter
@@ -62,12 +60,12 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     @Override
     public void onLocalFileImport(String text) {
-//        new Thread(() -> {
-        clear();
-        document.insertTextBlock(siteId, 0, text);
-        textEditor.getTextArea().insert(text, 0);
-        textEditor.unpause();
-//        }).start();
+        new Thread(() -> {
+            clear();
+            document.insertTextBlock(siteId, 0, text);
+            textEditor.getTextArea().insert(text, 0);
+            textEditor.unpause();
+        }).start();
         messenger.broadcastTextUpdate(text);
     }
 
@@ -87,7 +85,7 @@ public class Controller implements TextEditorListener, MessengerListener {
 
     public void onlyInDocLocalDeleteRange(int startPos, int endPos) {
         document.deleteRange(startPos, endPos);
-        textEditor.getTextArea().replaceRange("", startPos + 1, endPos);
+        textEditor.getTextArea().replaceRange("", startPos + 1 , endPos);
         messenger.broadcastDeleteRange(startPos, endPos);
     }
 
@@ -121,35 +119,6 @@ public class Controller implements TextEditorListener, MessengerListener {
         textEditor.getTextArea().setCaretPosition(0);
         textEditor.unpause();
     }
-
-//    @Override
-//    public void handleRemoteTextUpdate(String from, String text) {
-//        clear();
-//        textEditor.pause();
-//        new Thread(() -> { // Загрузка файла в отдельном потоке
-//            document.insertTextBlock(from, 0, text);
-//            textEditor.getTextArea().insert(text, 0);
-//            textEditor.getTextArea().setCaretPosition(0);
-//            SwingUtilities.invokeLater(() -> textEditor.unpause()); // Обновляем интерфейс в EDT
-//        }).start();
-//    }
-
-//    @Override
-//    public void handleRemoteTextUpdate(String from, String text) {
-//        clear();
-//        new Thread(() -> {
-//            SwingUtilities.invokeLater(() -> { // Отображаем importDialog в EDT
-//                textEditor.pause();
-//            });
-//
-//            // Загрузка файла
-//            document.insertTextBlock(from, 0, text);
-//            textEditor.getTextArea().insert(text, 0);
-//            textEditor.getTextArea().setCaretPosition(0);
-//
-//            SwingUtilities.invokeLater(() -> textEditor.unpause()); // Закрываем importDialog в EDT
-//        }).start();
-//    }
 
     @Override
     public void handleRemoteInsertBlock(String from, int pos, String text) {
