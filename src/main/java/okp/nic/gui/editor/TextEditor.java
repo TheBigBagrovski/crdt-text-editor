@@ -456,7 +456,10 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     }
 
     public void pause() {
-        new Thread(() -> importDialog.setVisible(true)).start();
+        new Thread(() -> {
+            System.out.println("hey");
+            importDialog.setVisible(true);
+        }).start();
         textArea.setEnabled(false);
     }
 
@@ -480,7 +483,6 @@ public class TextEditor extends JFrame implements CaretListener, DocumentListene
     public void unpause() {
         if (importDialog != null) {
             importDialog.dispose();
-            importDialog = null;
         }
         textArea.setEnabled(true);
     }
