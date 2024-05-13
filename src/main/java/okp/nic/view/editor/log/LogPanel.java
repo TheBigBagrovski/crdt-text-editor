@@ -23,8 +23,6 @@ public class LogPanel extends JPanel {
 
     public LogPanel(BorderLayout bl) {
         super(bl);
-        JPanel logPanel = new JPanel();
-        logPanel.setLayout(new BorderLayout());
         logArea.setEditable(false);
         // заголовок логи
         JLabel logLabel = new JLabel(getUtfString("ЖУРНАЛ ЛОГОВ"));
@@ -33,8 +31,8 @@ public class LogPanel extends JPanel {
         logLabel.setOpaque(true);
         logLabel.setBackground(Color.LIGHT_GRAY);
         logLabel.setHorizontalAlignment(JLabel.CENTER);
-        logPanel.add(logLabel, BorderLayout.NORTH);
-        logPanel.add(logArea, BorderLayout.CENTER);
+        add(logLabel, BorderLayout.NORTH);
+        add(logArea, BorderLayout.CENTER);
         logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         logScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     }

@@ -87,10 +87,7 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         screenWidth = screenSize.width;
         JFrame frame = setupFrame();
-        // настройки основной панели
-        JPanel mainPanel = setupMainPanel();
-        // настройки правой панели
-        JPanel rightPanel = setupRightPanel();
+
         // настройки меню
         JMenuBar menuBar = setupMenuBar();
         frame.setJMenuBar(menuBar);
@@ -105,7 +102,10 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
         // панель логов
         logPanel = new LogPanel(new BorderLayout());
         logService = new LogServiceImpl(logPanel);
-        Logger.setLogService(logService);
+        // настройки основной панели
+        JPanel mainPanel = setupMainPanel();
+        // настройки правой панели
+        JPanel rightPanel = setupRightPanel();
         // окно паузы
         setupPauseWindow();
         // финальные настройки
@@ -117,6 +117,7 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.pack();
         frame.setVisible(true);
+        Logger.setLogService(logService);
     }
 
     private JFrame setupFrame() {

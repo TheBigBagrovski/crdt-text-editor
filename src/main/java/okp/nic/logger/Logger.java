@@ -33,9 +33,7 @@ public class Logger {
     }
 
     private static void logToEditor(String message) {
-        if (logService != null) {
             logService.showLog(message);
-        }
     }
 
 }

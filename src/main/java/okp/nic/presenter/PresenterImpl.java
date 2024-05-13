@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import static okp.nic.utils.Utils.getUtfString;
+
 public class PresenterImpl implements Presenter, MessengerListener {
 
     @Getter
@@ -87,6 +89,7 @@ public class PresenterImpl implements Presenter, MessengerListener {
 
     @Override
     public void sendChatMessage(String message) {
+        textEditor.getChatService().showChatMessage(getUtfString("Вы"), message);
         messenger.broadcastChatMessage(message);
     }
 
