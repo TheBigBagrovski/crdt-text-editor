@@ -98,7 +98,7 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
         setupKeyStrokeActions();
         // настройки чата
         chatPanel = new ChatPanel(new BorderLayout(), presenter, screenWidth);
-        chatService = new ChatServiceImpl(presenter, chatPanel);
+        chatService = new ChatServiceImpl(chatPanel);
         // настройки панели пиров
         peerPanel = new PeerPanel(new BorderLayout(), screenWidth);
         peerService = new PeerServiceImpl(peerPanel);
