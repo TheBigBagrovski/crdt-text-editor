@@ -229,8 +229,8 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (copiedText != null && !copiedText.isEmpty() && selectStartPos == selectEndPos) {
-                    insertTextBlock(copiedText, textArea.getCaretPosition());
                     presenter.onLocalInsertBlock(textArea.getCaretPosition(), copiedText);
+                    insertTextBlock(copiedText, textArea.getCaretPosition());
                 }
             }
         });
