@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import javax.swing.JLabel;
 import java.awt.Component;
 import java.awt.Font;
+import java.util.Iterator;
 
 @AllArgsConstructor
 public class PeerServiceImpl implements PeerService{
@@ -24,9 +25,13 @@ public class PeerServiceImpl implements PeerService{
 
     @Override
     public void removePeerName(String name) {
-        for (JLabel label : peerPanel.getPeersList()) {
+        Iterator<JLabel> iterator = peerPanel.getPeersList().iterator();
+        while (iterator.hasNext()) {
+            JLabel label = iterator.next();
             if (label.getText().equals(name)) {
                 peerPanel.getPeersListPanel().remove(label);
+                iterator.remove();
+                break;
             }
         }
         peerPanel.getPeersListPanel().revalidate();
