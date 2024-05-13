@@ -25,12 +25,10 @@ public class PeerServiceImpl implements PeerService{
 
     @Override
     public void removePeerName(String name) {
-        Iterator<JLabel> iterator = peerPanel.getPeersList().iterator();
-        while (iterator.hasNext()) {
-            JLabel label = iterator.next();
-            if (label.getText().equals(name)) {
-                peerPanel.getPeersListPanel().remove(label);
-                iterator.remove();
+        for (int i = 0; i < peerPanel.getPeersList().size(); i++) {
+            if (peerPanel.getPeersList().get(i).getText().equals(name)) {
+                peerPanel.getPeersListPanel().remove(peerPanel.getPeersList().get(i));
+                peerPanel.getPeersList().remove(i);
                 break;
             }
         }
