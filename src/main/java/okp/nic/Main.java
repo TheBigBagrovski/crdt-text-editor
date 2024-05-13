@@ -1,11 +1,9 @@
 package okp.nic;
 
-import okp.nic.gui.InputDialogs;
-import okp.nic.network.Messenger;
+import okp.nic.network.messenger.Messenger;
+import okp.nic.view.InputDialogs;
 
-import static okp.nic.Utils.findAvailablePort;
-//todo() чат
-//todo() паттерны и принципы
+import static okp.nic.utils.PortChecker.findAvailablePort;
 //todo() тест на 3 пирах
 //todo() безопасность пароля? вынести соль?
 

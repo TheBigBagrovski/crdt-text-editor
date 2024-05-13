@@ -1,4 +1,4 @@
-package okp.nic.network;
+package okp.nic.network.messenger;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.gson.Gson;
@@ -12,23 +12,21 @@ import okp.nic.network.peer.PeerClient;
 import okp.nic.network.peer.PeerMessageType;
 import okp.nic.network.peer.PeerServer;
 import okp.nic.network.signal.SignalClient;
+import okp.nic.presenter.PresenterImpl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-import static okp.nic.Utils.SALT;
+import static okp.nic.utils.TextCompressor.compress;
+import static okp.nic.utils.TextCompressor.decompress;
+import static okp.nic.utils.Utils.SALT;
 
 @Getter
-public class Messenger {
+public class Messenger implements  PeerListener, PeerPublisher, SignalListener {
 
     private final Map<String, PeerClient> connectedPeers = new HashMap<>();
     private final Map<String, String> peerNames = new HashMap<>();
@@ -37,15 +35,13 @@ public class Messenger {
     private final int port;
     private final String hostFullAddress;
 
-    private Controller controller;
+    private PresenterImpl presenter;
     private PeerServer peerServer;
     private SignalClient signalClient;
     private final String name;
     private final String inputPassword;
 
     private final Gson gson = new Gson();
-
-    private Logger logger;
 
     public Messenger(String host, int port, String signalHost, String signalPort, String password, String name) {
         this.host = host;
@@ -56,87 +52,96 @@ public class Messenger {
         connectToSignalServer("ws://" + signalHost + ":" + signalPort, name);
     }
 
+    @Override
     public void connectToSignalServer(String signalServerAddress, String name) {
         try {
             String uri = signalServerAddress + "?address=" + hostFullAddress + "&name=" + URLEncoder.encode(name);
             signalClient = new SignalClient(new URI(uri), this);
             signalClient.connectBlocking();
         } catch (Exception ex) {
-            logger.error("Ошибка при подключении к сигнальному серверу: " + ex);
+            Logger.error("Ошибка при подключении к сигнальному серверу: " + ex);
         }
     }
 
+    @Override
     public void startServerPeer() {
-        controller = new Controller(host, port);
-        controller.start(this, name);
-        logger = controller.getLogger();
-        logger.info("Указанный пароль верен");
-        logger.info("Получено WELCOME-сообщение от сигнального сервера");
-        peerServer = new PeerServer(new InetSocketAddress(host, port), this, logger);
+        presenter = new PresenterImpl(host, port);
+        presenter.start(this, name);
+        Logger.info("Указанный пароль верен");
+        Logger.info("Получено WELCOME-сообщение от сигнального сервера");
+        peerServer = new PeerServer(new InetSocketAddress(host, port), this);
         peerServer.setConnectionLostTimeout(0);
         peerServer.start();
     }
 
+    @Override
     public void handlePasswordRequest() {
         String hashedPassword = BCrypt.withDefaults().hashToString(6, (SALT + inputPassword).toCharArray());
         signalClient.send(PeerMessageType.PASSWORD.formatMessage(hashedPassword));
     }
 
+    @Override
     public void handleRemotePeerConnected(String peerAddress, String peerName) {
-        logger.info("Попытка соединения с пиром " + peerAddress);
+        Logger.info("Попытка соединения с пиром " + peerAddress);
         try {
-            PeerClient peerNode = new PeerClient(new URI(peerAddress), this, logger);
+            PeerClient peerNode = new PeerClient(new URI(peerAddress), this);
             while (!connectedPeers.containsKey(peerAddress)) {
                 boolean isSucceeded = peerNode.connectBlocking();
                 peerNode.setConnectionLostTimeout(0);
                 if (isSucceeded) {
                     connectedPeers.put(peerAddress, peerNode);
                     peerNames.put(peerAddress, peerName);
-                    controller.addPeerName(peerAddress, peerName);
+                    presenter.addPeerName(peerAddress, peerName);
                 } else {
-                    logger.error("Не удалось подключиться к пиру " + peerAddress);
+                    Logger.error("Не удалось подключиться к пиру " + peerAddress);
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {
-                        logger.error("Ошибка прерывания потока в ожидании");
+                        Logger.error("Ошибка прерывания потока в ожидании");
                     }
                 }
             }
         } catch (Exception ex) {
-            logger.error("Ошибка при подключении к пиру");
+            Logger.error("Ошибка при подключении к пиру");
         }
     }
 
+    @Override
     public void handleRemotePeerDisconnected(String disconnectedPeer) {
-        logger.info("Получено сообщение от сигнального сервера: " + disconnectedPeer + " отключается");
+        Logger.info("Получено сообщение от сигнального сервера: " + disconnectedPeer + " отключается");
         connectedPeers.remove(disconnectedPeer);
-        controller.removePeerName(disconnectedPeer, peerNames.get(disconnectedPeer));
+        presenter.removePeerName(disconnectedPeer, peerNames.get(disconnectedPeer));
     }
 
-    public void broadcastInsert(char value, int position) {
-        InsertOperation op = new InsertOperation(position, value);
+    @Override
+    public void broadcastInsert(char value, int pos) {
+        InsertOperation op = new InsertOperation(pos, value);
         String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
         peerServer.broadcast(payload);
     }
 
-    public void broadcastDelete(int position) {
-        DeleteOperation op = new DeleteOperation(position);
+    @Override
+    public void broadcastDelete(int pos) {
+        DeleteOperation op = new DeleteOperation(pos);
         String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
         peerServer.broadcast(payload);
     }
 
+    @Override
     public void broadcastDeleteRange(int startPos, int endPos) {
         DeleteRangeOperation op = new DeleteRangeOperation(startPos, endPos);
         String payload = PeerMessageType.OPERATION.formatOperationMessage(op.getType(), gson.toJson(op));
         peerServer.broadcast(payload);
     }
 
+    @Override
     public void broadcastTextUpdate(String text) {
         byte[] compressedText = compress(text);
         String payload = PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(hostFullAddress, Base64.getEncoder().encodeToString(compressedText));
         peerServer.broadcast(payload);
     }
 
+    @Override
     public void broadcastInsertBlock(int pos, String text) {
         byte[] compressedBlock = compress(text);
         InsertBlockOperation op = new InsertBlockOperation(pos, Base64.getEncoder().encodeToString(compressedBlock));
@@ -144,79 +149,62 @@ public class Messenger {
         peerServer.broadcast(payload);
     }
 
+    @Override
     public void broadcastChatMessage(String message) {
         String payload = PeerMessageType.CHAT_MESSAGE.formatMessage(message);
         peerServer.broadcast(payload);
     }
 
-    public void handleRemoteInsert(String from, int position, char value) {
-        controller.handleRemoteInsert(from, value, position);
+    @Override
+    public void handleRemoteInsert(String from, int pos, char value) {
+        presenter.handleRemoteInsert(from, value, pos);
     }
 
-    public void handleRemoteDelete(int position) {
-        controller.handleRemoteDelete(position);
+    @Override
+    public void handleRemoteDelete(int pos) {
+        presenter.handleRemoteDelete(pos);
     }
 
+    @Override
     public void handleRemoteCurrentStateRequest(String peerAddress) {
-        logger.info("Получен запрос текста от сигнального сервера для " + peerAddress);
-        byte[] text = compress(controller.getCurrentDocument());
+        Logger.info("Получен запрос текста от сигнального сервера для " + peerAddress);
+        byte[] text = compress(presenter.getCurrentDocument());
         try {
             if (connectedPeers.containsKey(peerAddress)) {
                 connectedPeers.get(peerAddress).send(PeerMessageType.UPDATE_TEXT.formatTextUpdateMessage(
                         hostFullAddress, Base64.getEncoder().encodeToString(text)));
-                logger.info("Текущий файл отправлен " + peerAddress);
+                Logger.info("Текущий файл отправлен " + peerAddress);
             } else {
-                logger.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
+                Logger.error("Не удалось отправить сообщение с текстом пиру " + peerAddress + ", нет подключения");
             }
         } catch (Exception ex) {
-            logger.error("Ошибка при подключении к пиру");
+            Logger.error("Ошибка при подключении к пиру");
         }
     }
 
+    @Override
     public void handleRemoteTextUpdate(String from, String compressedText) {
-        logger.info("Получено обновление файла от " + from);
+        Logger.info("Получено обновление файла от " + from);
         byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
         String text = decompress(decodedBlock);
-        controller.handleRemoteTextUpdate(from, text);
+        presenter.handleRemoteTextUpdate(from, text);
     }
 
+    @Override
     public void handleRemoteInsertBlock(String from, int pos, String compressedText) {
         byte[] decodedBlock = Base64.getDecoder().decode(compressedText);
         String text = decompress(decodedBlock);
-        controller.handleRemoteInsertBlock(from, pos, text);
+        presenter.handleRemoteInsertBlock(from, pos, text);
     }
 
+    @Override
     public void handleRemoteDeleteRange(int startPos, int endPos) {
-        controller.handleRemoteDeleteRange(startPos, endPos);
+        presenter.handleRemoteDeleteRange(startPos, endPos);
     }
 
+    @Override
     public void handleRemoteChatMessage(String from, String message) {
-        controller.handleRemoteChatMessage(peerNames.get(from), message);
+        presenter.handleRemoteChatMessage(peerNames.get(from), message);
     }
-
-    private byte[] compress(String text) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
-            gzipOut.write(text.getBytes());
-        } catch (IOException e) {
-            logger.error("Ошибка при сжатии файла: " + e.getMessage());
-        }
-        return baos.toByteArray();
-    }
-
-    private String decompress(byte[] compressedText) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (GZIPInputStream gzipIn = new GZIPInputStream(new ByteArrayInputStream(compressedText))) {
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = gzipIn.read(buffer)) > 0) {
-                baos.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            logger.error("Ошибка при распаковке файла: " + e.getMessage());
-        }
-        return baos.toString();
-    }
-
 
 }

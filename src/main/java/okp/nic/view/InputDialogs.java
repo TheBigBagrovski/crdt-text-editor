@@ -1,4 +1,4 @@
-package okp.nic.gui;
+package okp.nic.view;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -15,7 +15,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.Objects;
 
-import static okp.nic.Utils.getUtfString;
+import static okp.nic.utils.Utils.getUtfString;
 
 public class InputDialogs {
 

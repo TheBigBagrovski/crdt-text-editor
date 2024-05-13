@@ -1,7 +1,7 @@
 package okp.nic.network.peer;
 
 import okp.nic.logger.Logger;
-import okp.nic.network.Messenger;
+import okp.nic.network.messenger.Messenger;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -13,12 +13,10 @@ import java.util.regex.Pattern;
 public class PeerServer extends WebSocketServer {
 
     private final Messenger messenger;
-    private final Logger logger;
 
-    public PeerServer(InetSocketAddress address, Messenger messenger, Logger logger) {
+    public PeerServer(InetSocketAddress address, Messenger messenger) {
         super(address);
         this.messenger = messenger;
-        this.logger = logger;
     }
 
     @Override
@@ -52,7 +50,7 @@ public class PeerServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        logger.info("Пир-сервер успешно запущен на сокете " + "ws:/" + getAddress());
+        Logger.info("Пир-сервер успешно запущен на сокете " + "ws:/" + getAddress());
     }
 
 }

@@ -3,7 +3,7 @@ package okp.nic.network.peer;
 import com.google.gson.Gson;
 import lombok.Getter;
 import okp.nic.logger.Logger;
-import okp.nic.network.Messenger;
+import okp.nic.network.messenger.Messenger;
 import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.DeleteRangeOperation;
 import okp.nic.network.operation.InsertBlockOperation;
@@ -21,23 +21,21 @@ public class PeerClient extends WebSocketClient {
     private final Gson gson = new Gson();
     private final String remotePeerAddress;
     private final Messenger messenger;
-    private final Logger logger;
 
-    public PeerClient(URI serverURI, Messenger messenger, Logger logger) {
+    public PeerClient(URI serverURI, Messenger messenger) {
         super(serverURI);
         remotePeerAddress = "ws://" + serverURI.getHost() + ":" + serverURI.getPort();
         this.messenger = messenger;
-        this.logger = logger;
     }
 
     @Override
     public void onOpen(ServerHandshake handshakeData) {
-        logger.info("Установлено соединение с " + remotePeerAddress);
+        Logger.info("Установлено соединение с " + remotePeerAddress);
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        logger.info("Соединение с " + remotePeerAddress + " прервано с кодом " + code);
+        Logger.info("Соединение с " + remotePeerAddress + " прервано с кодом " + code);
     }
 
     @Override
@@ -83,7 +81,7 @@ public class PeerClient extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-        logger.error("При соединении с " + remotePeerAddress + " возникла ошибка: " + ex);
+        Logger.error("При соединении с " + remotePeerAddress + " возникла ошибка: " + ex);
     }
 
 }

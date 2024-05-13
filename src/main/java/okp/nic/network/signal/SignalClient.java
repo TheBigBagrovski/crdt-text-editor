@@ -1,7 +1,7 @@
 package okp.nic.network.signal;
 
 import lombok.extern.slf4j.Slf4j;
-import okp.nic.network.Messenger;
+import okp.nic.network.messenger.Messenger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 

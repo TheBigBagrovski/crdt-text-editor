@@ -3,8 +3,8 @@ package okp.nic.network.signal;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import okp.nic.gui.InputDialogs;
 import okp.nic.network.peer.PeerMessageType;
+import okp.nic.view.InputDialogs;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -15,9 +15,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static okp.nic.Utils.SALT;
-import static okp.nic.Utils.findAvailablePort;
-import static okp.nic.Utils.isPortAvailable;
+import static okp.nic.utils.PortChecker.findAvailablePort;
+import static okp.nic.utils.PortChecker.isPortAvailable;
+import static okp.nic.utils.Utils.SALT;
 
 @Slf4j
 @Getter

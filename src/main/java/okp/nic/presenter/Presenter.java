@@ -1,6 +1,10 @@
-package okp.nic.gui.editor;
+package okp.nic.presenter;
 
-public interface TextEditorListener {
+import okp.nic.network.messenger.Messenger;
+
+public interface Presenter {
+    void start(Messenger messenger, String name);
+
     void clear();
 
     void onLocalInsert(char value, int index);
@@ -14,5 +18,11 @@ public interface TextEditorListener {
     void onLocalDeleteRange(int startPos, int endPos);
 
     String getCurrentDocument();
+
+    void sendChatMessage(String message);
+
+    void saveFile();
+
+    void loadFile();
 
 }

@@ -1,4 +1,4 @@
-package okp.nic.crdt;
+package okp.nic.model;
 
 import lombok.Getter;
 import lombok.Setter;

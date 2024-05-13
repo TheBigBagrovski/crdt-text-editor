@@ -1,4 +1,4 @@
-package okp.nic.network;
+package okp.nic.presenter;
 
 public interface MessengerListener {
     void handleRemoteInsert(String siteId, char value, int position);
@@ -14,5 +14,7 @@ public interface MessengerListener {
     void addPeerName(String peerAddress, String name);
 
     void removePeerName(String peerAddress, String name);
+
+    void handleRemoteChatMessage(String from, String message);
 
 }
