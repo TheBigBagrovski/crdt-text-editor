@@ -8,7 +8,7 @@ import java.awt.Font;
 import java.util.Iterator;
 
 @AllArgsConstructor
-public class PeerServiceImpl implements PeerService{
+public class PeerServiceImpl implements PeerService {
 
     private final PeerPanel peerPanel;
 
@@ -25,11 +25,9 @@ public class PeerServiceImpl implements PeerService{
 
     @Override
     public void removePeerName(String name) {
-        for (int i = 0; i < peerPanel.getPeersList().size(); i++) {
-            if (peerPanel.getPeersList().get(i).getText().equals(name)) {
-                peerPanel.getPeersListPanel().remove(peerPanel.getPeersList().get(i));
-                peerPanel.getPeersList().remove(i);
-                break;
+        for (JLabel label : peerPanel.getPeersList()) {
+            if (label.getText().equals(name)) {
+                peerPanel.getPeersListPanel().remove(label);
             }
         }
         peerPanel.getPeersListPanel().revalidate();

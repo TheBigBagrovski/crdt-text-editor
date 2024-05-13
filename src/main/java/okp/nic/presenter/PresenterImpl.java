@@ -175,7 +175,7 @@ public class PresenterImpl implements Presenter, MessengerListener {
 
     @Override
     public void removePeerName(String peerAddress, String name) {
-        textEditor.getPeerService().removePeerName(name + " [" + peerAddress + "]");
+        textEditor.getPeerService().removePeerName(name + " [" + peerAddress.substring(5) + "]");
     }
 
     @Override

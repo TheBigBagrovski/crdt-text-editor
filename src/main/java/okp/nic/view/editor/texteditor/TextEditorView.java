@@ -220,6 +220,7 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
             public void actionPerformed(ActionEvent e) {
                 copiedText = selectedText;
                 presenter.onLocalDeleteRange(selectStartPos, selectEndPos);
+                deleteRange(selectStartPos, selectEndPos);
             }
         });
         // вставка
@@ -271,8 +272,8 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && !(e.isControlDown())) {
             if (selectStartPos != selectEndPos) {
-                deleteRange(selectStartPos + 1 , selectEndPos);
                 presenter.onLocalDeleteRange(selectStartPos, selectEndPos);
+                deleteRange(selectStartPos + 1, selectEndPos);
             } else {
                 presenter.onLocalDelete(textArea.getCaretPosition());
             }
@@ -295,6 +296,7 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
             value = e.getKeyChar();
             if (selectStartPos != selectEndPos) {
                 presenter.onLocalDeleteRange(selectStartPos, selectEndPos);
+                deleteRange(selectStartPos, selectEndPos);
             }
             if (value != '\u0003' && value != '\u0018' && value != '\u0016') {
                 presenter.onLocalInsert(value, textArea.getCaretPosition());
