@@ -1,6 +1,7 @@
 package okp.nic.view.editor.texteditor;
 
 import lombok.Getter;
+import lombok.Setter;
 import okp.nic.logger.Logger;
 import okp.nic.presenter.Presenter;
 import okp.nic.view.editor.chat.ChatPanel;
@@ -49,6 +50,8 @@ import java.util.Objects;
 
 import static okp.nic.utils.Utils.getUtfString;
 
+@Getter
+@Setter
 public class TextEditorView extends JFrame implements CaretListener, DocumentListener, KeyListener, ComponentListener, TextEditor {
 
     public static final double RIGHT_PANEL_WIDTH_RATIO = 0.2; // 20% от ширины экрана
@@ -59,20 +62,20 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
     private final Presenter presenter;
 
     @Getter
-    private final JTextArea textArea = new JTextArea();
-    private final JPanel rightPanel = new JPanel(new BorderLayout());
+    private  JTextArea textArea = new JTextArea();
+    private  JPanel rightPanel = new JPanel(new BorderLayout());
     private JDialog importDialog = new JDialog();
 
     @Getter
-    private final ChatService chatService;
+    private  ChatService chatService;
     @Getter
-    private final PeerService peerService;
+    private  PeerService peerService;
     @Getter
-    private final LogService logService;
+    private  LogService logService;
 
-    private final ChatPanel chatPanel;
-    private final LogPanel logPanel;
-    private final PeerPanel peerPanel;
+    private  ChatPanel chatPanel;
+    private  LogPanel logPanel;
+    private  PeerPanel peerPanel;
 
     private String selectedText;
     private String copiedText;
@@ -374,10 +377,7 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
 
     @Override
     public void pause() {
-        new Thread(() -> {
-            System.out.println("hey");
-            importDialog.setVisible(true);
-        }).start();
+        new Thread(() -> importDialog.setVisible(true)).start();
         textArea.setEnabled(false);
     }
 

@@ -3,6 +3,7 @@ package okp.nic.network.messenger;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.google.gson.Gson;
 import lombok.Getter;
+import lombok.Setter;
 import okp.nic.logger.Logger;
 import okp.nic.network.operation.DeleteOperation;
 import okp.nic.network.operation.DeleteRangeOperation;
@@ -26,9 +27,10 @@ import static okp.nic.utils.TextCompressor.decompress;
 import static okp.nic.utils.Utils.SALT;
 
 @Getter
+@Setter
 public class Messenger implements  PeerListener, PeerPublisher, SignalListener {
 
-    private final Map<String, PeerClient> connectedPeers = new HashMap<>();
+    private Map<String, PeerClient> connectedPeers = new HashMap<>();
     private final Map<String, String> peerNames = new HashMap<>();
 
     private final String host;

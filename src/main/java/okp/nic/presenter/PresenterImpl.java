@@ -1,6 +1,7 @@
 package okp.nic.presenter;
 
 import lombok.Getter;
+import lombok.Setter;
 import okp.nic.logger.Logger;
 import okp.nic.model.Document;
 import okp.nic.network.messenger.Messenger;
@@ -16,14 +17,14 @@ import java.io.IOException;
 
 import static okp.nic.utils.Utils.getUtfString;
 
+@Getter
+@Setter
 public class PresenterImpl implements Presenter, MessengerListener {
 
-    @Getter
     private Messenger messenger;
     private Document document;
     private TextEditor textEditor;
 
-    @Getter
     private final String siteId;
 
     public PresenterImpl(String host, int port) {
@@ -100,22 +101,23 @@ public class PresenterImpl implements Presenter, MessengerListener {
 
     @Override
     public void saveFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showSaveDialog(null);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            try (FileWriter writer = new FileWriter(selectedFile)) {
-                writer.write(textEditor.getText());
-            } catch (IOException ex) {
-                Logger.error("Ошибка при сохранении файла: " + ex.getMessage());
-            }
-        }
+//        JFileChooser fileChooser = new JFileChooser();
+//        int returnValue = fileChooser.showSaveDialog(null);
+//        if (returnValue == JFileChooser.APPROVE_OPTION) {
+//            File selectedFile = fileChooser.getSelectedFile();
+//            try (FileWriter writer = new FileWriter(selectedFile)) {
+//                writer.write(textEditor.getText());
+//            } catch (IOException ex) {
+//                Logger.error("Ошибка при сохранении файла: " + ex.getMessage());
+//            }
+//        }
     }
 
     @Override
     public void loadFile() {
         JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
+//        int returnValue = fileChooser.showOpenDialog(null);
+        int returnValue = 0;
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             textEditor.pause();

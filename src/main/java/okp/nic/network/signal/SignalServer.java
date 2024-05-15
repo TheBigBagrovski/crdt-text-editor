@@ -2,6 +2,7 @@ package okp.nic.network.signal;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.network.peer.PeerMessageType;
 import okp.nic.view.InputDialogs;
@@ -21,10 +22,11 @@ import static okp.nic.utils.Utils.SALT;
 
 @Slf4j
 @Getter
+@Setter
 public class SignalServer extends WebSocketServer {
 
-    private final Map<WebSocket, String[]> clients = new HashMap<>();
-    private static String passwordHash;
+    private Map<WebSocket, String[]> clients = new HashMap<>();
+    public static String passwordHash;
 
     public SignalServer(InetSocketAddress address) {
         super(address);
@@ -84,7 +86,7 @@ public class SignalServer extends WebSocketServer {
         InputDialogs.showInfoWindow(socketAddress);
     }
 
-    private void broadcastMessage(String message) {
+    public void broadcastMessage(String message) {
         for (WebSocket client : clients.keySet()) {
             client.send(message);
         }
