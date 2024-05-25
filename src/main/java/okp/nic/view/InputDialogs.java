@@ -47,16 +47,11 @@ public class InputDialogs {
         JPanel panel = new JPanel(new GridLayout(1, 2));
         addLabel(panel, "Порт сигнального сервера:");
         JTextField portField = addTextField(panel);
-        while (true) {
-            int result = JOptionPane.showConfirmDialog(null, panel, getUtfString("Сигнальный сервер"), JOptionPane.OK_CANCEL_OPTION);
-            if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
-                return null;
-            }
-            checkFilled(portField);
-            if (!portField.getText().isEmpty()) {
-                return portField.getText();
-            }
+        int result = JOptionPane.showConfirmDialog(null, panel, getUtfString("Сигнальный сервер"), JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+            return null;
         }
+        return portField.getText();
     }
 
     public static String[] getPeerInfo() {

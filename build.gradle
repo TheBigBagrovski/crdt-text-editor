@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 
-group = 'okp.nic'
-version = '1.0-SNAPSHOT'
+group 'com.example'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -34,6 +34,42 @@ dependencies {
     implementation 'at.favre.lib:bcrypt:0.10.2'
 
 }
+
+task createMainJar(type: Jar) {
+    archiveBaseName.set('main-app')
+    from sourceSets.main.output
+    manifest {
+        attributes(
+                'Main-Class': 'okp.nic.Main',
+                'Encoding': 'UTF-8'
+        )
+    }
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+task createSignalServerJar(type: Jar) {
+    archiveBaseName.set('signalserver-app')
+    from sourceSets.main.output
+    manifest {
+        attributes(
+                'Main-Class': 'okp.nic.network.signal.SignalServer',
+                'Encoding': 'UTF-8'
+        )
+    }
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+build.dependsOn createMainJar, createSignalServerJar
 
 test {
     useJUnitPlatform()
