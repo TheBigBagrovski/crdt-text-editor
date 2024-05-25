@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static okp.nic.utils.PortChecker.findAvailablePort;
 import static okp.nic.utils.PortChecker.isPortAvailable;
+import static okp.nic.utils.Utils.getUtfString;
 
 @Slf4j
 @Getter
@@ -36,31 +37,30 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        log.info("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: " + reason);
+        log.info(getUtfString("Закрывается соединение с сигнальным сервером: " + conn.getRemoteSocketAddress() + " с кодом " + code + ", причина: ") + reason);
         if (clients.containsKey(conn)) {
             clients.remove(conn);
             String peerAddress = conn.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
             broadcastMessage(SignalMessageType.PEER_DISCONNECTED.formatMessage(peerAddress));
         } else {
-            log.error(conn.getRemoteSocketAddress() + " не является клиентом сигнального сервера");
+            log.error(getUtfString(conn.getRemoteSocketAddress() + " не является клиентом сигнального сервера"));
         }
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        log.info("Сигнальный сервер получает сообщение от " + conn.getRemoteSocketAddress() + ": " + message);
         String passwordPrefix = PeerMessageType.PASSWORD.getPrefix();
         if (message.startsWith(passwordPrefix)) {
             String providedPasswordHash = message.substring(passwordPrefix.length());
             BCrypt.Result result = BCrypt.verifyer().verify(passwordHash.toCharArray(), providedPasswordHash.getBytes());
             if (!result.verified) {
-                log.error("Введен неверный пароль при попытке подключиться");
+                log.error(getUtfString("Введен неверный пароль при попытке подключиться"));
                 conn.close();
                 return;
             }
             String peerAddress = conn.getResourceDescriptor().split("\\?")[1].split("&")[0].split("=")[1];
             String peerName = URLDecoder.decode(conn.getResourceDescriptor().split("\\?")[1].split("&")[1].split("=")[1]);
-            log.info("Новое подключение к сигнальному серверу: " + peerAddress);
+            log.info(getUtfString("Новое подключение к сигнальному серверу: " + peerAddress));
             conn.send(SignalMessageType.WELCOME.formatWelcomeMessage(clients.values())); // отправка новому пиру текущих подключенных клиентов
             broadcastMessage(SignalMessageType.PEER_CONNECTED.formatMessage(peerAddress + "-" + peerName)); // отправка подключенным клиентам данных о новом пире
             if (!clients.isEmpty()) {
@@ -73,13 +73,13 @@ public class SignalServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        log.error("Ошибка при попытке подключиться к сигнальному серверу");
+        log.error(getUtfString("Ошибка при попытке подключиться к сигнальному серверу"));
     }
 
     @Override
     public void onStart() {
         String socketAddress = getAddress().toString();
-        log.info("Сигнальный сервер запущен на сокете: " + socketAddress);
+        log.info(getUtfString("Сигнальный сервер запущен на сокете: ") + socketAddress);
         InputDialogs.showInfoWindow(socketAddress);
     }
 
@@ -96,7 +96,7 @@ public class SignalServer extends WebSocketServer {
         do {
             info = InputDialogs.getSignalServerAddress();
             if (info == null) {
-                log.info("Пользователь отменил ввод");
+                log.info(getUtfString("Пользователь отменил ввод"));
                 return;
             }
             address = info[0];
@@ -105,10 +105,10 @@ public class SignalServer extends WebSocketServer {
                 if (!testAddress.isUnresolved()) {
                     validAddress = true;
                 } else {
-                    log.error("Введите корректный адрес");
+                    log.error(getUtfString("Введите корректный адрес"));
                 }
             } catch (IllegalArgumentException e) {
-                log.error("Некорретный формат адреса");
+                log.error(getUtfString("Некорретный формат адреса"));
             }
         } while (!validAddress);
         passwordHash = info[1];
@@ -117,7 +117,7 @@ public class SignalServer extends WebSocketServer {
         do {
             port = InputDialogs.getSignalServerPort();
             if (port == null) {
-                log.info("Пользователь отменил ввод");
+                log.info(getUtfString("Пользователь отменил ввод"));
                 return;
             } else if (port.isEmpty()) {
                 port = String.valueOf(findAvailablePort());
@@ -128,10 +128,10 @@ public class SignalServer extends WebSocketServer {
                 if (isPortAvailable(portNumber)) {
                     validPort = true;
                 } else {
-                    log.error("Порт " + portNumber + " недоступен");
+                    log.error(getUtfString("Порт " + portNumber + " недоступен"));
                 }
             } catch (NumberFormatException e) {
-                log.error("Некорректный номер порта");
+                log.error(getUtfString("Некорректный номер порта"));
             }
         } while (!validPort);
 

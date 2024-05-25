@@ -4,6 +4,7 @@ import okp.nic.network.messenger.Messenger;
 import okp.nic.view.InputDialogs;
 
 import static okp.nic.utils.PortChecker.findAvailablePort;
+import static okp.nic.utils.Utils.getUtfString;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,9 +17,9 @@ public class Main {
             String password = peerInfo[4];
             int port = findAvailablePort();
             Messenger messenger = new Messenger(host, port, signalHost, signalPort, password, name);
-            System.out.println("Пир запущен на адресе: " + host + ", порт: " + port);
+            System.out.println(getUtfString("Пир запущен на адресе: " + host + ", порт: " + port));
         } else {
-            System.out.println("Пользователь отменил ввод");
+            System.out.println(getUtfString("Пользователь отменил ввод"));
         }
     }
 

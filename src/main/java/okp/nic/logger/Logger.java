@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okp.nic.view.editor.log.LogService;
 
+import static okp.nic.utils.Utils.getUtfString;
+
 @AllArgsConstructor
 @Slf4j
 public class Logger {
@@ -25,11 +27,11 @@ public class Logger {
     }
 
     private static void infoToConsole(String message) {
-        log.info(message);
+        log.info(getUtfString(message));
     }
 
     private static void errorToConsole(String message) {
-        log.error(message);
+        log.error(getUtfString(message));
     }
 
     private static void logToEditor(String message) {

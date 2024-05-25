@@ -2,6 +2,8 @@ package okp.nic.utils;
 
 import java.net.ServerSocket;
 
+import static okp.nic.utils.Utils.getUtfString;
+
 public class PortChecker {
 
     // метод для нахождения доступного порта
@@ -12,7 +14,7 @@ public class PortChecker {
             serverSocket.close();
             return port;
         } catch (Exception e) {
-            System.out.println("Не удалось выбрать свободный порт");
+            System.out.println(getUtfString("Не удалось выбрать свободный порт"));
             return -1;
         }
     }

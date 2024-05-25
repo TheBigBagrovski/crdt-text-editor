@@ -7,6 +7,8 @@ import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 
+import static okp.nic.utils.Utils.getUtfString;
+
 @Slf4j
 public class SignalClient extends WebSocketClient {
 
@@ -19,12 +21,12 @@ public class SignalClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakeData) {
-        log.info("Соединение с сигнальным сервером установлено");
+        log.info(getUtfString("Соединение с сигнальным сервером установлено"));
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.info("Соединение с сигнальным сервером прервано с кодом " + code + ", причина: " + reason);
+        log.info(getUtfString("Соединение с сигнальным сервером прервано с кодом " + code + ", причина: ") + reason);
     }
 
     @Override
@@ -34,7 +36,7 @@ public class SignalClient extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-        log.error("Ошибка при подключении к сигнальному серверу: " + ex);
+        log.error(getUtfString("Ошибка при подключении к сигнальному серверу: " + ex));
     }
 
     private void handleSignalServerMessage(String message) {
