@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import javax.swing.JLabel;
 import java.awt.Component;
 import java.awt.Font;
-import java.util.Iterator;
 
 @AllArgsConstructor
 public class PeerServiceImpl implements PeerService {

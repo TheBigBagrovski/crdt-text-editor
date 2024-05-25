@@ -23,7 +23,6 @@ import java.util.Map;
 
 import static okp.nic.utils.TextCompressor.compress;
 import static okp.nic.utils.TextCompressor.decompress;
-import static okp.nic.utils.Utils.SALT;
 
 @Getter
 public class Messenger implements  PeerListener, PeerPublisher, SignalListener {
@@ -76,7 +75,7 @@ public class Messenger implements  PeerListener, PeerPublisher, SignalListener {
 
     @Override
     public void handlePasswordRequest() {
-        String hashedPassword = BCrypt.withDefaults().hashToString(6, (SALT + inputPassword).toCharArray());
+        String hashedPassword = BCrypt.withDefaults().hashToString(6, (inputPassword).toCharArray());
         signalClient.send(PeerMessageType.PASSWORD.formatMessage(hashedPassword));
     }
 

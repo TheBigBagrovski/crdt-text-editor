@@ -4,12 +4,6 @@ import okp.nic.network.messenger.Messenger;
 import okp.nic.view.InputDialogs;
 
 import static okp.nic.utils.PortChecker.findAvailablePort;
-//todo() тест на 3 пирах
-//todo() безопасность пароля? вынести соль?
-
-//todo() тесты
-//todo() рефакторинг
-//todo() финальный смотр
 
 public class Main {
     public static void main(String[] args) {

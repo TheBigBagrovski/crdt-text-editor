@@ -17,7 +17,6 @@ import java.util.Map;
 
 import static okp.nic.utils.PortChecker.findAvailablePort;
 import static okp.nic.utils.PortChecker.isPortAvailable;
-import static okp.nic.utils.Utils.SALT;
 
 @Slf4j
 @Getter
@@ -112,8 +111,7 @@ public class SignalServer extends WebSocketServer {
                 log.error("Некорретный формат адреса");
             }
         } while (!validAddress);
-        String password = info[1];
-        passwordHash = SALT + password;
+        passwordHash = info[1];
         String port;
         boolean validPort = false;
         do {

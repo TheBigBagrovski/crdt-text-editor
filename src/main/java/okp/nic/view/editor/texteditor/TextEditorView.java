@@ -375,7 +375,7 @@ public class TextEditorView extends JFrame implements CaretListener, DocumentLis
     @Override
     public void pause() {
         new Thread(() -> {
-            System.out.println("hey");
+            System.out.println();
             importDialog.setVisible(true);
         }).start();
         textArea.setEnabled(false);
