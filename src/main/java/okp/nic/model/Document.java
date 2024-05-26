@@ -56,9 +56,9 @@ public class Document {
         localClock++;
     }
 
-    public int position(String charID) {
+    public int position(String id) {
         for (int i = 0; i < chars.size(); i++) {
-            if (chars.get(i).getId().equals(charID)) {
+            if (chars.get(i).getId().equals(id)) {
                 return i + 1;
             }
         }
