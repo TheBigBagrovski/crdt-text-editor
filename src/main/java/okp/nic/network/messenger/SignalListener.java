@@ -11,5 +11,4 @@ public interface SignalListener {
 
     void handleRemoteCurrentStateRequest(String peerAddress);
 
-
 }
